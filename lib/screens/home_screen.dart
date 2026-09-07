@@ -201,39 +201,55 @@ class _PrimaryTabs extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-        height: 54,
-        child: ListView.separated(
-          padding: const EdgeInsets.fromLTRB(16, 2, 16, 8),
-          scrollDirection: Axis.horizontal,
-          itemCount: forms.length,
-          separatorBuilder: (_, __) => const SizedBox(width: 10),
-          itemBuilder: (context, index) {
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.fromLTRB(12, 2, 12, 8),
+        child: Row(
+          children: List.generate(forms.length, (index) {
             final selected = index == selectedIndex;
             final form = forms[index];
-            return Semantics(
-              button: true,
-              selected: selected,
-              label: form.label,
-              child: ChoiceChip(
-                label: Text(form.label),
-                selected: selected,
-                onSelected: (_) => onSelected(index),
-                selectedColor: AppTheme.gold,
-                backgroundColor: AppTheme.surfaceColor(context),
-                side: BorderSide(color: AppTheme.dividerColor(context)),
-                labelStyle: TextStyle(
-                  color: selected
-                      ? Colors.black
-                      : AppTheme.textSecondary(context),
-                  fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
-                  fontSize: 14,
+            return Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(right: index == forms.length - 1 ? 0 : 6),
+                child: Semantics(
+                  button: true,
+                  selected: selected,
+                  label: form.label,
+                  child: GestureDetector(
+                    onTap: () => onSelected(index),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      height: 42,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: selected
+                            ? AppTheme.gold
+                            : AppTheme.surfaceColor(context),
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: selected
+                              ? AppTheme.gold
+                              : AppTheme.dividerColor(context),
+                        ),
+                      ),
+                      child: Text(
+                        form.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: selected
+                              ? Colors.black
+                              : AppTheme.textSecondary(context),
+                          fontWeight:
+                              selected ? FontWeight.w800 : FontWeight.w500,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                shape: const StadiumBorder(),
               ),
             );
-          },
+          }),
         ),
       );
 }
