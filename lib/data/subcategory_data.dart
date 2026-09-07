@@ -202,13 +202,6 @@ class SubcategoryData {
       icon: Icons.map_rounded,
       description: 'Organizations, people & places',
     ),
-    Subcategory(
-      id: 'structured_tools',
-      name: 'Interactive Tools',
-      form: InformationForm.structured,
-      icon: Icons.widgets_rounded,
-      description: 'Simulations and hands-on tools',
-    ),
   ];
 
   static List<Subcategory> forForm(InformationForm form) => switch (form) {

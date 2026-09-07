@@ -17,7 +17,9 @@ import 'shorts_player_screen.dart';
 
 /// Shorts tab — full-screen vertical PageView player on tap.
 class ChannelsScreen extends StatefulWidget {
-  const ChannelsScreen({super.key});
+  final bool showAppBar;
+
+  const ChannelsScreen({this.showAppBar = true, super.key});
 
   @override
   State<ChannelsScreen> createState() => _ChannelsScreenState();
@@ -51,6 +53,20 @@ class _ChannelsScreenState extends State<ChannelsScreen> {
         .toList()
       ..sort((a, b) => b.publishedAt.compareTo(a.publishedAt));
 
+    final body = Column(
+        children: [
+          Expanded(child: _buildGrid(context, shorts, provider.state)),
+          ListenableBuilder(
+            listenable: AdService.instance,
+            builder: (_, __) => AdService.instance.adsRemoved
+                ? const SizedBox.shrink()
+                : const LabelledBannerAd(fixedSize: AdSize.mediumRectangle),
+          ),
+        ],
+      );
+
+    if (!widget.showAppBar) return body;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Shorts'),
@@ -61,17 +77,7 @@ class _ChannelsScreenState extends State<ChannelsScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(child: _buildGrid(context, shorts, provider.state)),
-          ListenableBuilder(
-            listenable: AdService.instance,
-            builder: (_, __) => AdService.instance.adsRemoved
-                ? const SizedBox.shrink()
-                : const LabelledBannerAd(fixedSize: AdSize.mediumRectangle),
-          ),
-        ],
-      ),
+      body: body,
     );
   }
 

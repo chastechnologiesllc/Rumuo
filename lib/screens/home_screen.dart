@@ -1,26 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../data/subcategory_data.dart';
 import '../models/information_form.dart';
 import '../providers/feed_provider.dart';
 import '../services/notification_store.dart';
 import '../services/scroll_visibility_service.dart';
 import '../theme/app_theme.dart';
-import '../widgets/feed_shelf.dart';
 import '../widgets/rumuo_mark.dart';
+import '../widgets/subcategory_card.dart';
+import '../widgets/video_feed_list.dart';
+import 'channels_screen.dart';
 import 'content_search_screen.dart';
 import 'notifications_screen.dart';
+import 'subcategory_router.dart';
 
-/// The Feed screen — a single vertically-scrolling page made of five
-/// shelves, one per [InformationForm] (Videos, Shorts, Audio, Written,
-/// Structured/Interactive). Each shelf's subcategories scroll
-/// horizontally; the shelves themselves stack vertically.
-///
-/// The header (logo + notifications) and the search bar sit above the
-/// shelves and collapse away while the feed is scrolling, returning as
-/// soon as scrolling stops — see [ScrollVisibilityService].
-class HomeScreen extends StatelessWidget {
+/// The Feed screen uses horizontal primary tabs, matching the original Rumuo
+/// navigation: Videos, Shorts, Audio, Written, and Datasets. Blogs and Books
+/// are subcategories inside Written rather than primary tabs of their own.
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _selectedIndex = 0;
+
+  static const _forms = [
+    InformationForm.videos,
+    InformationForm.shorts,
+    InformationForm.audio,
+    InformationForm.written,
+    InformationForm.structured,
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -36,11 +50,24 @@ class HomeScreen extends StatelessWidget {
                 duration: const Duration(milliseconds: 220),
                 curve: Curves.easeOutCubic,
                 alignment: Alignment.topCenter,
-                child: visible ? child : const SizedBox(width: double.infinity, height: 0),
+                child: visible
+                    ? child
+                    : const SizedBox(width: double.infinity, height: 0),
               ),
               child: const _HeaderAndSearch(),
             ),
-            const Expanded(child: _FeedBody()),
+            _PrimaryTabs(
+              forms: _forms,
+              selectedIndex: _selectedIndex,
+              onSelected: (index) => setState(() => _selectedIndex = index),
+            ),
+            Expanded(
+              child: NotificationListener<ScrollNotification>(
+                onNotification:
+                    ScrollVisibilityService.instance.handleScrollNotification,
+                child: _TabContent(form: _forms[_selectedIndex]),
+              ),
+            ),
           ],
         ),
       ),
@@ -48,7 +75,6 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-// ── Header: logo, notifications, search bar ─────────────────────────────────
 class _HeaderAndSearch extends StatelessWidget {
   const _HeaderAndSearch();
 
@@ -74,25 +100,33 @@ class _HeaderAndSearch extends StatelessWidget {
               const Spacer(),
               ValueListenableBuilder<int>(
                 valueListenable: NotificationStore.instance.unreadCount,
-                builder: (context, count, _) {
-                  return Badge(
-                    isLabelVisible: count > 0,
-                    label: Text(
-                      count > 99 ? '99+' : '$count',
-                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700),
+                builder: (context, count, _) => Badge(
+                  isLabelVisible: count > 0,
+                  label: Text(
+                    count > 99 ? '99+' : '$count',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
                     ),
-                    backgroundColor: Colors.red,
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: IconButton(
-                      icon: Icon(
-                        count > 0 ? Icons.notifications_rounded : Icons.notifications_outlined,
-                        color: count > 0 ? AppTheme.gold : AppTheme.textMuted(context),
+                  ),
+                  backgroundColor: Colors.red,
+                  child: IconButton(
+                    icon: Icon(
+                      count > 0
+                          ? Icons.notifications_rounded
+                          : Icons.notifications_outlined,
+                      color: count > 0
+                          ? AppTheme.gold
+                          : AppTheme.textMuted(context),
+                    ),
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const NotificationsScreen(),
                       ),
-                      onPressed: () => Navigator.of(context)
-                          .push(MaterialPageRoute(builder: (_) => const NotificationsScreen())),
                     ),
-                  );
-                },
+                  ),
+                ),
               ),
             ],
           ),
@@ -100,12 +134,13 @@ class _HeaderAndSearch extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
           child: _SearchBar(
-            onTap: () {
-              final feedProvider = context.read<FeedProvider>();
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => ContentSearchScreen(feedProvider: feedProvider)),
-              );
-            },
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => ContentSearchScreen(
+                  feedProvider: context.read<FeedProvider>(),
+                ),
+              ),
+            ),
           ),
         ),
       ],
@@ -118,61 +153,137 @@ class _SearchBar extends StatelessWidget {
   const _SearchBar({required this.onTap});
 
   @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: onTap,
-        child: Container(
-          height: 46,
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          decoration: BoxDecoration(
-            color: AppTheme.surfaceColor(context),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppTheme.dividerColor(context), width: 0.6),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.search_rounded, color: AppTheme.textMuted(context), size: 20),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  'Search Rumuo — videos, books, blogs & more',
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: AppTheme.textMuted(context), fontSize: 14),
-                ),
+  Widget build(BuildContext context) => Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: onTap,
+          child: Container(
+            height: 46,
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceColor(context),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: AppTheme.dividerColor(context),
+                width: 0.6,
               ),
-            ],
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.search_rounded,
+                    color: AppTheme.textMuted(context), size: 20),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Search Rumuo — videos, books, blogs & more',
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        color: AppTheme.textMuted(context), fontSize: 14),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
 }
 
-// ── Feed body: five vertically-stacked shelves ──────────────────────────────
-class _FeedBody extends StatelessWidget {
-  const _FeedBody();
+class _PrimaryTabs extends StatelessWidget {
+  final List<InformationForm> forms;
+  final int selectedIndex;
+  final ValueChanged<int> onSelected;
+
+  const _PrimaryTabs({
+    required this.forms,
+    required this.selectedIndex,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+        height: 54,
+        child: ListView.separated(
+          padding: const EdgeInsets.fromLTRB(16, 2, 16, 8),
+          scrollDirection: Axis.horizontal,
+          itemCount: forms.length,
+          separatorBuilder: (_, __) => const SizedBox(width: 10),
+          itemBuilder: (context, index) {
+            final selected = index == selectedIndex;
+            final form = forms[index];
+            return Semantics(
+              button: true,
+              selected: selected,
+              label: form.label,
+              child: ChoiceChip(
+                label: Text(form.label),
+                selected: selected,
+                onSelected: (_) => onSelected(index),
+                selectedColor: AppTheme.gold,
+                backgroundColor: AppTheme.surfaceColor(context),
+                side: BorderSide(color: AppTheme.dividerColor(context)),
+                labelStyle: TextStyle(
+                  color: selected
+                      ? Colors.black
+                      : AppTheme.textSecondary(context),
+                  fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
+                  fontSize: 14,
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                shape: const StadiumBorder(),
+              ),
+            );
+          },
+        ),
+      );
+}
+
+class _TabContent extends StatelessWidget {
+  final InformationForm form;
+  const _TabContent({required this.form});
 
   @override
   Widget build(BuildContext context) {
-    return NotificationListener<ScrollNotification>(
-      onNotification: ScrollVisibilityService.instance.handleScrollNotification,
-      child: RefreshIndicator(
-        color: AppTheme.gold,
-        onRefresh: () => context.read<FeedProvider>().refresh(force: true),
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
-          padding: const EdgeInsets.only(top: 4, bottom: 120),
-          children: const [
-            FeedShelf(form: InformationForm.videos),
-            FeedShelf(form: InformationForm.shorts),
-            FeedShelf(form: InformationForm.audio),
-            FeedShelf(form: InformationForm.written),
-            FeedShelf(form: InformationForm.structured),
-          ],
+    switch (form) {
+      case InformationForm.videos:
+        return const VideoFeedList();
+      case InformationForm.shorts:
+        return const ChannelsScreen(showAppBar: false);
+      case InformationForm.audio:
+      case InformationForm.written:
+      case InformationForm.structured:
+        return _SubcategoryGrid(form: form);
+    }
+  }
+}
+
+class _SubcategoryGrid extends StatelessWidget {
+  final InformationForm form;
+  const _SubcategoryGrid({required this.form});
+
+  @override
+  Widget build(BuildContext context) {
+    final subcategories = SubcategoryData.forForm(form);
+    return RefreshIndicator(
+      color: AppTheme.gold,
+      onRefresh: () => context.read<FeedProvider>().refresh(force: true),
+      child: GridView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+          childAspectRatio: 1.08,
         ),
+        itemCount: subcategories.length,
+        itemBuilder: (context, index) {
+          final subcategory = subcategories[index];
+          return SubcategoryCard(
+            subcategory: subcategory,
+            onTap: () => openSubcategory(context, subcategory),
+          );
+        },
       ),
     );
   }

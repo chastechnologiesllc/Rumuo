@@ -17,16 +17,15 @@ prototype, and where the next backend work plugs in.
 
 ### 1.2 Feed restructure — 4 tabs → 5 information forms
 The old single-select tab row (Videos / Shorts / Blogs / Books) is
-replaced with a **single vertically-scrolling feed** made of five
-shelves, one per `InformationForm` (`lib/models/information_form.dart`):
+replaced with a **horizontal primary tab row** containing five tabs, one per
+`InformationForm` (`lib/models/information_form.dart`):
 
-**Videos → Shorts → Audio → Written → Structured/Interactive**
+**Videos → Shorts → Audio → Written → Datasets**
 
-Each shelf (`lib/widgets/feed_shelf.dart`) scrolls its **subcategories
-horizontally**, ending in a **"See more"** card. Tapping "See more" (or
-the shelf's "See all") opens `InformationFormScreen`
-(`lib/screens/information_form_screen.dart`) — a grid of every
-subcategory under that form.
+The selected tab displays its own feed below the horizontal pills. Blogs and
+Books are subcategories of Written rather than primary tabs. Audio and
+Datasets display their subcategory cards, while Videos and Shorts retain their
+existing live feeds.
 
 ### 1.3 Subcategories — one named screen each
 Per the follow-up instruction, every subcategory has its **own named
@@ -41,7 +40,7 @@ from a subcategory to its screen is centralized in
 | Shorts | Clips, Quick Explanations, Highlights, Demonstrations | Clips | `channels_screen.dart` (existing, reused, live); rest in `screens/subcategories/shorts/` |
 | Audio | Podcasts, Audiobooks, Interviews, Lectures, Audio Courses | — | all in `screens/subcategories/audio/` |
 | Written | Books, Blogs, Articles, Research Papers, News & Reports, Newsletters, Case Studies | Books, Blogs | `books_feed_screen.dart`, `blogs_feed_screen.dart` (live); rest in `screens/subcategories/written/` |
-| Structured | Datasets, Statistics, Calculators, Directories, Interactive Tools | — | all in `screens/subcategories/structured/` |
+| Datasets | Datasets, Statistics, Calculators, Directories | — | all in `screens/subcategories/structured/` |
 
 "Live" = wired to real Rumuo content today (reuses the existing
 `FeedProvider` videos/books tabs, or the existing blog/shorts screens —
