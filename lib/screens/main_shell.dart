@@ -9,9 +9,9 @@ import '../providers/feed_provider.dart';
 import '../screens/video_player_screen.dart';
 import '../services/notification_service.dart';
 import '../services/notification_store.dart';
+import '../services/scroll_visibility_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/no_flash_page_route.dart';
-import 'channels_screen.dart';
 import 'home_screen.dart';
 import 'profile_screen.dart';
 import 'saved_screen.dart';
@@ -29,7 +29,6 @@ class _MainShellState extends State<MainShell> {
 
   static const _screens = [
     HomeScreen(),
-    ChannelsScreen(),
     SavedScreen(),
     ProfileScreen(),
   ];
@@ -131,21 +130,40 @@ class _MainShellState extends State<MainShell> {
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    final navBar = SafeArea(
+      top: false,
+      minimum: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+      child: _FloatingNavBar(
+        currentIndex: _index,
+        isDark: isDark,
+        onTap: (i) {
+          if (i == _index) return;
+          // Always land on a fully visible bar — avoids the nav re-opening
+          // to a stale "hidden" state left over from mid-scroll on Feed.
+          ScrollVisibilityService.instance.show();
+          setState(() => _index = i);
+        },
+      ),
+    );
+
     return Scaffold(
       extendBody: true,
       body: IndexedStack(index: _index, children: _screens),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        minimum: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-        child: _FloatingNavBar(
-          currentIndex: _index,
-          isDark: isDark,
-          onTap: (i) {
-            if (i == _index) return;
-            setState(() => _index = i);
-          },
-        ),
-      ),
+      // The nav bar only hides itself while the Feed tab is scrolling
+      // (see ScrollVisibilityService); every other tab keeps it fully on
+      // screen regardless of that shared visibility flag.
+      bottomNavigationBar: _index != 0
+          ? navBar
+          : ValueListenableBuilder<bool>(
+              valueListenable: ScrollVisibilityService.instance.visible,
+              builder: (context, visible, child) => AnimatedSize(
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOutCubic,
+                alignment: Alignment.bottomCenter,
+                child: visible ? child : const SizedBox(width: double.infinity, height: 0),
+              ),
+              child: navBar,
+            ),
     );
   }
 }
@@ -163,10 +181,9 @@ class _FloatingNavBar extends StatelessWidget {
   });
 
   static const _items = [
-    (Icons.home_outlined,    Icons.home_rounded,              'Feed'),
-    (Icons.play_circle_outline_rounded, Icons.play_circle_rounded, 'Shorts'),
-    (Icons.bookmark_outline_rounded,    Icons.bookmark_rounded,    'Saved'),
-    (Icons.person_outline_rounded,      Icons.person_rounded,      'Profile'),
+    (Icons.home_outlined,    Icons.home_rounded,     'Feed'),
+    (Icons.bookmark_outline_rounded, Icons.bookmark_rounded, 'Saved'),
+    (Icons.person_outline_rounded,   Icons.person_rounded,   'Profile'),
   ];
 
   @override

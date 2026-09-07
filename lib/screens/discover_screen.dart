@@ -12,7 +12,12 @@ import 'category_detail_screen.dart';
 /// is tapped (see CategoryDetailScreen) — browsing the list itself is
 /// pure local data, instant, and free.
 class DiscoverScreen extends StatefulWidget {
-  const DiscoverScreen({super.key});
+  /// False when this screen lives as a persistent bottom-nav tab (there's
+  /// nothing above it on the stack to pop back to); true when it's pushed
+  /// as its own route.
+  final bool showBackButton;
+
+  const DiscoverScreen({this.showBackButton = true, super.key});
 
   @override
   State<DiscoverScreen> createState() => _DiscoverScreenState();
@@ -29,10 +34,13 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
         backgroundColor: AppTheme.bgColor(context),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_rounded, color: AppTheme.textColor(context), size: 20),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+        automaticallyImplyLeading: false,
+        leading: widget.showBackButton
+            ? IconButton(
+                icon: Icon(Icons.arrow_back_ios_rounded, color: AppTheme.textColor(context), size: 20),
+                onPressed: () => Navigator.of(context).pop(),
+              )
+            : null,
         title: Text('Discover',
             style: Theme.of(context)
                 .textTheme
