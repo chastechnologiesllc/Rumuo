@@ -20,7 +20,7 @@ extension InformationFormX on InformationForm {
         InformationForm.shorts => 'Shorts',
         InformationForm.audio => 'Audio',
         InformationForm.written => 'Written',
-        InformationForm.structured => 'Datasets & Tools',
+        InformationForm.structured => 'Datasets',
       };
 
   /// One-line description shown under each shelf header.
@@ -33,7 +33,7 @@ extension InformationFormX on InformationForm {
         InformationForm.written =>
           'Books, blogs, articles, papers & reports',
         InformationForm.structured =>
-          'Datasets, statistics, calculators, directories & interactive tools',
+          'Datasets, statistics, calculators & directories',
       };
 
   IconData get icon => switch (this) {
