@@ -40,7 +40,7 @@ from a subcategory to its screen is centralized in
 | Shorts | Clips, Quick Explanations, Highlights, Demonstrations | Clips | `channels_screen.dart` (existing, reused, live); rest in `screens/subcategories/shorts/` |
 | Audio | Podcasts, Audiobooks, Interviews, Lectures, Audio Courses | — | all in `screens/subcategories/audio/` |
 | Written | Books, Blogs, Articles, Research Papers, News & Reports, Newsletters, Case Studies | Books, Blogs | `books_feed_screen.dart`, `blogs_feed_screen.dart` (live); rest in `screens/subcategories/written/` |
-| Datasets | Datasets, Statistics, Calculators, Directories | — | all in `screens/subcategories/structured/` |
+| Datasets | Datasets, Statistics, Calculators, Directories, Interactive Tools | — | all in `screens/subcategories/structured/` |
 
 "Live" = wired to real Rumuo content today (reuses the existing
 `FeedProvider` videos/books tabs, or the existing blog/shorts screens —
