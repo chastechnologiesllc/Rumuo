@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 /// Drives the show/hide animation of the header, search bar and bottom
 /// nav while the feed is scrolling. Mirrors the [NotificationStore]

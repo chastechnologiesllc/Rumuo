@@ -54,20 +54,25 @@ content can be dropped into any one of them independently.
 
 ### 1.4 Bottom nav
 `Shorts` is removed from the bottom nav (Shorts is now a shelf inside
-Feed) and replaced with **Discover** — the existing
-`DiscoverScreen` (Profession / Skill / Business browser), previously
-only reachable indirectly. `DiscoverScreen` gained a `showBackButton`
-flag so it renders correctly both as a nav tab (no back arrow) and if
-ever pushed as its own route.
+Feed) and **nothing replaced it** — nav is **Feed, Saved, Profile**
+(3 tabs). `discover_screen.dart` was left fully untouched.
 
 ### 1.5 Auto-hide header / search / bottom nav
 While the Feed is scrolling, the header+search block and the bottom nav
 collapse away (`AnimatedSize`, driven by
 `lib/services/scroll_visibility_service.dart`); both return the moment
 scrolling stops. Bottom nav only does this on the Feed tab — it stays
-fully visible on Discover/Saved/Profile.
+fully visible on Saved/Profile.
 
-## 2. New files (37 touched total)
+### 1.6 CI fix — `flutter analyze` error
+First push failed: `scroll_visibility_service.dart` used
+`ScrollDirection` without importing `package:flutter/rendering.dart`
+directly (it's normally reachable through `material.dart`, but the
+analyzer needed it explicit here). Fixed by adding that import. The
+other ~76 items in that CI run were pre-existing `info`-level lints in
+files this restructure never touched — not a regression.
+
+## 2. New files (18 + 22 subcategory screens = 40)
 
 - `models/information_form.dart`, `models/subcategory.dart`
 - `data/subcategory_data.dart`
@@ -82,12 +87,16 @@ fully visible on Discover/Saved/Profile.
 - `screens/subcategory_router.dart`, `screens/information_form_screen.dart`
 - `screens/subcategories/{videos,shorts,audio,written,structured}/*.dart`
   (22 dedicated subcategory screens)
+- this audit file
 
-## 3. Modified files
+## 3. Modified files (2)
 
 - `screens/home_screen.dart` — full rewrite (header/search/shelves/auto-hide)
-- `screens/main_shell.dart` — bottom nav swap + auto-hide wiring
-- `screens/discover_screen.dart` — added `showBackButton`
+- `screens/main_shell.dart` — Shorts removed from nav, auto-hide wiring
+
+Verified against your original upload with a full recursive diff —
+these are the only files that differ; everything else, including
+`discover_screen.dart`, is byte-identical to what you sent.
 
 ## 4. Explicitly not touched (per instruction)
 
