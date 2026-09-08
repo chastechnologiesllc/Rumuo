@@ -202,7 +202,7 @@ class _PrimaryTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.fromLTRB(12, 2, 12, 8),
+        padding: const EdgeInsets.fromLTRB(12, 2, 12, 6),
         child: Row(
           children: List.generate(forms.length, (index) {
             final selected = index == selectedIndex;
@@ -218,7 +218,7 @@ class _PrimaryTabs extends StatelessWidget {
                     onTap: () => onSelected(index),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 180),
-                      height: 42,
+                      height: 34,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: selected

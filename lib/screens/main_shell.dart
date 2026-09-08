@@ -132,7 +132,7 @@ class _MainShellState extends State<MainShell> {
 
     final navBar = SafeArea(
       top: false,
-      minimum: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+      minimum: const EdgeInsets.fromLTRB(16, 0, 16, 10),
       child: _FloatingNavBar(
         currentIndex: _index,
         isDark: isDark,
@@ -189,12 +189,12 @@ class _FloatingNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 68,
+      height: 58,
       decoration: BoxDecoration(
         color: isDark
             ? const Color(0xFF1A1A1A).withValues(alpha: 0.96)
             : Colors.white.withValues(alpha: 0.96),
-        borderRadius: BorderRadius.circular(36),
+        borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: isDark ? 0.5 : 0.15),
@@ -222,7 +222,7 @@ class _FloatingNavBar extends StatelessWidget {
                 type: MaterialType.transparency,
                 child: InkWell(
                   key: ValueKey('main-tab-$i'),
-                  borderRadius: BorderRadius.circular(30),
+                  borderRadius: BorderRadius.circular(26),
                   onTap: () => onTap(i),
                   child: SizedBox.expand(
                     child: Column(
@@ -255,7 +255,7 @@ class _FloatingNavBar extends StatelessWidget {
                                           : (isDark
                                               ? AppTheme.darkTextMuted
                                               : AppTheme.lightTextMuted),
-                                      size: isActive ? 26 : 24,
+                                      size: isActive ? 22 : 20,
                                     ),
                                   ),
                                 )
@@ -267,10 +267,10 @@ class _FloatingNavBar extends StatelessWidget {
                                       : (isDark
                                           ? AppTheme.darkTextMuted
                                           : AppTheme.lightTextMuted),
-                                  size: isActive ? 26 : 24,
+                                  size: isActive ? 22 : 20,
                                 ),
                         ),
-                        const SizedBox(height: 3),
+                        const SizedBox(height: 1),
                         Text(
                           item.$3,
                           style: TextStyle(
@@ -279,7 +279,7 @@ class _FloatingNavBar extends StatelessWidget {
                                 : (isDark
                                     ? AppTheme.darkTextMuted
                                     : AppTheme.lightTextMuted),
-                            fontSize: 10,
+                            fontSize: 9,
                             fontWeight:
                                 isActive ? FontWeight.w700 : FontWeight.w400,
                           ),
