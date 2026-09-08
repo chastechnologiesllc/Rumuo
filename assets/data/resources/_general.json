@@ -1,19 +1,20 @@
 {
   "categoryId": "_general",
   "status": "verified",
-  "lastUpdated": "2026-08-26",
+  "lastUpdated": "2026-09-08",
   "channels": [
     {
-      "id": "UC3YxJzFvjfjRZN0a7HR6x1w",
+      "id": "UCXsH4hSV_kEdAOsupMMm4Qw",
       "name": "OpenLearn from The Open University",
       "handle": "@OpenLearn_OU",
-      "description": "Free learning across education, society, science, and lifelong learning.",
+      "description": "OpenLearn provides free learning videos from The Open University across a wide range of subjects.",
       "accentColor": "0xFF2563EB",
-      "initials": "OF",
-      "focus": "General Learning: Free learning across education, society, science, and lifelong learning.",
+      "initials": "OFT",
+      "focus": "Free educational and lifelong-learning content including philosophy, economics, history, astronomy, religion, podcasts, and educational films.",
       "region": "Global",
-      "verifiedOn": "2026-08-23",
-      "verificationMethod": "Direct YouTube handle page resolved to channel ID UC3YxJzFvjfjRZN0a7HR6x1w; selected for the General Learning learning pathway beyond business-only content."
+      "verifiedOn": "2026-09-08",
+      "verificationMethod": "Verified on the official channel page and canonical channel URL; the page identifies OpenLearn from The Open University, its handle, active video catalog, and educational description.",
+      "sourceUrl": "https://www.youtube.com/@OpenLearn_OU"
     },
     {
       "id": "UC4EY_qnSeAP1xGsh61eOoJA",
@@ -40,16 +41,17 @@
       "verificationMethod": "Direct YouTube handle page resolved to channel ID UCBa5G_ESCn8Yd4vw5U-gIcg; selected for the General Learning learning pathway beyond business-only content."
     },
     {
-      "id": "UC2ri4rEb8abnNwXvTjg5ARw",
+      "id": "UC4a-Gbdw7vOaccHmFo40b9g",
       "name": "Khan Academy",
       "handle": "@khanacademy",
-      "description": "Foundational and advanced learning with practice across core subjects.",
-      "accentColor": "0xFF7C3AED",
+      "description": "Khan Academy is a nonprofit providing free education through videos, articles, and practice across many subjects.",
+      "accentColor": "0xFF2563EB",
       "initials": "KA",
-      "focus": "General Learning: Foundational and advanced learning with practice across core subjects.",
+      "focus": "Free lessons across mathematics, science, history, economics, finance, grammar, computer science, and test preparation.",
       "region": "Global",
-      "verifiedOn": "2026-08-23",
-      "verificationMethod": "Direct YouTube handle page resolved to channel ID UC2ri4rEb8abnNwXvTjg5ARw; selected for the General Learning learning pathway beyond business-only content."
+      "verifiedOn": "2026-09-08",
+      "verificationMethod": "Verified on the official YouTube page and canonical channel URL; the page identifies Khan Academy, its active video catalog, and subject playlists. Khan Academy’s first-party site corroborates its nonprofit educational mission.",
+      "sourceUrl": "https://www.youtube.com/@khanacademy"
     },
     {
       "id": "UCX6b17PVsYBQ0ip5gyeme-Q",
@@ -119,6 +121,84 @@
       "focus": "Mindset",
       "verifiedOn": "2026-07-25",
       "verificationMethod": "ID confirmed by direct YouTube page fetch (youtube.com/@Insightpreneur)."
+    },
+    {
+      "id": "UCsooa4yRKGN_zEE8iknghZA",
+      "name": "TED-Ed",
+      "handle": "@TEDEd",
+      "description": "TED-Ed creates animated lessons worth sharing, with supplemental learning materials for educators, students, and curious learners.",
+      "focus": "Educational short animated lessons spanning science, history, mathematics, culture, and other ideas.",
+      "region": "Global",
+      "sourceUrl": "https://www.youtube.com/@TEDEd",
+      "verificationMethod": "Verified on the official YouTube handle page and canonical channel URL; the page identifies TED-Ed, handle @TEDEd, and recent uploads. TED.com and ed.ted.com independently describe TED-Ed as TED’s education initiative.",
+      "initials": "T",
+      "accentColor": "0xFF2563EB",
+      "verifiedOn": "2026-09-08"
+    },
+    {
+      "id": "UCEBb1b_L6zDS3xTUrIALZOw",
+      "name": "MIT OpenCourseWare",
+      "handle": "@mitocw",
+      "description": "MIT OpenCourseWare publishes free educational material from thousands of MIT courses across the curriculum.",
+      "focus": "Open lectures and learning materials across science, engineering, mathematics, computer science, economics, humanities, and other academic subjects.",
+      "region": "Global",
+      "sourceUrl": "https://www.youtube.com/@mitocw",
+      "verificationMethod": "Verified on the official YouTube handle page and canonical channel URL; the page shows the MIT OpenCourseWare identity, active uploads, and course content. MIT’s official OCW site independently corroborates the free educational mission.",
+      "initials": "MO",
+      "accentColor": "0xFF2563EB",
+      "verifiedOn": "2026-09-08"
+    },
+    {
+      "id": "UC8butISFwT-Wl7EV0hUK0BQ",
+      "name": "freeCodeCamp.org",
+      "handle": "@freecodecamp",
+      "description": "freeCodeCamp provides free courses and tutorials for learning programming and computer science.",
+      "focus": "Programming, software development, mathematics, computer science, AI, data structures, and technical career skills.",
+      "region": "United States",
+      "sourceUrl": "https://www.youtube.com/@freecodecamp",
+      "verificationMethod": "Verified on the official YouTube channel and About page; the canonical URL and channel metadata identify freeCodeCamp.org and its active educational catalog.",
+      "initials": "F",
+      "accentColor": "0xFF2563EB",
+      "verifiedOn": "2026-09-08"
+    },
+    {
+      "id": "UCtYLUTtgS3k1Fg4y5tAhLbw",
+      "name": "StatQuest with Josh Starmer",
+      "handle": "@statquest",
+      "description": "StatQuest explains statistics, machine learning, data science, and AI through clear step-by-step lessons.",
+      "focus": "Accessible statistics, machine learning, data science, neural networks, and AI education.",
+      "region": "Global",
+      "sourceUrl": "https://www.youtube.com/@statquest",
+      "verificationMethod": "Verified on the official YouTube page, canonical channel URL, and active Videos catalog; the official channel description confirms the statistics, machine learning, data science, and AI focus.",
+      "initials": "SWJ",
+      "accentColor": "0xFF2563EB",
+      "verifiedOn": "2026-09-08"
+    },
+    {
+      "id": "UC9-y-6csu5WGm29I7JiwpnA",
+      "name": "Computerphile",
+      "handle": "@Computerphile",
+      "description": "Computerphile publishes educational videos about computers and computer science.",
+      "focus": "Programming, algorithms, cybersecurity, hardware, AI, and related computing topics.",
+      "region": "Global",
+      "sourceUrl": "https://www.youtube.com/@Computerphile",
+      "verificationMethod": "Verified on the official YouTube channel page, canonical URL, and active Videos catalog; the official description states that the channel covers computers and computer-related topics.",
+      "initials": "C",
+      "accentColor": "0xFF2563EB",
+      "verifiedOn": "2026-09-08"
+    },
+    {
+      "id": "UCoZCili40vUhAECOq2WzUdQ",
+      "name": "PBS LearningMedia™",
+      "handle": "@PBSLearningMediaORG",
+      "description": "PBS LearningMedia offers free curriculum-aligned resources for PreK–12 educators and students.",
+      "focus": "Educational videos and classroom resources across science, social studies, language arts, the arts, and core subjects.",
+      "region": "Global",
+      "sourceUrl": "https://www.youtube.com/@PBSLearningMedia",
+      "verificationMethod": "Verified against the official PBS LearningMedia YouTube page and canonical channel metadata; the page shows an active video catalog and curriculum-aligned educational focus.",
+      "initials": "PL",
+      "accentColor": "0xFF2563EB",
+      "verifiedOn": "2026-09-08"
     }
   ],
   "blogs": [
@@ -340333,5 +340413,5 @@
     "2026-08-23: Cover candidates use ordered exact-edition sources; keep the placeholder when no verified edition cover exists.",
     "2026-08-23: Cover candidates use ordered exact-edition sources; keep the placeholder when no verified edition cover exists."
   ],
-  "notes": "2026-08-23: Added 303 high-confidence openly licensed textbook records from the Open Textbook Library catalog; records were limited to titles with a non-empty license and a $0.00 Online, PDF, or eBook format. 2026-08-23: Added 250 selected Project Gutenberg public-domain non-fiction records to the General collection. 2026-08-23: Added 0 selected Project Gutenberg public-domain non-fiction records to the General collection. 2026-08-23: Filled missing author metadata on Project Gutenberg records with an explicit fallback rather than leaving the field blank. 2026-08-23: Added 500 selected Project Gutenberg public-domain non-fiction records to the General collection. 2026-08-23: Added 500 selected Project Gutenberg public-domain non-fiction records to the General collection. 2026-08-23: Added 2266 selected Project Gutenberg public-domain non-fiction records to the General collection. 2026-08-23: Added 3500 selected Project Gutenberg public-domain non-fiction records to the General collection. 2026-08-23: Added exact Project Gutenberg edition cover candidates and accepted only title-matched page-specific cover images from trusted free-book hosts; unresolved books intentionally fall back to the branded placeholder rather than a guessed cover. 2026-08-23: Added exact Project Gutenberg edition cover candidates and accepted only title-matched page-specific cover images from trusted free-book hosts; unresolved books intentionally fall back to the branded placeholder rather than a guessed cover. 2026-08-23: Added exact Project Gutenberg edition cover candidates and accepted only title-matched page-specific cover images from trusted free-book hosts; unresolved books intentionally fall back to the branded placeholder rather than a guessed cover. 2026-08-23: Added ten broad educational channels and ten learning blogs for General discovery. 2026-08-23: General is intentionally limited to ten broad discovery channels and ten broad learning blogs; specialized sources live in their categories. 2026-08-23: Added ten broad educational channels and ten learning blogs for General discovery. 2026-08-23: General is intentionally limited to ten broad discovery channels and ten broad learning blogs; specialized sources live in their categories. 2026-08-25: Added 13 source-verified open textbooks from Open Textbook Library and OpenStax; unresolved cover identifiers intentionally use the branded Rumuo fallback. Added 7069 Project Gutenberg public-domain catalog records with source links and cover candidates on 2026-08-26."
+  "notes": "2026-08-23: Added 303 high-confidence openly licensed textbook records from the Open Textbook Library catalog; records were limited to titles with a non-empty license and a $0.00 Online, PDF, or eBook format. 2026-08-23: Added 250 selected Project Gutenberg public-domain non-fiction records to the General collection. 2026-08-23: Added 0 selected Project Gutenberg public-domain non-fiction records to the General collection. 2026-08-23: Filled missing author metadata on Project Gutenberg records with an explicit fallback rather than leaving the field blank. 2026-08-23: Added 500 selected Project Gutenberg public-domain non-fiction records to the General collection. 2026-08-23: Added 500 selected Project Gutenberg public-domain non-fiction records to the General collection. 2026-08-23: Added 2266 selected Project Gutenberg public-domain non-fiction records to the General collection. 2026-08-23: Added 3500 selected Project Gutenberg public-domain non-fiction records to the General collection. 2026-08-23: Added exact Project Gutenberg edition cover candidates and accepted only title-matched page-specific cover images from trusted free-book hosts; unresolved books intentionally fall back to the branded placeholder rather than a guessed cover. 2026-08-23: Added exact Project Gutenberg edition cover candidates and accepted only title-matched page-specific cover images from trusted free-book hosts; unresolved books intentionally fall back to the branded placeholder rather than a guessed cover. 2026-08-23: Added exact Project Gutenberg edition cover candidates and accepted only title-matched page-specific cover images from trusted free-book hosts; unresolved books intentionally fall back to the branded placeholder rather than a guessed cover. 2026-08-23: Added ten broad educational channels and ten learning blogs for General discovery. 2026-08-23: General is intentionally limited to ten broad discovery channels and ten broad learning blogs; specialized sources live in their categories. 2026-08-23: Added ten broad educational channels and ten learning blogs for General discovery. 2026-08-23: General is intentionally limited to ten broad discovery channels and ten broad learning blogs; specialized sources live in their categories. 2026-08-25: Added 13 source-verified open textbooks from Open Textbook Library and OpenStax; unresolved cover identifiers intentionally use the branded Rumuo fallback. Added 7069 Project Gutenberg public-domain catalog records with source links and cover candidates on 2026-08-26.\n\n2026-09-08: Added or refreshed ten authoritative General learning channels with official channel IDs, handles, focus descriptions, and verification notes.\n"
 }
