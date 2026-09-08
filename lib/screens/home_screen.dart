@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../data/subcategory_data.dart';
 import '../models/information_form.dart';
 import '../providers/feed_provider.dart';
 import '../services/notification_store.dart';
 import '../services/scroll_visibility_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/mvp_subcategory_feed.dart';
 import '../widgets/rumuo_mark.dart';
-import '../widgets/subcategory_card.dart';
 import 'content_search_screen.dart';
 import 'notifications_screen.dart';
-import 'subcategory_router.dart';
 
 /// The Feed screen uses horizontal primary tabs, matching the original Rumuo
 /// navigation: Videos, Shorts, Audio, Written, and Datasets. Blogs and Books
@@ -258,45 +256,6 @@ class _TabContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    switch (form) {
-      case InformationForm.videos:
-      case InformationForm.shorts:
-      case InformationForm.audio:
-      case InformationForm.written:
-      case InformationForm.structured:
-        return _SubcategoryGrid(form: form);
-    }
-  }
-}
-
-class _SubcategoryGrid extends StatelessWidget {
-  final InformationForm form;
-  const _SubcategoryGrid({required this.form});
-
-  @override
-  Widget build(BuildContext context) {
-    final subcategories = SubcategoryData.forForm(form);
-    return RefreshIndicator(
-      color: AppTheme.gold,
-      onRefresh: () => context.read<FeedProvider>().refresh(force: true),
-      child: GridView.builder(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-          childAspectRatio: 1.08,
-        ),
-        itemCount: subcategories.length,
-        itemBuilder: (context, index) {
-          final subcategory = subcategories[index];
-          return SubcategoryCard(
-            subcategory: subcategory,
-            onTap: () => openSubcategory(context, subcategory),
-          );
-        },
-      ),
-    );
+    return MvpSubcategoryFeed(form: form);
   }
 }
