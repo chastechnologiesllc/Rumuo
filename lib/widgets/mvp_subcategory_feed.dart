@@ -1,180 +1,109 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../data/channel_data.dart';
 import '../data/subcategory_data.dart';
 import '../models/information_form.dart';
-import '../models/subcategory.dart';
-import '../screens/subcategory_router.dart';
+import '../models/video.dart';
+import '../providers/feed_provider.dart';
 import '../theme/app_theme.dart';
+import 'inline_video_card.dart';
+import 'shimmer_loader.dart';
 
-class _MvpItem {
-  final Subcategory subcategory;
-  final String title;
-  final String summary;
-  final String meta;
-
-  const _MvpItem({
-    required this.subcategory,
-    required this.title,
-    required this.summary,
-    required this.meta,
-  });
-}
-
-/// Prototype content stream for a primary tab. It deliberately mixes every
-/// subcategory under the selected form so the MVP behaves like a real feed,
-/// while each card remains clearly labeled with its source subcategory.
-class MvpSubcategoryFeed extends StatelessWidget {
+/// A real content stream for a primary category. It reads the existing
+/// FeedProvider pool; the only MVP metadata added here is the subcategory tag.
+class MvpSubcategoryFeed extends StatefulWidget {
   final InformationForm form;
 
   const MvpSubcategoryFeed({required this.form, super.key});
 
-  List<_MvpItem> _items() {
-    final subcategories = SubcategoryData.forForm(form);
-    final items = <_MvpItem>[];
-    for (final subcategory in subcategories) {
-      items.addAll([
-        _MvpItem(
-          subcategory: subcategory,
-          title: '${subcategory.name}: the essential starting point',
-          summary:
-              'A clear, practical introduction with examples and useful next steps.',
-          meta: 'Featured',
-        ),
-        _MvpItem(
-          subcategory: subcategory,
-          title: 'What to know about ${subcategory.name.toLowerCase()}',
-          summary:
-              'A concise guide designed to help you understand the topic and apply it.',
-          meta: 'Guide',
-        ),
-        _MvpItem(
-          subcategory: subcategory,
-          title: '${subcategory.name} in practice',
-          summary:
-              'A real-world example showing how the ideas work beyond the definition.',
-          meta: 'Case study',
-        ),
-      ]);
-    }
-    return items;
+  @override
+  State<MvpSubcategoryFeed> createState() => _MvpSubcategoryFeedState();
+}
+
+class _MvpSubcategoryFeedState extends State<MvpSubcategoryFeed> {
+  final _activeVideoNotifier = ValueNotifier<String?>(null);
+
+  @override
+  void dispose() {
+    _activeVideoNotifier.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final items = _items();
+    final provider = context.watch<FeedProvider>();
+    final videos = _contentFor(provider);
+
+    if (provider.state == FeedState.loading && videos.isEmpty) {
+      return const ShimmerLoader();
+    }
+    if (videos.isEmpty) {
+      return RefreshIndicator(
+        color: AppTheme.gold,
+        onRefresh: () => provider.refresh(force: true),
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            SizedBox(
+              height: 300,
+              child: Center(
+                child: Text(
+                  'No content available yet. Pull to refresh.',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final subcategories = SubcategoryData.forForm(widget.form);
     return RefreshIndicator(
       color: AppTheme.gold,
-      onRefresh: () async {},
+      onRefresh: () => provider.refresh(force: true),
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
-        itemCount: items.length,
+        itemCount: videos.length,
         itemBuilder: (context, index) {
-          final item = items[index];
-          return _MvpContentCard(
-            item: item,
-            onTap: () => openSubcategory(context, item.subcategory),
+          final video = videos[index];
+          final channel = ChannelData.byId[video.channelId] ?? ChannelData.fallback;
+          final tag = subcategories[index % subcategories.length].name;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 14),
+            child: InlineVideoCard(
+              video: video,
+              channel: channel,
+              subcategoryTag: tag,
+              saved: provider.isVideoSaved(video.id),
+              activeVideoNotifier: _activeVideoNotifier,
+              onSave: () => provider.toggleSaved(video),
+              onShare: () {},
+            ),
           );
         },
       ),
     );
   }
-}
 
-class _MvpContentCard extends StatelessWidget {
-  final _MvpItem item;
-  final VoidCallback onTap;
-
-  const _MvpContentCard({required this.item, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) => GestureDetector(
-        onTap: onTap,
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppTheme.surfaceColor(context),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppTheme.dividerColor(context), width: 0.6),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppTheme.gold.withValues(alpha: 0.14),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      item.subcategory.name,
-                      style: const TextStyle(
-                        color: AppTheme.gold,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(item.meta,
-                      style: TextStyle(
-                          color: AppTheme.textMuted(context), fontSize: 11)),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 46,
-                    height: 46,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: AppTheme.gold.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(13),
-                    ),
-                    child: Icon(item.subcategory.icon,
-                        color: AppTheme.gold, size: 24),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(item.title,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w800)),
-                        const SizedBox(height: 6),
-                        Text(item.summary,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                    color: AppTheme.textMuted(context),
-                                    height: 1.35)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  const Icon(Icons.arrow_forward_rounded,
-                      size: 16, color: AppTheme.gold),
-                  const SizedBox(width: 5),
-                  const Text('Open content',
-                      style: TextStyle(
-                          color: AppTheme.gold, fontWeight: FontWeight.w700)),
-                ],
-              ),
-            ],
-          ),
-        ),
-      );
+  List<Video> _contentFor(FeedProvider provider) {
+    final all = provider.allFeedVideos
+        .where((video) => video.channelId != 'books' && video.channelId != 'verified_book')
+        .toList();
+    switch (widget.form) {
+      case InformationForm.videos:
+        return all.where((video) => !video.isShort).toList();
+      case InformationForm.shorts:
+        return all.where((video) => video.isShort).toList();
+      case InformationForm.audio:
+      case InformationForm.written:
+      case InformationForm.structured:
+        // These information forms do not yet have separate backend content
+        // types. Until those sources land, show the real loaded content pool
+        // rather than fabricated cards, while preserving the subcategory tag.
+        return all;
+    }
+  }
 }
