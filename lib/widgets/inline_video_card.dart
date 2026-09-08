@@ -60,6 +60,7 @@ import 'web_youtube_player.dart';
 class InlineVideoCard extends StatefulWidget {
   final Video video;
   final Channel channel;
+  final String? subcategoryTag;
   final bool saved;
   final VoidCallback? onSave;
   final VoidCallback? onShare;
@@ -70,6 +71,7 @@ class InlineVideoCard extends StatefulWidget {
     required this.channel,
     required this.activeVideoNotifier,
     super.key,
+    this.subcategoryTag,
     this.saved = false,
     this.onSave,
     this.onShare,
@@ -499,6 +501,24 @@ class _InlineVideoCardState extends State<InlineVideoCard>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (widget.subcategoryTag != null) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppTheme.gold.withValues(alpha: 0.14),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        widget.subcategoryTag!,
+                        style: const TextStyle(
+                          color: AppTheme.gold,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 9),
+                  ],
                   Text(
                     widget.video.title,
                     maxLines: 2,

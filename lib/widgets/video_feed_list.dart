@@ -76,6 +76,7 @@ class _VideoFeedListState extends State<VideoFeedList> {
                   key: ValueKey(video.id),
                   video: video,
                   channel: channel,
+                  subcategoryTag: 'Long-form',
                   saved: provider.isVideoSaved(video.id),
                   activeVideoNotifier: _activeVideoNotifier,
                   onSave: () => provider.toggleSaved(video),
