@@ -199,6 +199,32 @@
       "initials": "PL",
       "accentColor": "0xFF2563EB",
       "verifiedOn": "2026-09-08"
+    },
+    {
+      "id": "UCoxcjq-8xIDTYp3uz647V5A",
+      "name": "Numberphile",
+      "handle": "@numberphile",
+      "description": "Numberphile publishes educational videos about numbers and mathematics.",
+      "focus": "Mathematics and number-focused explanatory videos covering historic discoveries, modern breakthroughs, mathematicians, and guests.",
+      "region": "Global",
+      "sourceUrl": "https://www.youtube.com/@numberphile",
+      "verificationMethod": "Verified on the official YouTube handle page and canonical channel metadata; the page shows Numberphile, handle @numberphile, an active catalog, and recent uploads. The official Numberphile About page independently confirms the mathematics focus.",
+      "initials": "N",
+      "accentColor": "0xFF2563EB",
+      "verifiedOn": "2026-09-08"
+    },
+    {
+      "id": "UCvjgXvBlbQiydffZU7m1_aw",
+      "name": "The Coding Train",
+      "handle": "@TheCodingTrain",
+      "description": "The Coding Train publishes creative coding tutorials from programming basics through machine learning and generative projects.",
+      "focus": "Beginner-friendly programming, JavaScript, algorithmic art, machine learning, simulations, generative poetry, and coding challenges.",
+      "region": "Global",
+      "sourceUrl": "https://www.youtube.com/@TheCodingTrain",
+      "verificationMethod": "Verified on the official YouTube handle page and canonical channel metadata; the page identifies The Coding Train, its channel ID, and active educational content. The official Coding Train About page independently confirms the educational purpose.",
+      "initials": "TCT",
+      "accentColor": "0xFF2563EB",
+      "verifiedOn": "2026-09-08"
     }
   ],
   "blogs": [
