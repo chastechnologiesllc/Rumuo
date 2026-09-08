@@ -132,7 +132,7 @@ class _MainShellState extends State<MainShell> {
 
     final navBar = SafeArea(
       top: false,
-      minimum: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+      minimum: const EdgeInsets.fromLTRB(32, 0, 32, 10),
       child: _FloatingNavBar(
         currentIndex: _index,
         isDark: isDark,
