@@ -156,7 +156,7 @@ class _SourceCard extends StatelessWidget {
 
   const _SourceCard({required this.source});
 
-  Future<void> _open() async {
+  Future<void> _open(BuildContext context) async {
     final uri = Uri.tryParse(source.url);
     if (uri == null) return;
     await Navigator.of(context).push(MaterialPageRoute(
@@ -179,7 +179,7 @@ class _SourceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => GestureDetector(
-        onTap: _open,
+        onTap: () => _open(context),
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
