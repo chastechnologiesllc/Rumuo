@@ -340439,5 +340439,97 @@
     "2026-08-23: Cover candidates use ordered exact-edition sources; keep the placeholder when no verified edition cover exists.",
     "2026-08-23: Cover candidates use ordered exact-edition sources; keep the placeholder when no verified edition cover exists."
   ],
-  "notes": "2026-08-23: Added 303 high-confidence openly licensed textbook records from the Open Textbook Library catalog; records were limited to titles with a non-empty license and a $0.00 Online, PDF, or eBook format. 2026-08-23: Added 250 selected Project Gutenberg public-domain non-fiction records to the General collection. 2026-08-23: Added 0 selected Project Gutenberg public-domain non-fiction records to the General collection. 2026-08-23: Filled missing author metadata on Project Gutenberg records with an explicit fallback rather than leaving the field blank. 2026-08-23: Added 500 selected Project Gutenberg public-domain non-fiction records to the General collection. 2026-08-23: Added 500 selected Project Gutenberg public-domain non-fiction records to the General collection. 2026-08-23: Added 2266 selected Project Gutenberg public-domain non-fiction records to the General collection. 2026-08-23: Added 3500 selected Project Gutenberg public-domain non-fiction records to the General collection. 2026-08-23: Added exact Project Gutenberg edition cover candidates and accepted only title-matched page-specific cover images from trusted free-book hosts; unresolved books intentionally fall back to the branded placeholder rather than a guessed cover. 2026-08-23: Added exact Project Gutenberg edition cover candidates and accepted only title-matched page-specific cover images from trusted free-book hosts; unresolved books intentionally fall back to the branded placeholder rather than a guessed cover. 2026-08-23: Added exact Project Gutenberg edition cover candidates and accepted only title-matched page-specific cover images from trusted free-book hosts; unresolved books intentionally fall back to the branded placeholder rather than a guessed cover. 2026-08-23: Added ten broad educational channels and ten learning blogs for General discovery. 2026-08-23: General is intentionally limited to ten broad discovery channels and ten broad learning blogs; specialized sources live in their categories. 2026-08-23: Added ten broad educational channels and ten learning blogs for General discovery. 2026-08-23: General is intentionally limited to ten broad discovery channels and ten broad learning blogs; specialized sources live in their categories. 2026-08-25: Added 13 source-verified open textbooks from Open Textbook Library and OpenStax; unresolved cover identifiers intentionally use the branded Rumuo fallback. Added 7069 Project Gutenberg public-domain catalog records with source links and cover candidates on 2026-08-26.\n\n2026-09-08: Added or refreshed ten authoritative General learning channels with official channel IDs, handles, focus descriptions, and verification notes.\n"
+  "notes": "2026-08-23: Added 303 high-confidence openly licensed textbook records from the Open Textbook Library catalog; records were limited to titles with a non-empty license and a $0.00 Online, PDF, or eBook format. 2026-08-23: Added 250 selected Project Gutenberg public-domain non-fiction records to the General collection. 2026-08-23: Added 0 selected Project Gutenberg public-domain non-fiction records to the General collection. 2026-08-23: Filled missing author metadata on Project Gutenberg records with an explicit fallback rather than leaving the field blank. 2026-08-23: Added 500 selected Project Gutenberg public-domain non-fiction records to the General collection. 2026-08-23: Added 500 selected Project Gutenberg public-domain non-fiction records to the General collection. 2026-08-23: Added 2266 selected Project Gutenberg public-domain non-fiction records to the General collection. 2026-08-23: Added 3500 selected Project Gutenberg public-domain non-fiction records to the General collection. 2026-08-23: Added exact Project Gutenberg edition cover candidates and accepted only title-matched page-specific cover images from trusted free-book hosts; unresolved books intentionally fall back to the branded placeholder rather than a guessed cover. 2026-08-23: Added exact Project Gutenberg edition cover candidates and accepted only title-matched page-specific cover images from trusted free-book hosts; unresolved books intentionally fall back to the branded placeholder rather than a guessed cover. 2026-08-23: Added exact Project Gutenberg edition cover candidates and accepted only title-matched page-specific cover images from trusted free-book hosts; unresolved books intentionally fall back to the branded placeholder rather than a guessed cover. 2026-08-23: Added ten broad educational channels and ten learning blogs for General discovery. 2026-08-23: General is intentionally limited to ten broad discovery channels and ten broad learning blogs; specialized sources live in their categories. 2026-08-23: Added ten broad educational channels and ten learning blogs for General discovery. 2026-08-23: General is intentionally limited to ten broad discovery channels and ten broad learning blogs; specialized sources live in their categories. 2026-08-25: Added 13 source-verified open textbooks from Open Textbook Library and OpenStax; unresolved cover identifiers intentionally use the branded Rumuo fallback. Added 7069 Project Gutenberg public-domain catalog records with source links and cover candidates on 2026-08-26.\n\n2026-09-08: Added or refreshed ten authoritative General learning channels with official channel IDs, handles, focus descriptions, and verification notes.\n\n2026-09-08: Added ten official Audio and Datasets subcategory sources with verified URLs.\n",
+  "subcategorySources": [
+    {
+      "subcategoryId": "audio_podcasts",
+      "subcategoryName": "Podcasts",
+      "title": "NPR Podcasts & Shows",
+      "url": "https://www.npr.org/podcasts/",
+      "description": "Official NPR directory and listening hub for podcasts and shows, with playable episodes and browsing by arts, business, health, music, news, science, technology and more.",
+      "contentType": "Audio podcasts and podcast directory/listening service",
+      "region": "United States"
+    },
+    {
+      "subcategoryId": "audio_audiobooks",
+      "subcategoryName": "Audiobooks",
+      "title": "LibriVox",
+      "url": "https://librivox.org/",
+      "description": "Free public-domain audiobooks read by volunteers, searchable by author, title, genre, subject and language.",
+      "contentType": "Public-domain audiobook recordings and searchable catalog",
+      "region": "Global"
+    },
+    {
+      "subcategoryId": "audio_interviews",
+      "subcategoryName": "Interviews",
+      "title": "BBC Sounds",
+      "url": "https://www.bbc.co.uk/sounds",
+      "description": "BBC audio service with live radio, podcasts, music, news and on-demand programmes, including interview-led and conversational programmes.",
+      "contentType": "Audio live radio, podcasts and on-demand programmes",
+      "region": "United Kingdom"
+    },
+    {
+      "subcategoryId": "audio_lectures",
+      "subcategoryName": "Lectures",
+      "title": "Open Yale Courses",
+      "url": "https://oyc.yale.edu/",
+      "description": "Free selected introductory Yale courses with lectures available in audio, video and text-transcript formats, without registration.",
+      "contentType": "Audio lectures with video recordings and searchable text transcripts",
+      "region": "United States"
+    },
+    {
+      "subcategoryId": "audio_courses",
+      "subcategoryName": "Audio Courses",
+      "title": "OpenLearn",
+      "url": "https://www.open.edu/openlearn/",
+      "description": "Free Open University learning resources including courses, articles, videos and interactives across education, business, health, history, science, society and computing.",
+      "contentType": "Free online learning platform with courses, articles, videos and interactives",
+      "region": "United Kingdom"
+    },
+    {
+      "subcategoryId": "structured_datasets",
+      "subcategoryName": "Datasets",
+      "title": "Data.gov — The U.S. Government's Open Data",
+      "url": "https://data.gov/",
+      "description": "Official U.S. government open-data portal with dataset catalogs, tools, resources, geospatial data, organizations and recently added datasets.",
+      "contentType": "Structured datasets and dataset metadata catalog",
+      "region": "United States"
+    },
+    {
+      "subcategoryId": "structured_statistics",
+      "subcategoryName": "Statistics",
+      "title": "Our World in Data",
+      "url": "https://ourworldindata.org/",
+      "description": "Open research and data with interactive charts, data explorers, articles and downloadable data about global problems and indicators.",
+      "contentType": "Statistical data, interactive charts, data explorers and research articles",
+      "region": "Global"
+    },
+    {
+      "subcategoryId": "structured_calculators",
+      "subcategoryName": "Calculators",
+      "title": "Desmos Calculator",
+      "url": "https://www.desmos.com/calculator",
+      "description": "Interactive graphing calculator with expressions, functions, inequalities, roots, variables and mathematical operations.",
+      "contentType": "Interactive web graphing calculator",
+      "region": "Global"
+    },
+    {
+      "subcategoryId": "structured_directories",
+      "subcategoryName": "Directories",
+      "title": "Wikidata",
+      "url": "https://www.wikidata.org/",
+      "description": "Free, open, multilingual knowledge base for structured data, with linked data, standard exports, properties and SPARQL tools.",
+      "contentType": "Structured knowledge base and linked open data repository",
+      "region": "Global"
+    },
+    {
+      "subcategoryId": "structured_tools",
+      "subcategoryName": "Interactive Tools",
+      "title": "PhET Interactive Simulations",
+      "url": "https://phet.colorado.edu/",
+      "description": "Free research-based interactive math and science simulations with teaching tips, activities, accessibility information and language options.",
+      "contentType": "Interactive educational simulations and teaching resources",
+      "region": "Global"
+    }
+  ]
 }

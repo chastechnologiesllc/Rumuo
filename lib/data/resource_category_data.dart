@@ -51,11 +51,14 @@ class ResourceCategoryData {
   static List<Channel> _verifiedChannels = const [];
   static List<Map<String, String>> _verifiedBlogs = const [];
   static List<VerifiedBook> _verifiedBooks = const [];
+  static List<VerifiedSubcategorySource> _verifiedSubcategorySources = const [];
   static final Map<String, Map<String, dynamic>> _resourceFiles = {};
 
   static List<Channel> get verifiedChannels => _verifiedChannels;
   static List<Map<String, String>> get verifiedBlogs => _verifiedBlogs;
   static List<VerifiedBook> get verifiedBooks => _verifiedBooks;
+  static List<VerifiedSubcategorySource> get verifiedSubcategorySources =>
+      _verifiedSubcategorySources;
 
   /// Loads the lightweight category index. This is the only category data
   /// needed before the first screen and onboarding search are usable.
@@ -136,6 +139,7 @@ class ResourceCategoryData {
     final channels = <Channel>[];
     final blogs = <Map<String, String>>[];
     final books = <VerifiedBook>[];
+    final subcategorySources = <VerifiedSubcategorySource>[];
 
     // Every category's resource file, PLUS _general.json, read concurrently.
     // These are independent local asset reads with no ordering dependency
@@ -164,7 +168,7 @@ class ResourceCategoryData {
       if (map == null) continue;
       final category = _all[i];
       _resourceFiles[category.id] = map;
-      _addFrom(map, category.id, channels, blogs, books);
+      _addFrom(map, category.id, channels, blogs, books, subcategorySources);
     }
 
     // The general/cross-cutting resources — not tied to any category, so
@@ -175,7 +179,7 @@ class ResourceCategoryData {
     final general = results[_all.length];
     if (general != null) {
       _resourceFiles['_general'] = general;
-      _addFrom(general, null, channels, blogs, books);
+      _addFrom(general, null, channels, blogs, books, subcategorySources);
     }
 
     // The profession overlay is a checked-in, source-verified extension for
@@ -190,7 +194,7 @@ class ResourceCategoryData {
           final groupMap = group as Map<String, dynamic>;
           final categoryId = (groupMap['categoryId'] as String? ?? '').trim();
           if (categoryId.isEmpty) continue;
-          _addFrom(groupMap, categoryId, channels, blogs, books);
+          _addFrom(groupMap, categoryId, channels, blogs, books, subcategorySources);
         } on Object catch (e) {
           debugPrint('[ResourceCategoryData] skipping bad profession overlay group: $e');
         }
@@ -200,6 +204,7 @@ class ResourceCategoryData {
     _verifiedChannels = List.unmodifiable(channels);
     _verifiedBlogs = List.unmodifiable(blogs);
     _verifiedBooks = List.unmodifiable(books);
+    _verifiedSubcategorySources = List.unmodifiable(subcategorySources);
 
     // The verified channels are now in ResourceCategoryData.verifiedChannels.
     // Invalidate ChannelData's lazy caches so the next access to
@@ -225,7 +230,16 @@ class ResourceCategoryData {
     List<Channel> channels,
     List<Map<String, String>> blogs,
     List<VerifiedBook> books,
+    List<VerifiedSubcategorySource> subcategorySources,
   ) {
+    for (final source in (map['subcategorySources'] as List? ?? [])) {
+      try {
+        subcategorySources.add(VerifiedSubcategorySource.fromJson(
+            source as Map<String, dynamic>));
+      } on Object catch (e) {
+        debugPrint('[ResourceCategoryData] skipping bad subcategory source: $e');
+      }
+    }
     for (final c in (map['channels'] as List? ?? [])) {
       try {
         final ch = c as Map<String, dynamic>;

@@ -180,6 +180,37 @@ class VerifiedBook {
             const [],
       );
 }
+
+class VerifiedSubcategorySource {
+  final String subcategoryId;
+  final String subcategoryName;
+  final String title;
+  final String url;
+  final String description;
+  final String contentType;
+  final String region;
+
+  const VerifiedSubcategorySource({
+    required this.subcategoryId,
+    required this.subcategoryName,
+    required this.title,
+    required this.url,
+    required this.description,
+    required this.contentType,
+    required this.region,
+  });
+
+  factory VerifiedSubcategorySource.fromJson(Map<String, dynamic> json) =>
+      VerifiedSubcategorySource(
+        subcategoryId: json['subcategoryId'] as String? ?? '',
+        subcategoryName: json['subcategoryName'] as String? ?? '',
+        title: json['title'] as String? ?? '',
+        url: json['url'] as String? ?? '',
+        description: json['description'] as String? ?? '',
+        contentType: json['contentType'] as String? ?? '',
+        region: json['region'] as String? ?? '',
+      );
+}
 /// Field population differs by [section] — see the three "shape" groups
 /// below — because the three source documents captured genuinely different
 /// things: skills got open questions, businesses got answered Q&A,
