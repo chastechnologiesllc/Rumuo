@@ -9,8 +9,6 @@ import '../services/scroll_visibility_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/rumuo_mark.dart';
 import '../widgets/subcategory_card.dart';
-import '../widgets/video_feed_list.dart';
-import 'channels_screen.dart';
 import 'content_search_screen.dart';
 import 'notifications_screen.dart';
 import 'subcategory_router.dart';
@@ -262,9 +260,7 @@ class _TabContent extends StatelessWidget {
   Widget build(BuildContext context) {
     switch (form) {
       case InformationForm.videos:
-        return const VideoFeedList();
       case InformationForm.shorts:
-        return const ChannelsScreen(showAppBar: false);
       case InformationForm.audio:
       case InformationForm.written:
       case InformationForm.structured:

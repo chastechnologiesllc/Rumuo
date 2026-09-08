@@ -55,27 +55,6 @@ class SubcategoryCard extends StatelessWidget {
                 ),
               ],
             ),
-            if (!subcategory.isLive)
-              Positioned(
-                top: 0,
-                right: 0,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: AppTheme.dividerColor(context),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    'SOON',
-                    style: TextStyle(
-                      fontSize: 8,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.4,
-                      color: AppTheme.textMuted(context),
-                    ),
-                  ),
-                ),
-              ),
           ],
         ),
       ),
