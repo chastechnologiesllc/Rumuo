@@ -176,7 +176,7 @@ class _SearchBar extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'Search Rumuo — videos, books, blogs & more',
+                    "Search through the world's knowledge",
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                         color: AppTheme.textMuted(context), fontSize: 14),
