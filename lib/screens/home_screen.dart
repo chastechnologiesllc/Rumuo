@@ -9,6 +9,7 @@ import '../theme/app_theme.dart';
 import '../widgets/mvp_subcategory_feed.dart';
 import '../widgets/rumuo_mark.dart';
 import 'content_search_screen.dart';
+import 'channels_screen.dart';
 import 'notifications_screen.dart';
 
 /// The Feed screen uses horizontal primary tabs, matching the original Rumuo
@@ -256,6 +257,9 @@ class _TabContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (form == InformationForm.shorts) {
+      return const ChannelsScreen(showAppBar: false);
+    }
     return MvpSubcategoryFeed(form: form);
   }
 }

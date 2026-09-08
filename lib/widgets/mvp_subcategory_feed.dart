@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../data/channel_data.dart';
 import '../data/resource_category_data.dart';
@@ -8,6 +7,7 @@ import '../models/information_form.dart';
 import '../models/resource_category.dart';
 import '../models/video.dart';
 import '../providers/feed_provider.dart';
+import '../screens/blog_reader_screen.dart';
 import '../theme/app_theme.dart';
 import 'inline_video_card.dart';
 import 'shimmer_loader.dart';
@@ -158,9 +158,23 @@ class _SourceCard extends StatelessWidget {
 
   Future<void> _open() async {
     final uri = Uri.tryParse(source.url);
-    if (uri != null && await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
+    if (uri == null) return;
+    await Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => BlogReaderScreen(
+        url: source.url,
+        title: source.title,
+        sourceName: source.subcategoryName,
+        thumbnailUrl: _thumbnailUrl,
+        excerpt: source.description,
+      ),
+    ));
+  }
+
+  String get _thumbnailUrl {
+    final host = Uri.tryParse(source.url)?.host ?? '';
+    return host.isEmpty
+        ? ''
+        : 'https://www.google.com/s2/favicons?domain=$host&sz=256';
   }
 
   @override
@@ -176,6 +190,23 @@ class _SourceCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: AspectRatio(
+                  aspectRatio: 16 / 7,
+                  child: Image.network(
+                    _thumbnailUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: AppTheme.gold.withValues(alpha: 0.12),
+                      alignment: Alignment.center,
+                      child: const Icon(Icons.public_rounded,
+                          color: AppTheme.gold, size: 34),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
               Text(source.subcategoryName,
                   style: const TextStyle(
                       color: AppTheme.gold,
