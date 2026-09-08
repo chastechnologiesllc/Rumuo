@@ -494,28 +494,6 @@ class _InlineVideoCardState extends State<InlineVideoCard>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (widget.subcategoryTag != null)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(14, 10, 14, 8),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppTheme.gold.withValues(alpha: 0.14),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      widget.subcategoryTag!,
-                      style: const TextStyle(
-                        color: AppTheme.gold,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
             _buildMediaArea(context),
             Container(height: 3, color: widget.channel.accentColor),
             Padding(
@@ -678,6 +656,29 @@ class _InlineVideoCardState extends State<InlineVideoCard>
                   duration: const Duration(milliseconds: 400),
                   child: WebYoutubePlayer(
                     videoId: widget.video.id,
+                  ),
+                ),
+              ),
+
+            if (widget.subcategoryTag != null)
+              Positioned(
+                left: 10,
+                top: 10,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.62),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+                    child: Text(
+                      widget.subcategoryTag!,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ),
               ),

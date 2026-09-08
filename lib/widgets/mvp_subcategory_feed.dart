@@ -192,27 +192,43 @@ class _SourceCard extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: AspectRatio(
-                  aspectRatio: 16 / 7,
-                  child: Image.network(
-                    _thumbnailUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      color: AppTheme.gold.withValues(alpha: 0.12),
-                      alignment: Alignment.center,
-                      child: const Icon(Icons.public_rounded,
-                          color: AppTheme.gold, size: 34),
+                child: Stack(
+                  children: [
+                    AspectRatio(
+                      aspectRatio: 16 / 7,
+                      child: Image.network(
+                        _thumbnailUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          color: AppTheme.gold.withValues(alpha: 0.12),
+                          alignment: Alignment.center,
+                          child: const Icon(Icons.public_rounded,
+                              color: AppTheme.gold, size: 34),
+                        ),
+                      ),
                     ),
-                  ),
+                    Positioned(
+                      left: 10,
+                      top: 10,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.62),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+                          child: Text(source.subcategoryName,
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700)),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 12),
-              Text(source.subcategoryName,
-                  style: const TextStyle(
-                      color: AppTheme.gold,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800)),
-              const SizedBox(height: 9),
               Text(source.title,
                   style: Theme.of(context)
                       .textTheme
