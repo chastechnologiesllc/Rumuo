@@ -11,7 +11,6 @@ import '../services/ad_service.dart';
 import '../services/engagement_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/bookmark_button.dart';
-import '../widgets/rumuo_watermark.dart';
 import '../widgets/video_thumbnail_image.dart';
 import '../widgets/web_youtube_player.dart';
 
@@ -789,18 +788,6 @@ class _ShortPageState extends State<_ShortPage>
                       color: Colors.white, size: 38),
                 ),
               ),
-            ),
-
-          // Rumuo watermark for Shorts — right-side bar design.
-          // YouTube logo is usually off-screen (clipped by FittedBox 9:16 crop),
-          // so this is primarily branding. Shown while the short is active and
-          // has started; sits just above the bottom title / action bar.
-          if (_hasVideoStarted && widget.isActive)
-            const Positioned(
-              left: 0,
-              right: 0,
-              bottom: 100,
-              child: RumuoWatermark(),
             ),
 
           Positioned(

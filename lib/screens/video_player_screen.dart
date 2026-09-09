@@ -16,17 +16,14 @@ import '../services/engagement_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/banner_ad_widget.dart';
 import '../widgets/channel_avatar.dart';
-import '../widgets/rumuo_watermark.dart';
 import '../widgets/no_flash_page_route.dart';
 import '../widgets/video_thumbnail_image.dart';
 import '../widgets/web_youtube_player.dart';
 import 'channel_videos_screen.dart';
 
-/// In-app video player (Round 16 — sound, timed watermark, in-place landscape).
+/// In-app video player with sound and in-place landscape playback.
 ///
 /// • Starts with sound; unMute+setVolume retried briefly (package quirk).
-/// • Rumuo watermark only while YouTube logo is expected (paused / first
-///   ~4s of play). Right-side bar design with gold accent covers the logo.
 /// • Fullscreen is in-place landscape on the SAME controller so playback
 ///   continues without restart (no second WebView).
 /// • "See more" suggested videos from other channels in the category.
@@ -95,7 +92,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       // useHybridComposition: false → Virtual Display mode.
     // The WebView renders to a GPU texture that Flutter composites normally.
     // This is required for our Flutter overlay layers (thumbnail cover,
-    // progress bar, controls, watermark) to appear ABOVE the WebView.
+    // progress bar and controls appear ABOVE the WebView.
     // With the default useHybridComposition: true the WebView is a native
     // Android View placed in the Android View hierarchy ABOVE the Flutter
     // canvas — every Flutter overlay is invisible beneath it.
@@ -655,18 +652,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
           if (_ended) _buildEndOverlay(),
           // Flutter owns play/pause on all platforms.
           if (!_ended) _buildControls(context),
-          // Watermark AFTER controls so it renders above the gradient.
-          // Flush bottom-right — new bar design covers the YouTube logo zone.
-          // Visibility mirrors YouTube logo: ~4 s after play + while paused.
-          if (_hasStartedPlaying &&
-              !_ended &&
-              (_showYtCover || (!_playing && !kIsWeb)))
-            const Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: RumuoWatermark(),
-            ),
           if (_isLandscape)
             Positioned(
               top: 8,
@@ -935,9 +920,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     );
   }
 }
-
-// ── Rumuo watermark (covers YouTube logo) ────────────────────────────────
-// Right-side bar design — see lib/widgets/rumuo_watermark.dart.
 
 // ── Suggested video tile ────────────────────────────────────────────────────
 

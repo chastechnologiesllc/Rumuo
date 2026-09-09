@@ -12,7 +12,6 @@ import '../models/video.dart';
 import '../screens/channel_videos_screen.dart';
 import '../services/ad_service.dart';
 import '../theme/app_theme.dart';
-import 'rumuo_watermark.dart';
 import 'video_thumbnail_image.dart';
 import 'web_youtube_player.dart';
 
@@ -41,12 +40,8 @@ import 'web_youtube_player.dart';
 //
 // 4. useHybridComposition: false (Virtual Display mode)
 //    WebView renders to a GPU texture Flutter composites normally. This is
-//    required for Flutter overlay layers (thumbnail, play button, watermark)
+//    required for Flutter overlay layers (thumbnail and play button)
 //    to appear ABOVE the WebView on Android.
-//
-// 5. RUMUO WATERMARK (covers YouTube logo)
-//    Right-side dark bar + gold accent + icon/text. Shown ~4 s after play
-//    starts and while paused — same window the YouTube logo is visible.
 //
 // 6. FULLSCREEN via YoutubePlayerBuilder (from old)
 //    Moves the existing WebView into an Overlay — same controller, same
@@ -288,7 +283,7 @@ class _InlineVideoCardState extends State<InlineVideoCard>
   /// [autoPlay] = false during silent pre-warm; true for direct tap.
   /// [muted]    = true during pre-warm (no audio while scrolling); false for tap.
   /// useHybridComposition: false → Virtual Display mode — Flutter overlay
-  /// widgets (thumbnail, play button, watermark) composite above the WebView.
+  /// widgets (thumbnail and play button) composite above the WebView.
   void _createController({required bool autoPlay, bool muted = true}) {
     if (_controller != null) return;
     _controller = YoutubePlayerController(
@@ -586,7 +581,7 @@ class _InlineVideoCardState extends State<InlineVideoCard>
   //   ├─ Layer 1b WebYoutubePlayer (kIsWeb only)
   //   ├─ Layer 2  Spinner (loading, mobile only)
   //   ├─ Layer 3  Play / pause button
-  //   ├─ Layer 4  Rumuo watermark (theme-aware)
+  //   ├─ Layer 4  End-screen overlay
   //   └─ Layer 5  End-screen overlay
 
   Widget _buildMediaArea(BuildContext context) {
@@ -706,21 +701,6 @@ class _InlineVideoCardState extends State<InlineVideoCard>
                   child: const Icon(Icons.play_arrow_rounded,
                       color: Colors.white, size: 32),
                 ),
-              ),
-
-            // ── Layer 4: Rumuo watermark — timer-based ─────────────────
-            // Right-side bar design covers the YouTube logo zone.
-            // Shows for ~4 s after play starts and whenever paused
-            // (same window the official YouTube logo is on-screen).
-            if (_expanded &&
-                !_ended &&
-                _revealPlayer &&
-                (_showYtCover || !_isPlaying))
-              const Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: RumuoWatermark(),
               ),
 
             // ── Layer 5: end-screen overlay ───────────────────────────────
@@ -858,5 +838,3 @@ class _InlineVideoCardState extends State<InlineVideoCard>
     );
   }
 }
-
-// Watermark: see lib/widgets/rumuo_watermark.dart — RumuoWatermark.
