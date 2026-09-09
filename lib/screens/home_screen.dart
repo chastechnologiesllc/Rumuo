@@ -90,7 +90,7 @@ class _HeaderAndSearch extends StatelessWidget {
           IconButton(
             tooltip: 'Temporary search',
             onPressed: openSearch,
-            icon: Icon(Icons.incognito_rounded,
+            icon: Icon(Icons.visibility_off_outlined,
                 color: AppTheme.textMuted(context), size: 22),
           ),
         ],

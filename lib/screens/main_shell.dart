@@ -13,6 +13,7 @@ import '../services/scroll_visibility_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/no_flash_page_route.dart';
 import 'home_screen.dart';
+import 'notifications_screen.dart';
 import 'profile_screen.dart';
 import 'saved_screen.dart';
 
