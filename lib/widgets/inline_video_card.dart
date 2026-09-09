@@ -662,8 +662,8 @@ class _InlineVideoCardState extends State<InlineVideoCard>
 
             if (widget.subcategoryTag != null)
               Positioned(
-                left: 10,
-                top: 10,
+                left: 6,
+                top: 6,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.62),
