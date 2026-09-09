@@ -14,7 +14,10 @@ class FeedSnapshotService {
   FeedSnapshotService._();
   static final FeedSnapshotService instance = FeedSnapshotService._();
 
-  static const _assetPath = 'assets/data/feed_snapshot.json';
+  // The original snapshot contains long descriptions and a much larger
+  // historical corpus. Offline first paint only needs the latest feed window
+  // and card metadata, so keep this same-origin fallback bounded.
+  static const _assetPath = 'assets/data/feed_snapshot_compact.json';
   Map<String, dynamic>? _snapshot;
   Future<Map<String, dynamic>>? _loadInFlight;
 

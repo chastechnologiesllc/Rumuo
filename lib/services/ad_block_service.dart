@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 
 import '../config/app_config.dart';
 import 'connectivity_service.dart';
+import 'network_policy.dart';
 
 enum AdBlockStatus {
   checking, // initial / between checks
@@ -15,15 +16,15 @@ enum AdBlockStatus {
 /// Ad-block detection strategy:
 ///
 /// 1. ONLY runs when ConnectivityService confirms real internet (online).
-/// 2. First re-verifies internet independently using NON-ad endpoints so a
+/// 2. First re-verifies internet independently using two NON-ad endpoints so a
 ///    general network failure cannot be misread as ad-blocking.
-/// 3. Probes all 4 ad-network endpoints. Requires ALL 4 to fail before
-///    flagging as blocked — tolerates CDN blips, server maintenance, etc.
+/// 3. Probes a bounded three-endpoint sample. Requires ALL sampled endpoints
+///    to fail before flagging as blocked — tolerates individual CDN blips.
 /// 4. Distinguishes DNS-level blocking (SocketException / timeout) from HTTP
 ///    errors — only DNS/TCP failures count as "blocked"; a 403 from the ad
 ///    server itself does not.
-/// 5. Re-checks every 5 minutes while online so the overlay disappears the
-///    moment the user disables their ad blocker.
+/// 5. Re-checks every 30 minutes while online; ad-block status is non-critical
+///    and should not compete with feed traffic.
 class AdBlockService {
   AdBlockService._();
   static final AdBlockService instance = AdBlockService._();
@@ -56,8 +57,12 @@ class AdBlockService {
     _connectivitySub = ConnectivityService.instance.statusStream.listen((status) {
       if (_disposed) return;
       if (status == NetworkStatus.online) {
-        unawaited(runCheck());
-        _startPeriodicCheck();
+        if (!NetworkPolicy.instance.isConstrained) {
+          unawaited(runCheck());
+          _startPeriodicCheck();
+        } else {
+          _periodicTimer?.cancel();
+        }
       } else {
         // No internet — cannot determine ad-block status; reset quietly.
         _periodicTimer?.cancel();
@@ -68,14 +73,15 @@ class AdBlockService {
     // Run immediately if already online
     if (ConnectivityService.instance.current == NetworkStatus.online) {
       await runCheck();
-      _startPeriodicCheck();
+      if (!NetworkPolicy.instance.isConstrained) _startPeriodicCheck();
     }
   }
 
   void _startPeriodicCheck() {
     _periodicTimer?.cancel();
-    _periodicTimer = Timer.periodic(const Duration(minutes: 5), (_) {
-      if (ConnectivityService.instance.current == NetworkStatus.online) {
+    _periodicTimer = Timer.periodic(const Duration(minutes: 30), (_) {
+      if (!NetworkPolicy.instance.isConstrained &&
+          ConnectivityService.instance.current == NetworkStatus.online) {
         unawaited(runCheck());
       }
     });
@@ -95,56 +101,58 @@ class AdBlockService {
   Future<void> _performCheck() async {
     try {
       // Step 1 — Re-verify internet with neutral endpoints before touching ad URLs.
-    // If neutral endpoints also fail, it's a network issue, NOT an ad blocker.
-    final internetOk = await _verifyNeutralInternet();
-    if (!internetOk) {
-      // Network is actually down — don't change status, don't flag as blocked.
-      return;
-    }
-
-    // Step 2 — Probe ad-network endpoints.
-    var dnsBlockCount = 0;
-
-    final futures = AppConfig.adCheckEndpoints.map((url) async {
-      try {
-        final response = await http
-            .get(
-              Uri.parse(url),
-              headers: {
-                'User-Agent':
-                    'Dalvik/2.1.0 (Linux; U; Android 13; Pixel 6 Build/TP1A)',
-                'Accept': '*/*',
-              },
-            )
-            .timeout(const Duration(seconds: 8));
-
-        // HTTP 2xx / 3xx → endpoint reachable → NOT blocked at network level.
-        // HTTP 4xx/5xx from ad server itself is NOT an ad blocker — the server
-        // is responding, so DNS resolved and TCP connected successfully.
-        if (response.statusCode >= 200 && response.statusCode < 500) {
-          // Reachable — not blocked
-        } else {
-          // 5xx — server error, not ad block; don't count.
-        }
-      } on TimeoutException catch (_) {
-        // Silently blocked (null-routes / sinkhole) — ad-blocker signature.
-        dnsBlockCount++;
-      } on Exception catch (e) {
-        // SocketException / HandshakeException (dart:io) only exist on VM.
-        // Match by type name so this file stays web-safe without importing dart:io.
-        final name = e.runtimeType.toString();
-        if (name.contains('Socket') || name.contains('Handshake')) {
-          dnsBlockCount++;
-        }
-        // Other network exception — be conservative, don't count.
+      // If neutral endpoints also fail, it's a network issue, NOT an ad blocker.
+      final internetOk = await _verifyNeutralInternet();
+      if (!internetOk) {
+        // Network is actually down — don't change status, don't flag as blocked.
+        return;
       }
-    });
 
-    await Future.wait(futures);
+      // Step 2 — Probe ad-network endpoints.
+      var dnsBlockCount = 0;
 
-    // Only flag as blocked when ALL 4 ad endpoints fail at network/DNS level
-    // while neutral internet is confirmed working. This eliminates false positives.
-      final isBlocked = dnsBlockCount >= AppConfig.adCheckEndpoints.length;
+      final endpoints =
+          AppConfig.adCheckEndpoints.take(3).toList(growable: false);
+      final futures = endpoints.map((url) async {
+        try {
+          final response = await http
+              .get(
+                Uri.parse(url),
+                headers: {
+                  'User-Agent':
+                      'Dalvik/2.1.0 (Linux; U; Android 13; Pixel 6 Build/TP1A)',
+                  'Accept': '*/*',
+                },
+              )
+              .timeout(const Duration(seconds: 8));
+
+          // HTTP 2xx / 3xx → endpoint reachable → NOT blocked at network level.
+          // HTTP 4xx/5xx from ad server itself is NOT an ad blocker — the server
+          // is responding, so DNS resolved and TCP connected successfully.
+          if (response.statusCode >= 200 && response.statusCode < 500) {
+            // Reachable — not blocked
+          } else {
+            // 5xx — server error, not ad block; don't count.
+          }
+        } on TimeoutException catch (_) {
+          // Silently blocked (null-routes / sinkhole) — ad-blocker signature.
+          dnsBlockCount++;
+        } on Exception catch (e) {
+          // SocketException / HandshakeException (dart:io) only exist on VM.
+          // Match by type name so this file stays web-safe without importing dart:io.
+          final name = e.runtimeType.toString();
+          if (name.contains('Socket') || name.contains('Handshake')) {
+            dnsBlockCount++;
+          }
+          // Other network exception — be conservative, don't count.
+        }
+      });
+
+      await Future.wait(futures);
+
+      // Only flag as blocked when all sampled ad endpoints fail at network/DNS level
+      // while neutral internet is confirmed working. This eliminates false positives.
+      final isBlocked = dnsBlockCount >= endpoints.length;
       _emit(isBlocked ? AdBlockStatus.blocked : AdBlockStatus.clear);
     } finally {
       _checkInFlight = null;
@@ -152,11 +160,11 @@ class AdBlockService {
   }
 
   // ── Neutral Internet Verification ─────────────────────────────────────────────
-  /// Uses non-ad Google endpoints. If these fail, the device has no internet,
-  /// not an ad blocker. Returns true if at least 2 of 4 succeed.
+  /// Uses two non-ad Google endpoints. If both fail, the device has no
+  /// internet, not an ad blocker. One successful probe is enough to continue.
   Future<bool> _verifyNeutralInternet() async {
     var successCount = 0;
-    final futures = AppConfig.connectivityEndpoints.map((url) async {
+    final futures = AppConfig.connectivityEndpoints.take(2).map((url) async {
       try {
         final response = await http
             .get(Uri.parse(url))
@@ -169,7 +177,7 @@ class AdBlockService {
       }
     });
     await Future.wait(futures);
-    return successCount >= 2;
+    return successCount >= 1;
   }
 
   void _emit(AdBlockStatus status) {

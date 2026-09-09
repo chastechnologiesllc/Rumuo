@@ -105,7 +105,8 @@ flutter:
     - assets/books/
     - assets/blog/
     - assets/books/online_hustles/
-    - assets/data/
+    - assets/data/resource_categories.json
+    - assets/data/feed_snapshot_compact.json
     - assets/data/resources/
 
 flutter_icons:

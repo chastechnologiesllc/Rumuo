@@ -12,8 +12,9 @@ import '../data/resource_category_data.dart';
 import '../models/video.dart';
 import 'notification_store.dart';
 import 'platform_notification.dart';
-import 'rss_service.dart';
-import 'user_profile_service.dart';
+import 'background_service.dart';
+import 'connectivity_service.dart';
+import 'network_policy.dart';
 
 enum NotificationPermissionState { granted, denied, defaultState, unsupported, unknown }
 
@@ -197,8 +198,16 @@ class NotificationService {
     // and eagerFor() below is what keeps this background check from
     // fetching every verified channel across all 60 categories instead of
     // just the general set + whatever this person actually selected.
-    await ResourceCategoryData.load();
     await UserProfileService.instance.init();
+    await ResourceCategoryData.loadSelectedResources(
+      UserProfileService.instance.selectedCategoryIds,
+    );
+    await ConnectivityService.instance.init();
+    await NetworkPolicy.instance.init();
+    // Background polling is optional enrichment. Respect Data Saver and
+    // automatic mobile-data detection instead of waking the radio for every
+    // selected channel.
+    if (NetworkPolicy.instance.isConstrained) return;
     // Deduplicate by channel ID — eagerFor() operates on the fixed deduped
     // combined list, but this guard prevents duplicate background RSS fetches
     // even if the channel list grows or the combined dedup is bypassed.
@@ -404,6 +413,12 @@ class NotificationService {
 
   Future<void> _checkNowInternal() async {
     try {
+      // Upload notifications are optional enrichment. Do not wake the radio
+      // for a second RSS pass when the feed itself is already in Data Saver.
+      if (NetworkPolicy.instance.isConstrained) {
+        await NotificationStore.instance.reload();
+        return;
+      }
       await checkAndNotifyNewVideos();
       await NotificationStore.instance.reload();
     } on Object catch (e) {

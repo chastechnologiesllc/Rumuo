@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../models/video.dart';
 import '../services/media_cache_manager.dart';
+import '../services/network_policy.dart';
 import '../theme/app_theme.dart';
 import 'rumuo_shimmer.dart';
 
@@ -111,17 +112,14 @@ class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
     final id = video.id.trim();
     if (id.isEmpty) return const [''];
 
+    // mqdefault is sufficient for feed cards and is substantially smaller
+    // than maxres/hq/sd variants. Larger posters are reserved for the player
+    // route, not downloaded for every scrolling card.
+    final provided = _compactYoutubeUrl(video.thumbnailUrl.trim(), id);
     final direct = <String>[
-      video.thumbnailUrl.trim(),
-      video.thumbnailHd,
-      'https://i.ytimg.com/vi/$id/hqdefault.jpg',
+      provided,
       video.thumbnailMq,
-      'https://i.ytimg.com/vi/$id/sddefault.jpg',
-      // Best-effort numbered preview-frame candidates.
-      'https://i.ytimg.com/vi/$id/0.jpg',
-      'https://i.ytimg.com/vi/$id/1.jpg',
-      'https://i.ytimg.com/vi/$id/2.jpg',
-      'https://i.ytimg.com/vi/$id/3.jpg',
+      'https://i.ytimg.com/vi/$id/hqdefault.jpg',
     ];
 
     final output = <String>[];
@@ -132,13 +130,17 @@ class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
       output.add(url);
     }
 
-    for (final url in direct) {
+    for (final url in direct.take(
+          NetworkPolicy.instance.isConstrained ? 2 : direct.length,
+        )) {
       add(url);
     }
 
-    // Keep proxy retries bounded: direct YouTube URLs remain the preferred
-    // path, while these four cover the common CORS/fetch failure cases.
-    for (final url in direct.take(4)) {
+    // Keep one proxy fallback for the primary feed URL. Proxy races and a
+    // proxy candidate for every size variant can multiply image bytes quickly.
+    for (final url in NetworkPolicy.instance.maxProxyCandidates > 1
+        ? direct.take(1)
+        : const <String>[]) {
       final parsed = Uri.tryParse(url);
       if (parsed == null ||
           (parsed.scheme != 'http' && parsed.scheme != 'https')) {
@@ -148,6 +150,17 @@ class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
     }
 
     return output.isEmpty ? const [''] : List.unmodifiable(output);
+  }
+
+  static String _compactYoutubeUrl(String url, String id) {
+    final parsed = Uri.tryParse(url);
+    if (parsed == null ||
+        (parsed.host != 'i.ytimg.com' && parsed.host != 'img.youtube.com')) {
+      return url;
+    }
+    final path = parsed.path;
+    if (!path.contains('/vi/$id/')) return url;
+    return parsed.replace(path: '/vi/$id/mqdefault.jpg').toString();
   }
 
   void _advanceAfterFailure() {
@@ -205,6 +218,14 @@ class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
     final safeIndex = _index < _candidates.length ? _index : _candidates.length - 1;
     final candidate = _candidates[safeIndex];
     if (candidate.isEmpty) return _fallback(context);
+    final requestedWidth = widget.memCacheWidth ?? 720;
+    final requestedHeight = widget.memCacheHeight ?? 405;
+    final cacheWidth = NetworkPolicy.instance.isConstrained && requestedWidth > 480
+        ? 480
+        : requestedWidth;
+    final cacheHeight = NetworkPolicy.instance.isConstrained && requestedHeight > 270
+        ? 270
+        : requestedHeight;
 
     final image = CachedNetworkImage(
       imageUrl: candidate,
@@ -214,8 +235,8 @@ class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
         return Image(image: imageProvider, fit: widget.fit);
       },
       fit: widget.fit,
-      memCacheWidth: widget.memCacheWidth,
-      memCacheHeight: widget.memCacheHeight,
+      memCacheWidth: cacheWidth,
+      memCacheHeight: cacheHeight,
       placeholder: (_, __) => _shimmer(context),
       errorWidget: (_, __, ___) {
         _advanceAfterFailure();

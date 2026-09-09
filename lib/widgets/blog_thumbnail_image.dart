@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 
 import '../services/media_cache_manager.dart';
+import '../services/network_policy.dart';
 import '../theme/app_theme.dart';
 import 'rumuo_shimmer.dart';
 
@@ -65,8 +66,9 @@ class _BlogThumbnailImageState extends State<BlogThumbnailImage> {
       String? primary, List<String> fallbacks) {
     final out = <String>[];
     var sourceCount = 0;
+    final maxSources = NetworkPolicy.instance.isConstrained ? 3 : 5;
     for (final value in <String?>[primary, ...fallbacks]) {
-      if (sourceCount >= 5) break;
+      if (sourceCount >= maxSources) break;
       final url = value?.trim() ?? '';
       if (url.isEmpty || url.startsWith('data:')) continue;
       final parsed = Uri.tryParse(url);
@@ -77,11 +79,13 @@ class _BlogThumbnailImageState extends State<BlogThumbnailImage> {
       if (out.contains(url)) continue;
       sourceCount++;
       out.add(url);
-      final encoded = Uri.encodeComponent(url);
-      final proxied = 'https://wsrv.nl/?url=$encoded';
-      final legacyProxied = 'https://images.weserv.nl/?url=$encoded';
-      if (!out.contains(proxied)) out.add(proxied);
-      if (!out.contains(legacyProxied)) out.add(legacyProxied);
+      // Keep a single sequential proxy fallback for the primary source. Two
+      // proxy variants for every source made one failed card fan out into a
+      // surprisingly large number of image requests.
+      if (sourceCount == 1 && NetworkPolicy.instance.maxProxyCandidates > 1) {
+        final encoded = Uri.encodeComponent(url);
+        out.add('https://wsrv.nl/?url=$encoded');
+      }
     }
     return out;
   }
@@ -90,6 +94,19 @@ class _BlogThumbnailImageState extends State<BlogThumbnailImage> {
   Widget build(BuildContext context) {
     if (_candidates.isEmpty) return _fallback(context);
     final url = _candidates[_index.clamp(0, _candidates.length - 1)];
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+    final requestedWidth = widget.width == null
+        ? 720
+        : (widget.width! * dpr).round();
+    final requestedHeight = widget.height == null
+        ? 405
+        : (widget.height! * dpr).round();
+    final cacheWidth = NetworkPolicy.instance.isConstrained && requestedWidth > 480
+        ? 480
+        : requestedWidth;
+    final cacheHeight = NetworkPolicy.instance.isConstrained && requestedHeight > 270
+        ? 270
+        : requestedHeight;
     return CachedNetworkImage(
       imageUrl: url,
       cacheManager: RumuoMediaCache.instance,
@@ -102,12 +119,8 @@ class _BlogThumbnailImageState extends State<BlogThumbnailImage> {
       fit: widget.fit,
       fadeInDuration: Duration.zero,
       fadeOutDuration: Duration.zero,
-      memCacheWidth: widget.width == null
-          ? 720
-          : (widget.width! * MediaQuery.devicePixelRatioOf(context)).round(),
-      memCacheHeight: widget.height == null
-          ? 405
-          : (widget.height! * MediaQuery.devicePixelRatioOf(context)).round(),
+      memCacheWidth: cacheWidth,
+      memCacheHeight: cacheHeight,
       placeholder: (_, __) => _placeholder(context),
       errorWidget: (_, __, ___) {
         if (_index + 1 < _candidates.length) {

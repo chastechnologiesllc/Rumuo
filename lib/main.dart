@@ -18,6 +18,7 @@ import 'services/background_service.dart';
 import 'services/connectivity_service.dart';
 import 'services/engagement_service.dart';
 import 'services/iap_service.dart';
+import 'services/network_policy.dart';
 import 'services/notification_service.dart';
 import 'services/notification_store.dart';
 import 'services/user_profile_service.dart';
@@ -127,6 +128,7 @@ class _StartupGateState extends State<_StartupGate> {
 
   // Holds fully-initialised providers, set after init completes.
   FeedProvider? _feedProvider;
+  Future<void>? _networkServicesInit;
 
   @override
   void initState() {
@@ -150,14 +152,15 @@ class _StartupGateState extends State<_StartupGate> {
 
     // ── Group A: lightweight first-screen prerequisites ─────────────────────
     // The category index, profile selection, and engagement preferences are
-    // enough to render onboarding and construct the first feed provider. The
-    // much larger verified-resource catalog hydrates in the background below
-    // and triggers a quiet second refresh when it is ready.
+    // enough to render onboarding and construct the first feed provider. Only
+    // the selected resource scope hydrates in the background below, followed
+    // by a quiet refresh when it is ready.
     try {
       await Future.wait([
         _safeInit('ResourceCategories', ResourceCategoryData.loadCategories),
         _safeInit('UserProfile',        UserProfileService.instance.init),
         _safeInit('Engagement',         EngagementService.instance.init),
+        _safeInit('NetworkPolicy',      NetworkPolicy.instance.init),
       ]).timeout(const Duration(seconds: 4));
     } on TimeoutException {
       debugPrint('[startup] lightweight startup prerequisites exceeded 4s; '
@@ -175,13 +178,13 @@ class _StartupGateState extends State<_StartupGate> {
     unawaited(() async {
       try {
         await Future.wait([
-          _safeInit('Connectivity',       ConnectivityService.instance.init),
+          _safeInit('Connectivity',       _initNetworkServices),
           _safeInit('Background',         _initBackgroundServices),
           _safeInit('Notifications',      NotificationService.instance.init),
           // Load persisted notification inbox + unread count so the bell
           // badge is correct from the very first frame of the shell.
           _safeInit('NotificationStore',  NotificationStore.instance.init),
-          _safeInit('Ads',                AdService.instance.init),
+          _safeInit('Ads',                _initAdsAfterNetwork),
           _safeInit('IAP',                IapService.instance.init),
         ]).timeout(const Duration(seconds: 6));
       } on TimeoutException {
@@ -199,16 +202,18 @@ class _StartupGateState extends State<_StartupGate> {
     unawaited(providerInit);
 
     // Verified channels/blogs/books are intentionally not on the critical
-    // path. Once the full local catalog finishes, wait for the initial feed
-    // request and quietly refresh using the now-complete category scope.
+    // path. Once the selected local scope finishes, quietly refresh using the
+    // now-complete category scope.
     unawaited(() async {
       await _safeInit(
         'VerifiedResources',
-        ResourceCategoryData.loadVerifiedResources,
+        () => ResourceCategoryData.loadSelectedResources(
+          UserProfileService.instance.selectedCategoryIds,
+        ),
       );
       await providerInit;
       if (mounted) {
-        unawaited(provider.refresh(force: true, silent: true));
+        unawaited(provider.refresh(force: false, silent: true));
       }
     }());
 
@@ -226,6 +231,19 @@ class _StartupGateState extends State<_StartupGate> {
   Future<void> _initBackgroundServices() async {
     await BackgroundService.instance.init();
     await BackgroundService.instance.registerRssCheck();
+  }
+
+  Future<void> _initNetworkServices() =>
+      _networkServicesInit ??= _initNetworkServicesInternal();
+
+  Future<void> _initNetworkServicesInternal() async {
+    await ConnectivityService.instance.init();
+    await NetworkPolicy.instance.init();
+  }
+
+  Future<void> _initAdsAfterNetwork() async {
+    await _initNetworkServices();
+    await AdService.instance.init();
   }
 
   /// Runs [fn] and swallows any error. A single misbehaving service (no
@@ -280,6 +298,7 @@ class _StartupGateState extends State<_StartupGate> {
           ChangeNotifierProvider.value(value: AdService.instance),
           ChangeNotifierProvider.value(value: UserProfileService.instance),
           ChangeNotifierProvider.value(value: EngagementService.instance),
+          ChangeNotifierProvider.value(value: NetworkPolicy.instance),
         ],
         child: const ConnectivityOverlay(
           child: AdBlockOverlay(child: _AppRoot()),
@@ -327,10 +346,9 @@ class _AppRootState extends State<_AppRoot> with WidgetsBindingObserver {
       // app restart.
       unawaited(AdService.instance.refreshStatus());
       unawaited(AdService.instance.showAppOpenAd());
-      // Forces a true network refresh (replacing each channel's cached 15
-      // with whatever is genuinely latest on YouTube right now) — but only
-      // if it's been a few minutes since the last one, to avoid hammering
-      // the RSS endpoint on rapid app-switching.
+      // Refreshes the feeds only after a cooldown. Cached content remains
+      // visible across rapid app-switches instead of triggering another burst
+      // of RSS requests each time the app resumes.
       unawaited(context.read<FeedProvider>().refreshOnResume());
       // Check the same RSS sources for uploads discovered while the app was
       // suspended. NotificationService throttles this to one foreground poll

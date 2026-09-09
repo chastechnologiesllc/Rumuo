@@ -31,8 +31,10 @@ class ChannelAvatar extends StatelessWidget {
             width: size,
             height: size,
             fit: BoxFit.cover,
-            memCacheWidth: (size * 3).round(),
-            memCacheHeight: (size * 3).round(),
+            // Two device-pixels are enough for a small circular avatar. The
+            // previous 3x decode multiplied memory across large channel grids.
+            memCacheWidth: (size * 2).round(),
+            memCacheHeight: (size * 2).round(),
             placeholder: (_, __) => _AvatarShimmer(size: size),
             errorWidget: (_, __, ___) => fallback,
           );

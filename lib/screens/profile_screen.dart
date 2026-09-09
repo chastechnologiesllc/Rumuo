@@ -12,6 +12,7 @@ import '../screens/my_business_screen.dart';
 import '../screens/privacy_policy_screen.dart';
 import '../services/ad_service.dart';
 import '../services/consent_service.dart';
+import '../services/network_policy.dart';
 import '../services/user_profile_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/banner_ad_widget.dart';
@@ -77,6 +78,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final adsGone = context.watch<AdService>().adsRemoved;
+    final networkPolicy = context.watch<NetworkPolicy>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -150,6 +152,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           );
                           if (mounted) setState(() {});
                         },
+                      ),
+
+                      // ── Data usage ────────────────────────────────────────
+                      const _SectionHeader('Data usage'),
+                      _SettingsTile(
+                        icon: Icons.data_saver_on_rounded,
+                        iconColor: const Color(0xFF42C98A),
+                        title: 'Data Saver',
+                        subtitle: networkPolicy.isDataSaverEnabled
+                            ? 'On — no video preloading, lighter feeds'
+                            : 'Off — full feed quality and normal refreshes',
+                        trailing: Switch.adaptive(
+                          value: networkPolicy.isDataSaverEnabled,
+                          onChanged: (_) => networkPolicy.toggle(),
+                        ),
                       ),
 
                       // ── Support ─────────────────────────────────────────

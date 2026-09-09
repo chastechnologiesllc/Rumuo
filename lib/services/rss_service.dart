@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -8,6 +7,7 @@ import 'package:xml/xml.dart';
 
 import '../models/video.dart';
 import 'feed_snapshot_service.dart';
+import 'network_policy.dart';
 import 'youtube_channel_service.dart';
 
 /// Top-level function (required by compute()) — runs XML parsing on a
@@ -81,9 +81,9 @@ String _idFromUrnTopLevel(String urn) =>
 ///
 /// Additional robustness (for transient failures / rate-limit edge cases):
 ///  • Response is validated as XML before parsing (guards against HTML errors).
-///  • Up to 3 retries with 0 / 1 500 / 5 000 ms backoff.
-///  • Requests are staggered 200 ms apart (passed from FeedProvider) so
-///    10 simultaneous app-launch requests never burst.
+///  • Adaptive retries with a smaller attempt budget on constrained networks.
+///  • Requests are staggered by the feed provider so app-launch requests never
+///    burst on a low-end phone.
 ///  • SharedPreferences disk cache (30-min TTL) — app renders instantly
 ///    from last session on every launch after the first.
 class RssService {
@@ -169,17 +169,20 @@ class RssService {
     String channelId, {
     bool includeHistory = false,
   }) async {
-    // Three attempts: immediate, 600ms, 2000ms.
-    // Faster than the old [0, 1500, 5000] schedule — YouTube's RSS is rarely
-    // slow enough to need more than a 600ms pause before the second try.
-    const delays = [0, 600, 2000];
+    // A constrained connection gets one economical retry; normal connections
+    // retain the more forgiving three-attempt schedule.
+    final delays = NetworkPolicy.instance.maxRequestAttempts == 2
+        ? const [0, 900]
+        : const [0, 600, 2000];
     for (var i = 0; i < delays.length; i++) {
       if (delays[i] > 0) {
         await Future<void>.delayed(Duration(milliseconds: delays[i]));
       }
       final result = await _tryFetch(channelId);
       if (result != null) {
-        if (includeHistory && result.isNotEmpty) {
+        if (includeHistory &&
+            result.isNotEmpty &&
+            NetworkPolicy.instance.allowHistoryEnrichment) {
           return YoutubeChannelService.instance.fetchHistory(
             channelId,
             seed: result,
@@ -192,7 +195,7 @@ class RssService {
     return [];
   }
 
-  // ── Single fetch attempt (web: CORS proxy race; native: direct HTTP) ─────────
+  // ── Single fetch attempt (web: sequential CORS fallbacks; native: direct HTTP)
 
   Future<List<Video>?> _tryFetch(String channelId) async {
     // Web: browsers block cross-origin reads of youtube.com RSS (no ACAO header).
@@ -209,54 +212,33 @@ class RssService {
         'https://www.youtube.com/feeds/videos.xml?channel_id=$channelId';
     final encoded = Uri.encodeComponent(feedUrl);
 
-    // Concurrent proxy race — both proxies start simultaneously; the first one
-    // to return valid Atom XML wins.  This replaces the old rss2json JSONP path
-    // which had no fallback: when rss2json rate-limited (its free tier severely
-    // restricts unauthenticated concurrent requests), all channels returned
-    // nothing on web with no recovery.
-    //
-    // Parsing reuses _parseXmlIsolate(), so the Video model output is identical
-    // to the native path — no separate rss2json field-mapping needed.
+    // Try proxies sequentially. Racing both proxies duplicates the same Atom
+    // response on every channel, which is particularly expensive on mobile
+    // data. Parsing reuses _parseXmlIsolate(), so the model output is identical
+    // to the native path.
     final proxyUrls = [
       'https://corsproxy.io/?url=$encoded',
       'https://api.allorigins.win/raw?url=$encoded',
     ];
 
-    final completer = Completer<List<Video>?>();
-    var pending = proxyUrls.length;
-
-    for (final proxyUrl in proxyUrls) {
-      unawaited(() async {
-        try {
-          final response = await http
-              .get(Uri.parse(proxyUrl))
-              .timeout(const Duration(seconds: 12));
-
-          if (response.statusCode == 200) {
-            final body = response.body.trim();
-            if (_looksLikeXml(body)) {
-              final videos = await compute(
-                _parseXmlIsolate,
-                (xml: body, channelId: channelId),
-              );
-              if (videos.isNotEmpty && !completer.isCompleted) {
-                completer.complete(videos);
-                return; // Skip pending decrement; completer is resolved.
-              }
-            }
-          }
-        } on Object catch (e) {
-          debugPrint('[RssService] $channelId via $proxyUrl: $e');
-        }
-        // Reached only on failure or empty parse.
-        pending--;
-        if (pending == 0 && !completer.isCompleted) {
-          completer.complete(null); // null → _fetchWithRetry tries again.
-        }
-      }());
+    for (final proxyUrl in proxyUrls.take(NetworkPolicy.instance.maxProxyCandidates)) {
+      try {
+        final response = await http
+            .get(Uri.parse(proxyUrl))
+            .timeout(const Duration(seconds: 12));
+        if (response.statusCode != 200) continue;
+        final body = response.body.trim();
+        if (!_looksLikeXml(body)) continue;
+        final videos = await compute(
+          _parseXmlIsolate,
+          (xml: body, channelId: channelId),
+        );
+        if (videos.isNotEmpty) return videos;
+      } on Object catch (e) {
+        debugPrint('[RssService] $channelId via $proxyUrl: $e');
+      }
     }
-
-    return completer.future;
+    return null;
   }
 
   Future<List<Video>?> _tryFetchNative(String channelId) async {

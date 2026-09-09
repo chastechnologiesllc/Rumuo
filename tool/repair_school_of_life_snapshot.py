@@ -7,7 +7,7 @@ from pathlib import Path
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-SNAPSHOT = ROOT / "assets/data/feed_snapshot.json"
+SNAPSHOT = ROOT / "assets/data/feed_snapshot_compact.json"
 OLD_ID = "UC8c9l98f2Zq4l9YnbmutPTw"
 NEW_ID = "UC7IcJI8PUf5Z3zKxnZvTBog"
 

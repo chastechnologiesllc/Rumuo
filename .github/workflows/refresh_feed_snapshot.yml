@@ -28,16 +28,21 @@ jobs:
           python-version: '3.x'
 
       - name: Build feed snapshot
-        run: python3 tool/feed_snapshot_builder.py --output assets/data/feed_snapshot.json
+        run: |
+          python3 tool/feed_snapshot_builder.py --output /tmp/feed_snapshot.json
+          python3 tool/build_compact_snapshot.py \
+            --input /tmp/feed_snapshot.json \
+            --output assets/data/feed_snapshot_compact.json \
+            --general-output assets/data/resources/_general_boot.json
 
       - name: Commit changed snapshot
         run: |
-          if git diff --quiet -- assets/data/feed_snapshot.json; then
+          if git diff --quiet -- assets/data/feed_snapshot_compact.json assets/data/resources/_general_boot.json; then
             echo 'No public feed changes detected.'
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add assets/data/feed_snapshot.json
-          git commit -m 'Refresh public feed snapshot'
+          git add assets/data/feed_snapshot_compact.json assets/data/resources/_general_boot.json
+          git commit -m 'Refresh compact public feed snapshot'
           git push

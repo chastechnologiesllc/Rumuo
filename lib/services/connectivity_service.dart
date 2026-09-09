@@ -18,11 +18,17 @@ class ConnectivityService {
   static final ConnectivityService instance = ConnectivityService._();
 
   final _statusController = StreamController<NetworkStatus>.broadcast();
+  final _transportController =
+      StreamController<List<ConnectivityResult>>.broadcast();
   final Connectivity _connectivity = Connectivity();
   Stream<NetworkStatus> get statusStream => _statusController.stream;
+  Stream<List<ConnectivityResult>> get transportStream =>
+      _transportController.stream;
 
   NetworkStatus _current = NetworkStatus.checking;
   NetworkStatus get current => _current;
+  List<ConnectivityResult> _transport = const [ConnectivityResult.none];
+  List<ConnectivityResult> get transport => _transport;
 
   Timer? _pollTimer;
   Timer? _slowPollTimer;
@@ -36,17 +42,21 @@ class ConnectivityService {
     _initialized = true;
     await _runCheck();
 
-    _connectivitySub = _connectivity.onConnectivityChanged.listen((_) {
+    _connectivitySub = _connectivity.onConnectivityChanged.listen((result) {
+      _emitTransport(result);
       unawaited(_runCheck());
     });
 
-    _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+    // Recovery checks are deliberately not aggressive: a failed probe can
+    // take several seconds on a weak radio, and checking every five seconds
+    // creates a near-continuous mobile-data pattern while offline.
+    _pollTimer = Timer.periodic(const Duration(seconds: 30), (_) {
       if (_current != NetworkStatus.online) {
         unawaited(_runCheck());
       }
     });
 
-    _slowPollTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+    _slowPollTimer = Timer.periodic(const Duration(minutes: 5), (_) {
       if (_current == NetworkStatus.online) {
         unawaited(_runCheck());
       }
@@ -69,14 +79,15 @@ class ConnectivityService {
   Future<void> _performCheck() async {
     try {
       final result = await _connectivity.checkConnectivity();
-    final hasAdapter = result.any(
-      (r) => r != ConnectivityResult.none && r != ConnectivityResult.bluetooth,
-    );
+      _emitTransport(result);
+      final hasAdapter = result.any(
+        (r) => r != ConnectivityResult.none && r != ConnectivityResult.bluetooth,
+      );
 
-    if (!hasAdapter) {
-      _emit(NetworkStatus.noNetwork);
-      return;
-    }
+      if (!hasAdapter) {
+        _emit(NetworkStatus.noNetwork);
+        return;
+      }
 
       final hasData = await _verifyInternetAccess();
       _emit(hasData ? NetworkStatus.online : NetworkStatus.noInternet);
@@ -88,33 +99,42 @@ class ConnectivityService {
   }
 
   Future<bool> _verifyInternetAccess() async {
-    // Pick platform probe list (both AppConfig lists are compile-time const).
-    const endpoints = kIsWeb
+    // Try at most two probes sequentially. The previous implementation hit
+    // four endpoints concurrently every 30 seconds, which was disproportionate
+    // for a connectivity indicator and especially wasteful on mobile data.
+    final endpoints = kIsWeb
         ? AppConfig.connectivityEndpointsWeb
         : AppConfig.connectivityEndpoints;
-
-    var successCount = 0;
-    final futures = endpoints.map((url) async {
+    var success = false;
+    for (final endpoint in endpoints.take(2)) {
       try {
-        final response = await http
-            .get(Uri.parse(url))
-            .timeout(const Duration(seconds: 5));
+        final response = await http.get(
+          Uri.parse(endpoint),
+          headers: const {'Cache-Control': 'no-cache'},
+        ).timeout(const Duration(seconds: 4));
         if (response.statusCode >= 200 && response.statusCode < 400) {
-          successCount++;
+          success = true;
+          break;
         }
       } on Exception catch (_) {}
-    });
-
-    await Future.wait(futures);
+    }
 
     // Web: if CORS-friendly probes all fail but browser reports a live adapter,
     // prefer online so feed loading is not blocked by a false offline state.
-    if (kIsWeb && successCount == 0) {
+    if (kIsWeb && !success) {
       final result = await _connectivity.checkConnectivity();
       return result.any((r) => r != ConnectivityResult.none);
     }
 
-    return successCount >= 1;
+    return success;
+  }
+
+  void _emitTransport(List<ConnectivityResult> result) {
+    if (_disposed) return;
+    final normalized = List<ConnectivityResult>.unmodifiable(result);
+    if (listEquals(normalized, _transport)) return;
+    _transport = normalized;
+    _transportController.add(_transport);
   }
 
   void _emit(NetworkStatus status) {
@@ -133,5 +153,6 @@ class ConnectivityService {
     _slowPollTimer?.cancel();
     unawaited(_connectivitySub?.cancel());
     _statusController.close();
+    _transportController.close();
   }
 }

@@ -11,6 +11,7 @@ import '../models/channel.dart';
 import '../models/video.dart';
 import '../screens/channel_videos_screen.dart';
 import '../services/ad_service.dart';
+import '../services/network_policy.dart';
 import '../theme/app_theme.dart';
 import 'video_thumbnail_image.dart';
 import 'web_youtube_player.dart';
@@ -431,8 +432,13 @@ class _InlineVideoCardState extends State<InlineVideoCard>
     if (!mounted) return;
     final frac = info.visibleFraction;
 
-    // Pre-warm: silently create when meaningfully visible (mobile only).
-    if (!kIsWeb && _controller == null && frac > 0.3) {
+    // Pre-warm only on an unconstrained connection. A hidden YouTube WebView
+    // can download player resources before the user asks to watch; on mobile
+    // data the thumbnail remains the cheap preview until an explicit tap.
+    if (!kIsWeb &&
+        NetworkPolicy.instance.allowVideoPrewarm &&
+        _controller == null &&
+        frac > 0.3) {
       _createController(autoPlay: false);
       return;
     }

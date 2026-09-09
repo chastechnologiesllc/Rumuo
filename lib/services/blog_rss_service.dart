@@ -1,12 +1,15 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xml/xml.dart';
 
 import '../data/resource_category_data.dart';
 import 'feed_snapshot_service.dart';
+import 'network_policy.dart';
 import 'user_profile_service.dart';
 
 /// A single parsed blog article from an RSS/Atom feed.
@@ -133,6 +136,12 @@ class BlogRssService {
   List<BlogArticle>? _cache;
   DateTime? _cacheTime;
   static const _cacheTtl = Duration(minutes: 10);
+  static const _diskCacheTtl = Duration(minutes: 45);
+  static const _diskCacheKey = 'blog_rss_cache_v1';
+  static const _diskCacheTimeKey = 'blog_rss_cache_time_v1';
+  SharedPreferences? _prefs;
+  Future<SharedPreferences> _getPrefs() async =>
+      _prefs ??= await SharedPreferences.getInstance();
 
   bool get _isCacheFresh =>
       _cache != null &&
@@ -144,6 +153,8 @@ class BlogRssService {
   /// memoized bundled snapshot is used without starting live network work.
   Future<List<BlogArticle>> fetchSearchSeed() async {
     if (_isCacheFresh) return _cache!;
+    final disk = await _readDiskCache();
+    if (disk != null && disk.isNotEmpty) return disk;
     return _loadSnapshotArticles();
   }
 
@@ -152,6 +163,14 @@ class BlogRssService {
   /// general articles and the viewer's selected categories are shown.
   Future<List<BlogArticle>> fetchLocalSeed() async {
     if (_isCacheFresh) return _cache!;
+    final disk = await _readDiskCache();
+    if (disk != null && disk.isNotEmpty) {
+      final selected = UserProfileService.instance.selectedCategoryIds;
+      final scoped = disk.where((article) {
+        return article.categoryId == null || selected.contains(article.categoryId);
+      }).toList(growable: false);
+      return prioritizeForSelection(scoped, selected);
+    }
     final articles = await _loadSnapshotArticles();
     final selected = UserProfileService.instance.selectedCategoryIds;
     final scoped = articles.where((article) {
@@ -167,6 +186,18 @@ class BlogRssService {
   /// shows stale, wrongly-scoped articles for the rest of that window.
   Future<List<BlogArticle>> fetchAll({bool forceRefresh = false}) async {
     if (!forceRefresh && _isCacheFresh) return _cache!;
+    if (!forceRefresh) {
+      final disk = await _readDiskCache();
+      if (disk != null && disk.isNotEmpty) {
+        final selected = UserProfileService.instance.selectedCategoryIds;
+        final scoped = disk.where((article) {
+          return article.categoryId == null || selected.contains(article.categoryId);
+        });
+        _cache = List.unmodifiable(prioritizeForSelection(scoped, selected));
+        _cacheTime = DateTime.now();
+        return _cache!;
+      }
+    }
 
     // Fetch the hard-coded general feeds and the verified catalog feeds on
     // every platform. Web requests still go through CORS proxies, while
@@ -176,7 +207,12 @@ class BlogRssService {
     final feeds = _deduplicateFeeds(combinedBlogFeeds);
     final results = await _fetchFeedsBounded(feeds);
     final liveArticles = results.expand((l) => l).toList();
-    final snapshotArticles = await _loadSnapshotArticles();
+    // The bundled snapshot is a recovery path, not a second payload to merge
+    // into a successful live response. This avoids a multi-megabyte same-origin
+    // download on Web every time the Blogs tab opens normally.
+    final snapshotArticles = liveArticles.isEmpty
+        ? await _loadSnapshotArticles()
+        : const <BlogArticle>[];
     final articles = _mergeArticles(liveArticles, snapshotArticles);
     final selected = UserProfileService.instance.selectedCategoryIds;
     final scoped = articles.where((article) {
@@ -191,11 +227,14 @@ class BlogRssService {
     );
     _cache = mixed;
     _cacheTime = DateTime.now();
+    unawaited(_writeDiskCache(mixed));
     // Do not block first paint on article-page metadata lookups. RSS-provided
     // thumbnails are already usable; missing-image enrichment continues after
     // the list is visible and updates the same cache only if its scope is still
     // current.
-    unawaited(_hydrateCacheInBackground(mixed, _cacheTime!));
+    if (NetworkPolicy.instance.allowArticleImageHydration) {
+      unawaited(_hydrateCacheInBackground(mixed, _cacheTime!));
+    }
     return mixed;
   }
 
@@ -383,6 +422,81 @@ class BlogRssService {
     }).where((article) => article.url.isNotEmpty).toList(growable: false);
   }
 
+  Future<List<BlogArticle>?> _readDiskCache() async {
+    try {
+      final prefs = await _getPrefs();
+      final timestamp = DateTime.tryParse(
+        prefs.getString(_diskCacheTimeKey) ?? '',
+      );
+      if (timestamp == null ||
+          DateTime.now().difference(timestamp) >= _diskCacheTtl) {
+        return null;
+      }
+      final raw = prefs.getString(_diskCacheKey);
+      if (raw == null || raw.isEmpty) return null;
+      final decoded = jsonDecode(raw);
+      if (decoded is! List) return null;
+      final articles = decoded
+          .whereType<Map>()
+          .map(_articleFromJson)
+          .whereType<BlogArticle>()
+          .toList(growable: false);
+      return articles.isEmpty ? null : articles;
+    } on Object catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _writeDiskCache(List<BlogArticle> articles) async {
+    try {
+      final prefs = await _getPrefs();
+      final bounded = articles.take(180).map((article) {
+        return <String, dynamic>{
+          'title': article.title,
+          'url': article.url,
+          'sourceName': article.sourceName,
+          if (article.sourceUrl != null) 'sourceUrl': article.sourceUrl,
+          'publishedAt': article.publishedAt.toIso8601String(),
+          if (article.thumbnailUrl != null) 'thumbnailUrl': article.thumbnailUrl,
+          if (article.thumbnailFallbackUrls.isNotEmpty)
+            'thumbnailFallbackUrls': article.thumbnailFallbackUrls.take(2).toList(),
+          'excerpt': article.excerpt.length > 320
+              ? article.excerpt.substring(0, 320)
+              : article.excerpt,
+          if (article.categoryId != null) 'categoryId': article.categoryId,
+        };
+      }).toList(growable: false);
+      await prefs.setString(_diskCacheKey, jsonEncode(bounded));
+      await prefs.setString(_diskCacheTimeKey, DateTime.now().toIso8601String());
+    } on Object catch (e) {
+      debugPrint('[BlogRssService] disk cache write failed: $e');
+    }
+  }
+
+  static BlogArticle? _articleFromJson(Map raw) {
+    try {
+      final title = raw['title'] as String? ?? '';
+      final url = raw['url'] as String? ?? '';
+      if (title.isEmpty || url.isEmpty) return null;
+      return BlogArticle(
+        title: title,
+        url: url,
+        sourceName: raw['sourceName'] as String? ?? 'Rumuo source',
+        sourceUrl: raw['sourceUrl'] as String?,
+        publishedAt: DateTime.tryParse(raw['publishedAt'] as String? ?? '') ??
+            DateTime.fromMillisecondsSinceEpoch(0),
+        thumbnailUrl: raw['thumbnailUrl'] as String?,
+        thumbnailFallbackUrls:
+            (raw['thumbnailFallbackUrls'] as List?)?.whereType<String>().take(2).toList(growable: false) ??
+                const [],
+        excerpt: raw['excerpt'] as String? ?? '',
+        categoryId: raw['categoryId'] as String?,
+      );
+    } on Object catch (_) {
+      return null;
+    }
+  }
+
   List<BlogArticle> _mergeArticles(
     Iterable<BlogArticle> live,
     Iterable<BlogArticle> snapshot,
@@ -423,7 +537,10 @@ class BlogRssService {
       }
     }
 
-    final workerCount = math.min(8, feeds.length);
+    final workerCount = math.min(
+      NetworkPolicy.instance.blogConcurrency,
+      feeds.length,
+    );
     await Future.wait(List.generate(workerCount, (_) => worker()));
     return results;
   }
@@ -463,7 +580,9 @@ class BlogRssService {
       // than a raw feed URL. Discover the declared RSS/Atom alternate, then
       // fetch that feed. This keeps the JSON human-friendly and makes the
       // source work on native builds without requiring a hard-coded /feed path.
-      for (final discovered in _discoverFeedUrls(body, url)) {
+      for (final discovered in _discoverFeedUrls(body, url).take(
+            NetworkPolicy.instance.isConstrained ? 2 : 4,
+          )) {
         final feedResponse = await http.get(Uri.parse(discovered), headers: {
           'User-Agent': 'Rumuo/1.0 (+com.chastechgroup.rumuo)',
           'Accept': 'application/rss+xml, application/xml, text/xml',
@@ -576,9 +695,11 @@ class BlogRssService {
       );
     }
 
-    // If the catalog URL is HTML, discover its declared RSS/Atom alternate
-    // and fetch each candidate through the same two-proxy race.
-    for (final discovered in _discoverFeedUrls(firstBody, url)) {
+    // If the catalog URL is HTML, discover a small bounded set of RSS/Atom
+    // alternates. Each candidate uses the same economical proxy sequence.
+    for (final discovered in _discoverFeedUrls(firstBody, url).take(
+          NetworkPolicy.instance.isConstrained ? 2 : 4,
+        )) {
       final feedBody = await _fetchWebBody(discovered, sourceName);
       if (feedBody != null && _looksLikeXml(feedBody)) {
         final articles = await _parseBody(
@@ -600,27 +721,19 @@ class BlogRssService {
       'https://corsproxy.io/?url=$encoded',
       'https://api.allorigins.win/raw?url=$encoded',
     ];
-    final completer = Completer<String?>();
-    var pending = proxyUrls.length;
-    for (final proxyUrl in proxyUrls) {
-      unawaited(() async {
-        try {
-          final response = await http
-              .get(Uri.parse(proxyUrl))
-              .timeout(const Duration(seconds: 14));
-          if (response.statusCode == 200 && response.body.length > 50 &&
-              !completer.isCompleted) {
-            completer.complete(response.body);
-            return;
-          }
-        } on Object catch (e) {
-          debugPrint('[BlogRssService] $sourceName via $proxyUrl: $e');
+    for (final proxyUrl in proxyUrls.take(NetworkPolicy.instance.maxProxyCandidates)) {
+      try {
+        final response = await http
+            .get(Uri.parse(proxyUrl))
+            .timeout(const Duration(seconds: 14));
+        if (response.statusCode == 200 && response.body.length > 50) {
+          return response.body;
         }
-        pending--;
-        if (pending == 0 && !completer.isCompleted) completer.complete(null);
-      }());
+      } on Object catch (e) {
+        debugPrint('[BlogRssService] $sourceName via $proxyUrl: $e');
+      }
     }
-    return completer.future;
+    return null;
   }
 
   Future<void> _hydrateCacheInBackground(
@@ -639,7 +752,7 @@ class BlogRssService {
       List<BlogArticle> articles) async {
     final targets = articles
         .where((article) => article.thumbnailFallbackUrls.length < 2)
-        .take(40)
+        .take(NetworkPolicy.instance.isConstrained ? 0 : 16)
         .toList(growable: false);
     if (targets.isEmpty) return articles;
 
@@ -656,7 +769,7 @@ class BlogRssService {
       }
     }
 
-    final workerCount = math.min(4, targets.length);
+    final workerCount = math.min(2, targets.length);
     final hydrated = (await Future.wait(
       List.generate(workerCount, (_) => hydrateWorker()),
     )).expand((batch) => batch);

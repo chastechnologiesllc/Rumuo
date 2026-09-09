@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/app_config.dart';
 import 'consent_service.dart';
+import 'network_policy.dart';
 
 /// AdService — interstitial patterns:
 ///
@@ -94,6 +95,12 @@ class AdService extends ChangeNotifier {
       _initialized = true;
       return;
     }
+    if (NetworkPolicy.instance.isConstrained) {
+      // Ads are optional enrichment. Avoid initializing the SDK or downloading
+      // creatives while the person is on a constrained/unknown connection.
+      _initialized = true;
+      return;
+    }
 
     // GDPR/UK/Swiss consent MUST be gathered before the Mobile Ads SDK
     // initializes — see ConsentService and the manifest's
@@ -140,6 +147,7 @@ class AdService extends ChangeNotifier {
   static const int _maxInterstitialRetries = 5;
 
   Future<void> _loadInterstitial() async {
+    if (NetworkPolicy.instance.isConstrained) return;
     _interstitialReady = false;
     await InterstitialAd.load(
       adUnitId: AppConfig.interstitialAdUnitId,
@@ -182,6 +190,7 @@ class AdService extends ChangeNotifier {
 
   // ── Rewarded ──────────────────────────────────────────────────────────────
   Future<void> _loadRewarded() async {
+    if (NetworkPolicy.instance.isConstrained) return;
     _rewardedReady = false;
     await RewardedAd.load(
       adUnitId: AppConfig.rewardedAdUnitId,
@@ -229,6 +238,7 @@ class AdService extends ChangeNotifier {
 
   // ── Rewarded Interstitial ─────────────────────────────────────────────────
   Future<void> _loadRewardedInterstitial() async {
+    if (NetworkPolicy.instance.isConstrained) return;
     _rewardedInterstitialReady = false;
     await RewardedInterstitialAd.load(
       adUnitId: AppConfig.rewardedInterstitialAdUnitId,
@@ -281,6 +291,7 @@ class AdService extends ChangeNotifier {
 
   // ── App Open ──────────────────────────────────────────────────────────────
   Future<void> _loadAppOpen() async {
+    if (NetworkPolicy.instance.isConstrained) return;
     final unitId = AppConfig.appOpenAdUnitId;
     if (unitId == null) {
       // No production App Open unit configured (and not in kDebugAds mode)
@@ -321,7 +332,8 @@ class AdService extends ChangeNotifier {
   }
 
   Future<void> showAppOpenAd() async {
-    if (_adsRemoved || !_appOpenReady || _appOpenAd == null) return;
+    if (NetworkPolicy.instance.isConstrained ||
+        _adsRemoved || !_appOpenReady || _appOpenAd == null) return;
     if (_lastAppOpenShown != null) {
       if (DateTime.now().difference(_lastAppOpenShown!) <
           AppConfig.appOpenAdCooldown) { return; }
@@ -423,7 +435,8 @@ class AdService extends ChangeNotifier {
   }
 
   Future<void> showInterstitial() async {
-    if (_adsRemoved || _interstitialAd == null || !_interstitialReady) return;
+    if (NetworkPolicy.instance.isConstrained ||
+        _adsRemoved || _interstitialAd == null || !_interstitialReady) return;
 
     // Use a Completer so this method properly AWAITS the ad being DISMISSED —
     // not just shown.  This prevents the caller (e.g. onShortScrolled) from

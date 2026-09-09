@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 
 import '../services/media_cache_manager.dart';
+import '../services/network_policy.dart';
 import '../theme/app_theme.dart';
 import 'rumuo_shimmer.dart';
 
@@ -92,13 +93,22 @@ class _BookCoverImageState extends State<BookCoverImage> {
     if (seeds.isEmpty) return [''];
 
     final out = <String>[];
+    final maxCandidates = NetworkPolicy.instance.isConstrained ? 4 : 10;
     void add(String value) {
+      if (out.length >= maxCandidates) return;
       var trimmed = value.trim();
       final parsed = Uri.tryParse(trimmed);
       if (parsed != null &&
           parsed.host.toLowerCase() == 'covers.openlibrary.org' &&
           !parsed.queryParameters.containsKey('default')) {
+        // Book cards do not need Open Library's large 600px cover. Prefer the
+        // medium rendition so opening a shelf does not pull oversized images.
+        final mediumPath = parsed.path.replaceFirst(
+          RegExp(r'-L\.jpg$', caseSensitive: false),
+          '-M.jpg',
+        );
         trimmed = parsed
+            .replace(path: mediumPath)
             .replace(queryParameters: {
               ...parsed.queryParameters,
               'default': 'false',
@@ -113,11 +123,10 @@ class _BookCoverImageState extends State<BookCoverImage> {
               uri.host.toLowerCase() == 'images.weserv.nl')) {
         return;
       }
-      final encoded = Uri.encodeComponent(trimmed);
-      final proxied = 'https://wsrv.nl/?url=$encoded';
-      final legacyProxied = 'https://images.weserv.nl/?url=$encoded';
-      if (!out.contains(proxied)) out.add(proxied);
-      if (!out.contains(legacyProxied)) out.add(legacyProxied);
+      if (out.length == 1 && NetworkPolicy.instance.maxProxyCandidates > 1) {
+        final encoded = Uri.encodeComponent(trimmed);
+        out.add('https://wsrv.nl/?url=$encoded');
+      }
     }
 
     for (final seed in seeds) {
@@ -130,14 +139,14 @@ class _BookCoverImageState extends State<BookCoverImage> {
       if (olIsbn != null) {
         final isbn = olIsbn.group(1)!;
         final size = olIsbn.group(2)!.toUpperCase();
-        for (final candidateSize in ['L', 'M', 'S']) {
+        for (final candidateSize in ['M', 'S']) {
           if (candidateSize != size) {
             add('https://covers.openlibrary.org/b/isbn/$isbn-$candidateSize.jpg');
           }
         }
         final compact = isbn.replaceAll('-', '');
         if (compact != isbn) {
-          for (final candidateSize in ['L', 'M', 'S']) {
+          for (final candidateSize in ['M', 'S']) {
             add('https://covers.openlibrary.org/b/isbn/$compact-$candidateSize.jpg');
           }
         }
@@ -151,7 +160,7 @@ class _BookCoverImageState extends State<BookCoverImage> {
         final kind = olId.group(1)!.toLowerCase();
         final id = olId.group(2)!;
         final size = olId.group(3)!.toUpperCase();
-        for (final candidateSize in ['L', 'M', 'S']) {
+        for (final candidateSize in ['M', 'S']) {
           if (candidateSize != size) {
             add('https://covers.openlibrary.org/b/$kind/$id-$candidateSize.jpg');
           }
@@ -262,10 +271,16 @@ class _BookCoverImageState extends State<BookCoverImage> {
 
   Widget _buildNetwork(BuildContext context) {
     final dpr = MediaQuery.devicePixelRatioOf(context);
-    final cacheWidth =
+    final requestedWidth =
         widget.width != null ? (widget.width! * dpr).round() : 480;
-    final cacheHeight =
+    final requestedHeight =
         widget.height != null ? (widget.height! * dpr).round() : 640;
+    final cacheWidth = NetworkPolicy.instance.isConstrained && requestedWidth > 360
+        ? 360
+        : requestedWidth;
+    final cacheHeight = NetworkPolicy.instance.isConstrained && requestedHeight > 480
+        ? 480
+        : requestedHeight;
     final hasMore = _index + 1 < _candidates.length;
 
     return CachedNetworkImage(

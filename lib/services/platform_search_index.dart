@@ -4,6 +4,8 @@ import '../data/resource_category_data.dart';
 import '../models/resource_category.dart';
 import '../models/video.dart';
 import 'blog_rss_service.dart';
+import 'network_policy.dart';
+import 'user_profile_service.dart';
 
 /// The kinds of records that can be returned by the homepage search.
 enum PlatformSearchKind { short, video, blog, book, category, channel, blogSource }
@@ -56,9 +58,11 @@ class PlatformSearchDocument {
 
 /// Builds the app-wide search corpus from every source the app knows about.
 ///
-/// Static catalogue records are loaded once after [ResourceCategoryData.load].
-/// Feed videos and fetched blog articles are supplied at query time because
-/// they are network/cache state, not bundled catalogue state.
+/// Static catalogue records are loaded once after the appropriate
+/// [ResourceCategoryData] load. Data Saver uses the selected scope; normal
+/// search can still request the complete catalogue. Feed videos and fetched
+/// blog articles are supplied at query time because they are network/cache
+/// state, not bundled catalogue state.
 class PlatformSearchIndex {
   PlatformSearchIndex._();
   static final PlatformSearchIndex instance = PlatformSearchIndex._();
@@ -84,7 +88,14 @@ class PlatformSearchIndex {
   }
 
   Future<void> _buildStaticIndex() async {
-    await ResourceCategoryData.load();
+    if (NetworkPolicy.instance.isInitialized &&
+        NetworkPolicy.instance.isConstrained) {
+      await ResourceCategoryData.loadSelectedResources(
+        UserProfileService.instance.selectedCategoryIds,
+      );
+    } else {
+      await ResourceCategoryData.load();
+    }
     final documents = <PlatformSearchDocument>[];
     final categoriesById = {
       for (final category in ResourceCategoryData.all) category.id: category,

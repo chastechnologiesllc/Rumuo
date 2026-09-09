@@ -16,6 +16,7 @@ import '../models/saved_bookmark.dart';
 import '../models/video.dart';
 import '../services/blog_rss_service.dart';
 import '../services/engagement_service.dart';
+import '../services/network_policy.dart';
 import '../services/rss_service.dart';
 import '../services/user_profile_service.dart';
 
@@ -95,10 +96,17 @@ class FeedProvider extends ChangeNotifier {
     // long after switching category.
     BlogRssService.instance.clearCache();
     notifyListeners();
-    // Pulls in the newly-selected category's channels right away instead
-    // of making the person wait for next app open. Silent = no loading
-    // spinner flash; _eagerChannels() picks up the new selection itself.
-    unawaited(refresh(force: true, silent: true));
+    // Pull in the newly-selected category's local resource file before
+    // refreshing. Silent = no loading spinner flash; _eagerChannels() then
+    // sees the new channels without ever loading the whole catalog.
+    unawaited(_refreshAfterProfileSelection());
+  }
+
+  Future<void> _refreshAfterProfileSelection() async {
+    await ResourceCategoryData.loadSelectedResources(
+      UserProfileService.instance.selectedCategoryIds,
+    );
+    await refresh(force: true, silent: true);
   }
 
   @override
@@ -546,14 +554,10 @@ class FeedProvider extends ChangeNotifier {
     await _loadDiskCache();
     final hasCached = _videosByChannel.isNotEmpty;
 
-    // 2. ALWAYS force a true network refresh on app open. YouTube's RSS
-    // feed always returns exactly the latest 15 videos per channel — this
-    // forced refresh is what guarantees that "latest 15" window is
-    // genuinely up to date every time the user opens the app, rather than
-    // potentially serving a stale cached 15 from up to 30 minutes ago.
-    // silent: true when we already have something on screen, so this
-    // happens quietly in the background with no spinner flash.
-    await refresh(force: true, silent: hasCached);
+    // 2. Keep the first screen cache-first. A live refresh still happens when
+    // the cache is stale, but forcing it on every app open re-downloaded the
+    // same 15-item feed window even when it was only minutes old.
+    await refresh(force: false, silent: hasCached);
   }
 
   Future<void> _loadDiskCache() async {
@@ -592,6 +596,7 @@ class FeedProvider extends ChangeNotifier {
   // ── Refresh ───────────────────────────────────────────────────────────────────
 
   DateTime? _lastForcedRefreshAt;
+  DateTime? _lastRefreshAt;
   Future<void>? _refreshInFlight;
 
   /// [silent] = true → skip loading spinner, update quietly in background.
@@ -634,10 +639,9 @@ class FeedProvider extends ChangeNotifier {
 
     final snap = <String, List<Video>>{};
 
-    // Keep a small worker pool instead of starting every channel at once.
-    // Each worker still staggers its first request, but six concurrent channel
-    // fetches is substantially gentler on low-end phones and browser proxies
-    // than multiplying every channel by two CORS proxy requests.
+    // Keep an adaptive worker pool instead of starting every channel at once.
+    // The constrained profile is deliberately small and staggered; this is
+    // gentler on low-end phones and browser proxies than a full burst.
     final results = List<List<Video>?>.filled(channels.length, null);
     var nextIndex = 0;
     Future<void> fetchWorker() async {
@@ -649,7 +653,8 @@ class FeedProvider extends ChangeNotifier {
           results[index] = await RssService.instance.fetchVideos(
             ch.id,
             forceRefresh: force,
-            staggerMs: index * 50,
+            staggerMs: index *
+                (NetworkPolicy.instance.isConstrained ? 180 : 50),
           );
         } on Object catch (e) {
           debugPrint('[FeedProvider] channel ${ch.id} failed: $e');
@@ -658,7 +663,10 @@ class FeedProvider extends ChangeNotifier {
       }
     }
 
-    final workerCount = min(6, channels.length);
+    final workerCount = min(
+      NetworkPolicy.instance.feedConcurrency,
+      channels.length,
+    );
     await Future.wait(
       List.generate(workerCount, (_) => fetchWorker()),
     );
@@ -678,7 +686,9 @@ class FeedProvider extends ChangeNotifier {
     _state = total > 0 ? FeedState.loaded : FeedState.error;
     _errorMessage = total == 0 ? 'Could not load content. Check your connection.' : null;
 
-    if (force) _lastForcedRefreshAt = DateTime.now();
+    final refreshedAt = DateTime.now();
+    _lastRefreshAt = refreshedAt;
+    if (force) _lastForcedRefreshAt = refreshedAt;
 
       notifyListeners();
     } finally {
@@ -686,17 +696,20 @@ class FeedProvider extends ChangeNotifier {
     }
   }
 
-  /// Called when the app resumes from the background. Forces a true
-  /// network refresh — but only if it's been a while since the last one,
+  /// Called when the app resumes from the background. Refreshes only if it has
+  /// been a while since the last refresh,
   /// so rapid app-switching (checking a notification and coming straight
   /// back, for example) doesn't hammer YouTube's RSS endpoint with repeat
   /// requests every few seconds.
   Future<void> refreshOnResume() async {
-    final last = _lastForcedRefreshAt;
+    final last = _lastRefreshAt ?? _lastForcedRefreshAt;
+    final minimumGap = NetworkPolicy.instance.isConstrained
+        ? const Duration(minutes: 20)
+        : const Duration(minutes: 10);
     final dueForRefresh = last == null ||
-        DateTime.now().difference(last) > const Duration(minutes: 3);
+        DateTime.now().difference(last) > minimumGap;
     if (!dueForRefresh) return;
-    await refresh(force: true, silent: true);
+    await refresh(force: false, silent: true);
   }
 
   // ── Saved / Bookmarks ───────────────────────────────────────────────────────

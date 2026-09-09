@@ -28,8 +28,9 @@ import 'channel_data.dart';
 /// resource files are the opposite: never bulk-regenerated, only ever
 /// grown one confirmed entry at a time.
 ///
-/// Loaded once during startup (see main.dart's service-init group) so
-/// that by the time any screen needs it, everything below is synchronous.
+/// The lightweight category index loads during startup. Resource files load
+/// asynchronously for the selected scope; full loading remains available to
+/// search and discovery callers that explicitly need it.
 class ResourceCategoryData {
   ResourceCategoryData._();
 
@@ -38,6 +39,8 @@ class ResourceCategoryData {
   static TaxReform? _taxReform;
   static bool _loaded = false;
   static bool _resourcesLoaded = false;
+  static bool _allResourcesLoaded = false;
+  static Set<String> _loadedCategoryScope = <String>{};
   static Future<void>? _categoriesInFlight;
   static Future<void>? _resourcesInFlight;
 
@@ -104,26 +107,52 @@ class ResourceCategoryData {
     }
   }
 
-  /// Loads all verified channels, blogs, and books after the lightweight
-  /// category index is ready. It is safe to call from startup and screens.
-  static Future<void> loadVerifiedResources() {
-    if (_resourcesLoaded) return Future.value();
-    final existing = _resourcesInFlight;
-    if (existing != null) return existing;
-
-    final future = _loadVerifiedResourcesSafely();
-    _resourcesInFlight = future;
-    return future;
+  /// Loads only the general resources and the categories selected by the user.
+  /// This is the startup path: it avoids downloading the entire research
+  /// catalog when the first screen only needs a small, relevant subset.
+  static Future<void> loadSelectedResources(Set<String> selectedCategoryIds) {
+    final selected = Set<String>.from(selectedCategoryIds);
+    if (_allResourcesLoaded ||
+        (_resourcesLoaded && _loadedCategoryScope.containsAll(selected))) {
+      return Future.value();
+    }
+    return _loadScopedResources(selected);
   }
 
-  static Future<void> _loadVerifiedResourcesSafely() async {
+  /// Loads all verified resources for the full-text search and discovery
+  /// surfaces. The general payload is still the compact boot variant; the
+  /// large general book archive remains available from its own indexed source.
+  static Future<void> loadVerifiedResources() => _loadScopedResources(null);
+
+  static Future<void> _loadScopedResources(Set<String>? selected) async {
+    final existing = _resourcesInFlight;
+    if (existing != null) {
+      await existing;
+      if (selected == null
+          ? _allResourcesLoaded
+          : _allResourcesLoaded ||
+              (_resourcesLoaded && _loadedCategoryScope.containsAll(selected))) {
+        return;
+      }
+    }
+
+    final future = _loadVerifiedResourcesSafely(selected);
+    _resourcesInFlight = future;
+    await future;
+  }
+
+  static Future<void> _loadVerifiedResourcesSafely(Set<String>? selected) async {
     try {
       await loadCategories();
-      await _loadVerifiedResources();
+      await _loadVerifiedResources(selectedCategoryIds: selected);
+      _resourcesLoaded = true;
+      _allResourcesLoaded = selected == null;
+      _loadedCategoryScope = selected == null
+          ? _all.map((category) => category.id).toSet()
+          : Set<String>.from(selected);
     } on Object catch (e) {
       debugPrint('[ResourceCategoryData] verified resources load failed (non-fatal): $e');
     } finally {
-      _resourcesLoaded = true;
       _resourcesInFlight = null;
     }
   }
@@ -135,27 +164,31 @@ class ResourceCategoryData {
     await loadVerifiedResources();
   }
 
-  static Future<void> _loadVerifiedResources() async {
+  static Future<void> _loadVerifiedResources({
+    required Set<String>? selectedCategoryIds,
+  }) async {
     final channels = <Channel>[];
     final blogs = <Map<String, String>>[];
     final books = <VerifiedBook>[];
     final subcategorySources = <VerifiedSubcategorySource>[];
 
-    // Every category's resource file, PLUS _general.json, read concurrently.
-    // These are independent local asset reads with no ordering dependency
-    // between them, so there's no reason to pay their latency one at a
-    // time in a sequential await loop — that becomes real, user-visible
-    // startup delay as more of the 60 categories get their own file (up to
-    // 61 sequential awaits at full coverage). Future.wait runs them all at
-    // once; total time becomes the slowest single read instead of the sum
-    // of all of them. Each attempt is still fully independent — one
-    // bad/missing file (most of these don't exist yet, and that's
-    // expected, not an error — see _tryLoadResourceFile) never affects any
-    // other, exactly as before.
+    final categoryIds = selectedCategoryIds == null
+        ? _all.map((category) => category.id).toSet()
+        : selectedCategoryIds;
+    final categoriesToLoad = _all
+        .where((category) => categoryIds.contains(category.id))
+        .toList(growable: false);
+
+    // Resource files are independent, so read the selected scope in parallel.
+    // The startup path uses the small general boot file; full-load callers
+    // (notably search) still receive the complete general book archive.
+    final generalAsset = selectedCategoryIds == null
+        ? '_general.json'
+        : '_general_boot.json';
     final results = await Future.wait([
-      for (final category in _all)
+      for (final category in categoriesToLoad)
         _tryLoadResourceFile('assets/data/resources/${category.id}.json'),
-      _tryLoadResourceFile('assets/data/resources/_general.json'),
+      _tryLoadResourceFile('assets/data/resources/$generalAsset'),
       _tryLoadResourceFile('assets/data/resources/_profession_open_catalog.json'),
     ]);
 
@@ -163,10 +196,11 @@ class ResourceCategoryData {
     // then general and the profession overlay — regardless of which order the
     // concurrent reads above actually completed in, so combined lists stay
     // stable across runs.
-    for (var i = 0; i < _all.length; i++) {
+    _resourceFiles.clear();
+    for (var i = 0; i < categoriesToLoad.length; i++) {
       final map = results[i];
       if (map == null) continue;
-      final category = _all[i];
+      final category = categoriesToLoad[i];
       _resourceFiles[category.id] = map;
       _addFrom(map, category.id, channels, blogs, books, subcategorySources);
     }
@@ -176,7 +210,7 @@ class ResourceCategoryData {
     // ChannelData.eagerFor() (and the equivalent scoping in
     // BlogRssService/FeedProvider) as always-on, exactly like the
     // original 12 channels.
-    final general = results[_all.length];
+    final general = results[categoriesToLoad.length];
     if (general != null) {
       _resourceFiles['_general'] = general;
       _addFrom(general, null, channels, blogs, books, subcategorySources);
@@ -186,7 +220,7 @@ class ResourceCategoryData {
     // the 20 profession files. Its grouped shape lets one open textbook be
     // reused across related professions without copying it into every large
     // category JSON file, while categoryId is still preserved on each book.
-    final professionOverlay = results[_all.length + 1];
+    final professionOverlay = results[categoriesToLoad.length + 1];
     if (professionOverlay != null) {
       _resourceFiles['_profession_open_catalog'] = professionOverlay;
       for (final group in (professionOverlay['categories'] as List? ?? [])) {
