@@ -128,55 +128,30 @@ class _MainShellState extends State<MainShell> {
     // Warm-launch: app was already running when notification was tapped.
     _schedulePendingDeepLink();
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final navBar = SafeArea(
-      top: false,
-      minimum: const EdgeInsets.fromLTRB(32, 0, 32, 10),
-      child: _FloatingNavBar(
-        currentIndex: _index,
-        isDark: isDark,
-        onTap: (i) {
-          if (i == _index) return;
-          // Always land on a fully visible bar — avoids the nav re-opening
-          // to a stale "hidden" state left over from mid-scroll on Feed.
-          ScrollVisibilityService.instance.show();
-          setState(() => _index = i);
-        },
-      ),
-    );
-
     return Scaffold(
-      extendBody: true,
-      body: IndexedStack(index: _index, children: _screens),
-      // The nav bar only hides itself while the Feed tab is scrolling
-      // (see ScrollVisibilityService); every other tab keeps it fully on
-      // screen regardless of that shared visibility flag.
-      bottomNavigationBar: _index != 0
-          ? navBar
-          : ValueListenableBuilder<bool>(
-              valueListenable: ScrollVisibilityService.instance.visible,
-              builder: (context, visible, child) => AnimatedSize(
-                duration: const Duration(milliseconds: 220),
-                curve: Curves.easeOutCubic,
-                alignment: Alignment.bottomCenter,
-                child: visible ? child : const SizedBox(width: double.infinity, height: 0),
-              ),
-              child: navBar,
-            ),
+      body: Column(
+        children: [
+          _TopNavigation(
+            currentIndex: _index,
+            onTap: (i) {
+              if (i == _index) return;
+              ScrollVisibilityService.instance.show();
+              setState(() => _index = i);
+            },
+          ),
+          Expanded(child: IndexedStack(index: _index, children: _screens)),
+        ],
+      ),
     );
   }
 }
 
-// ── Floating Nav Bar ──────────────────────────────────────────────────────────
-class _FloatingNavBar extends StatelessWidget {
+class _TopNavigation extends StatelessWidget {
   final int currentIndex;
-  final bool isDark;
   final ValueChanged<int> onTap;
 
-  const _FloatingNavBar({
+  const _TopNavigation({
     required this.currentIndex,
-    required this.isDark,
     required this.onTap,
   });
 
@@ -187,112 +162,54 @@ class _FloatingNavBar extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 58,
-      decoration: BoxDecoration(
-        color: isDark
-            ? const Color(0xFF1A1A1A).withValues(alpha: 0.96)
-            : Colors.white.withValues(alpha: 0.96),
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.5 : 0.15),
-            blurRadius: 24,
-            offset: const Offset(0, 6),
-          ),
-        ],
-        border: Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.08)
-              : Colors.black.withValues(alpha: 0.06),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: List.generate(_items.length, (i) {
-          final item = _items[i];
-          final isActive = i == currentIndex;
-          return Expanded(
-            child: Semantics(
-              button: true,
-              selected: isActive,
-              label: item.$3,
-              child: Material(
-                type: MaterialType.transparency,
-                child: InkWell(
-                  key: ValueKey('main-tab-$i'),
-                  borderRadius: BorderRadius.circular(26),
-                  onTap: () => onTap(i),
-                  child: SizedBox.expand(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 200),
-                          child: i == 0
-                              ? ValueListenableBuilder<int>(
-                                  key: ValueKey(isActive),
-                                  valueListenable:
-                                      NotificationStore.instance.unreadCount,
-                                  builder: (context, count, _) => Badge(
-                                    isLabelVisible: count > 0,
-                                    label: Text(
-                                      count > 99 ? '99+' : '$count',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                    backgroundColor: Colors.red,
-                                    padding:
-                                        const EdgeInsets.symmetric(horizontal: 4),
-                                    child: Icon(
-                                      isActive ? item.$2 : item.$1,
-                                      color: isActive
-                                          ? AppTheme.gold
-                                          : (isDark
-                                              ? AppTheme.darkTextMuted
-                                              : AppTheme.lightTextMuted),
-                                      size: isActive ? 22 : 20,
-                                    ),
-                                  ),
-                                )
-                              : Icon(
-                                  isActive ? item.$2 : item.$1,
-                                  key: ValueKey(isActive),
-                                  color: isActive
-                                      ? AppTheme.gold
-                                      : (isDark
-                                          ? AppTheme.darkTextMuted
-                                          : AppTheme.lightTextMuted),
-                                  size: isActive ? 22 : 20,
-                                ),
-                        ),
-                        const SizedBox(height: 1),
-                        Text(
-                          item.$3,
-                          style: TextStyle(
-                            color: isActive
-                                ? AppTheme.gold
-                                : (isDark
-                                    ? AppTheme.darkTextMuted
-                                    : AppTheme.lightTextMuted),
-                            fontSize: 9,
-                            fontWeight:
-                                isActive ? FontWeight.w700 : FontWeight.w400,
-                          ),
-                        ),
-                      ],
-                    ),
+  Widget build(BuildContext context) => SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 10, 2),
+          child: Row(
+            children: [
+              Text('Rumuo',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontSize: 28, fontWeight: FontWeight.w800)),
+              const Spacer(),
+              _TopNavButton(
+                  icon: _items[0], active: currentIndex == 0, onTap: () => onTap(0)),
+              _TopNavButton(
+                  icon: _items[1], active: currentIndex == 1, onTap: () => onTap(1)),
+              ValueListenableBuilder<int>(
+                valueListenable: NotificationStore.instance.unreadCount,
+                builder: (_, count, __) => Badge(
+                  isLabelVisible: count > 0,
+                  label: Text(count > 99 ? '99+' : '$count'),
+                  child: IconButton(
+                    tooltip: 'Notifications',
+                    icon: Icon(count > 0
+                        ? Icons.notifications_rounded
+                        : Icons.notifications_outlined),
+                    color: count > 0 ? AppTheme.gold : AppTheme.textMuted(context),
+                    onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => const NotificationsScreen())),
                   ),
                 ),
               ),
-            ),
-          );
-        }),
-      ),
-    );
-  }
+              _TopNavButton(
+                  icon: _items[2], active: currentIndex == 2, onTap: () => onTap(2)),
+            ],
+          ),
+        ),
+      );
+}
+
+class _TopNavButton extends StatelessWidget {
+  final (IconData, IconData, String) icon;
+  final bool active;
+  final VoidCallback onTap;
+  const _TopNavButton({required this.icon, required this.active, required this.onTap});
+  @override
+  Widget build(BuildContext context) => IconButton(
+        tooltip: icon.$3,
+        onPressed: onTap,
+        icon: Icon(active ? icon.$2 : icon.$1,
+            color: active ? AppTheme.gold : AppTheme.textMuted(context)),
+      );
 }

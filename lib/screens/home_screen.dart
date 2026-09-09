@@ -3,14 +3,11 @@ import 'package:provider/provider.dart';
 
 import '../models/information_form.dart';
 import '../providers/feed_provider.dart';
-import '../services/notification_store.dart';
 import '../services/scroll_visibility_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/mvp_subcategory_feed.dart';
-import '../widgets/rumuo_mark.dart';
 import 'content_search_screen.dart';
 import 'channels_screen.dart';
-import 'notifications_screen.dart';
 
 /// The Feed screen uses horizontal primary tabs, matching the original Rumuo
 /// navigation: Videos, Shorts, Audio, Written, and Datasets. Blogs and Books
@@ -77,70 +74,27 @@ class _HeaderAndSearch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-          child: Row(
-            children: [
-              const RumuoMark(size: 44, borderRadius: 12),
-              const SizedBox(width: 10),
-              Text(
-                'Rumuo',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontSize: 30,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.5,
-                    ),
-              ),
-              const Spacer(),
-              ValueListenableBuilder<int>(
-                valueListenable: NotificationStore.instance.unreadCount,
-                builder: (context, count, _) => Badge(
-                  isLabelVisible: count > 0,
-                  label: Text(
-                    count > 99 ? '99+' : '$count',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  backgroundColor: Colors.red,
-                  child: IconButton(
-                    icon: Icon(
-                      count > 0
-                          ? Icons.notifications_rounded
-                          : Icons.notifications_outlined,
-                      color: count > 0
-                          ? AppTheme.gold
-                          : AppTheme.textMuted(context),
-                    ),
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const NotificationsScreen(),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
-          child: _SearchBar(
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => ContentSearchScreen(
-                  feedProvider: context.read<FeedProvider>(),
-                ),
-              ),
+    void openSearch() => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ContentSearchScreen(
+              feedProvider: context.read<FeedProvider>(),
             ),
           ),
-        ),
-      ],
+        );
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 10, 10),
+      child: Row(
+        children: [
+          Expanded(child: _SearchBar(onTap: openSearch)),
+          IconButton(
+            tooltip: 'Temporary search',
+            onPressed: openSearch,
+            icon: Icon(Icons.incognito_rounded,
+                color: AppTheme.textMuted(context), size: 22),
+          ),
+        ],
+      ),
     );
   }
 }
