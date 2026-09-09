@@ -122,8 +122,21 @@ class _SearchBar extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(Icons.search_rounded,
-                    color: AppTheme.textMuted(context), size: 20),
+                ColorFiltered(
+                  colorFilter: ColorFilter.mode(
+                    Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black,
+                    BlendMode.srcIn,
+                  ),
+                  child: Image.asset(
+                    'assets/icons/rumuo_bird_transparent.png',
+                    width: 20,
+                    height: 20,
+                    fit: BoxFit.contain,
+                    semanticLabel: 'Rumuo search',
+                  ),
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
