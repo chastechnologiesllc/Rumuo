@@ -61,8 +61,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   bool _playerAttached = false;
   bool _isLandscape = false;
   final GlobalKey _playerKey = GlobalKey();
-  bool _showYtCover = false;
-  Timer? _ytCoverTimer;
   // Double-tap seek feedback
   bool _showSeekLeft  = false;
   bool _showSeekRight = false;
@@ -164,20 +162,8 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       });
       if (justStarted || (playing && !wasPlaying)) {
         _forceSoundOn();
-        _armYtCover();
-      } else if (!playing && wasPlaying) {
-        _ytCoverTimer?.cancel();
-        if (mounted) setState(() => _showYtCover = true);
       }
     }
-  }
-
-  void _armYtCover() {
-    _ytCoverTimer?.cancel();
-    if (mounted) setState(() => _showYtCover = true);
-    _ytCoverTimer = Timer(const Duration(seconds: 4), () {
-      if (mounted) setState(() => _showYtCover = false);
-    });
   }
 
   /// Seek ±[seconds] from current position. Shows a ripple feedback.
@@ -199,7 +185,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   @override
   void dispose() {
     _centerIconTimer?.cancel();
-    _ytCoverTimer?.cancel();
     _seekFeedbackTimer?.cancel();
     _progressNotifier.dispose();
     _positionNotifier.dispose();
@@ -616,7 +601,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                     _ready = true;
                     _showCenterIcon = false;
                   });
-                  _armYtCover();
                 }
               });
               Future.delayed(const Duration(milliseconds: 2800), () {

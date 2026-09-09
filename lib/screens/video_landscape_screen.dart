@@ -43,11 +43,9 @@ class _VideoLandscapeScreenState extends State<VideoLandscapeScreen> {
   YoutubePlayerController? _controller;
   bool _playing      = false;
   bool _hasStarted   = false;
-  bool _showYtCover  = false;
   bool _showIcon     = false;
   int  _tapCount     = 0;
   Timer? _iconTimer;
-  Timer? _ytCoverTimer;
 
   final ValueNotifier<double>   _progress = ValueNotifier(0);
   final ValueNotifier<Duration> _position = ValueNotifier(Duration.zero);
@@ -86,7 +84,6 @@ class _VideoLandscapeScreenState extends State<VideoLandscapeScreen> {
   @override
   void dispose() {
     _iconTimer?.cancel();
-    _ytCoverTimer?.cancel();
     _progress.dispose();
     _position.dispose();
     _duration.dispose();
@@ -127,19 +124,9 @@ class _VideoLandscapeScreenState extends State<VideoLandscapeScreen> {
         _playing = playing;
         if (justStarted) {
           _hasStarted = true;
-          _armYtCover();
         }
-        if (!playing && _hasStarted) _showYtCover = true;
       });
     }
-  }
-
-  void _armYtCover() {
-    _ytCoverTimer?.cancel();
-    _showYtCover = true;
-    _ytCoverTimer = Timer(const Duration(seconds: 4), () {
-      if (mounted) setState(() => _showYtCover = false);
-    });
   }
 
   void _pop() {

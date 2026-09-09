@@ -83,13 +83,9 @@ class _InlineVideoCardState extends State<InlineVideoCard>
   bool _revealPlayer = false; // true only after onReady + real frame decoded
   bool _expanded     = false; // true once the user has tapped
   bool _ended        = false;
-  bool _isPlaying    = false;
-  bool _showYtCover  = false;
   bool _showSeekLeft  = false;
   bool _showSeekRight = false;
   Timer? _revealTimer;
-  Timer? _soundRetryTimer;
-  Timer? _ytCoverTimer;
   Timer? _seekFeedbackTimer;
 
   int _soundRetryCount = 0;
@@ -114,8 +110,6 @@ class _InlineVideoCardState extends State<InlineVideoCard>
   void dispose() {
     widget.activeVideoNotifier.removeListener(_onActiveChanged);
     _revealTimer?.cancel();
-    _soundRetryTimer?.cancel();
-    _ytCoverTimer?.cancel();
     _seekFeedbackTimer?.cancel();
     _controller?.removeListener(_onControllerUpdate);
     _controller?.dispose();
@@ -142,14 +136,6 @@ class _InlineVideoCardState extends State<InlineVideoCard>
       _soundRetryCount++;
       _forceSoundOn();
       if (_soundRetryCount >= 8 || !mounted) t.cancel();
-    });
-  }
-
-  void _armYtCover() {
-    _ytCoverTimer?.cancel();
-    if (mounted) setState(() => _showYtCover = true);
-    _ytCoverTimer = Timer(const Duration(seconds: 4), () {
-      if (mounted) setState(() => _showYtCover = false);
     });
   }
 
@@ -254,18 +240,14 @@ class _InlineVideoCardState extends State<InlineVideoCard>
       _revealTimer?.cancel();
       _forceSoundOn();
       setState(() { _revealPlayer = true; _isPlaying = true; });
-      _armYtCover();
     }
 
     final playing = currentState == PlayerState.playing;
     if (playing != _isPlaying && _revealPlayer) {
       setState(() => _isPlaying = playing);
       if (playing) {
-        _armYtCover();
         _forceSoundOn();
       } else {
-        _ytCoverTimer?.cancel();
-        if (mounted) setState(() => _showYtCover = true);
       }
     }
 
@@ -304,7 +286,6 @@ class _InlineVideoCardState extends State<InlineVideoCard>
   void _tearDownPlayer() {
     _revealTimer?.cancel();
     _soundRetryTimer?.cancel();
-    _ytCoverTimer?.cancel();
     _controller?.removeListener(_onControllerUpdate);
     try { _controller?.pause(); } on Object catch (_) {}
     _controller?.dispose();
@@ -314,7 +295,6 @@ class _InlineVideoCardState extends State<InlineVideoCard>
     _expanded     = false;
     _ended        = false;
     _isPlaying    = false;
-    _showYtCover  = false;
     _prevState    = PlayerState.unknown;
     if (mounted) {
       setState(() {});
@@ -373,7 +353,6 @@ class _InlineVideoCardState extends State<InlineVideoCard>
           Future.delayed(const Duration(milliseconds: 1500), () {
             if (mounted && _expanded && !_ended) {
               setState(() => _revealPlayer = true);
-              _armYtCover();
             }
           });
         } else {
