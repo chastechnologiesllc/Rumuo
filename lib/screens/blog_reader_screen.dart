@@ -8,10 +8,8 @@ import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 
-import '../services/ad_service.dart';
 import '../services/engagement_service.dart';
 import '../theme/app_theme.dart';
-import '../widgets/banner_ad_widget.dart';
 import '../widgets/web_iframe_view.dart';
 
 /// Opens a blog article or a free-book URL.
@@ -373,12 +371,6 @@ class _BlogReaderScreenState extends State<BlogReaderScreen> {
                     },
                   ),
           ),
-          ListenableBuilder(
-            listenable: AdService.instance,
-            builder: (_, __) => AdService.instance.adsRemoved
-                ? const SizedBox.shrink()
-                : const StickyBannerBar(),
-          ),
         ],
       ),
     );
@@ -406,12 +398,6 @@ class _BlogReaderScreenState extends State<BlogReaderScreen> {
       body: Column(
         children: [
           Expanded(child: _webArticleBody(context)),
-          ListenableBuilder(
-            listenable: AdService.instance,
-            builder: (_, __) => AdService.instance.adsRemoved
-                ? const SizedBox.shrink()
-                : const StickyBannerBar(),
-          ),
         ],
       ),
     );

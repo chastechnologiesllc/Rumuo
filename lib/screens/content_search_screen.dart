@@ -8,7 +8,6 @@ import '../models/resource_category.dart';
 import '../models/saved_bookmark.dart';
 import '../models/video.dart';
 import '../providers/feed_provider.dart';
-import '../services/ad_service.dart';
 import '../services/blog_rss_service.dart';
 import '../services/platform_search_index.dart';
 import '../theme/app_theme.dart';
@@ -415,7 +414,7 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
 
   void _openVideo(Video v) {
     final ch = ChannelData.byId[v.channelId] ?? ChannelData.fallback;
-    unawaited(AdService.instance.onVideoTapped());
+
     Navigator.push(
       context,
       NoFlashPageRoute(builder: (_) => VideoPlayerScreen(video: v, channel: ch)),
@@ -426,7 +425,7 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
     if ((b.freeSourceUrl ?? '').isEmpty && b.channelId == 'verified_book') {
       return;
     }
-    unawaited(AdService.instance.onBookRead());
+
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => BookDetailScreen(book: b)),
@@ -499,7 +498,7 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
       freeSourceType: book.freeSourceType,
       sourceCategoryId: book.categoryId,
     );
-    unawaited(AdService.instance.onBookRead());
+
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => BookDetailScreen(book: video)),

@@ -100,9 +100,6 @@ RSS feeds — no API key required.
 | **Feed** | YouTube RSS via `dart:http` — no API key, no backend |
 | **Codebase** | Pure Flutter (Dart) — single codebase for Android + iOS |
 | **Theme** | System-adaptive — pure white light / pure black dark |
-| **AdMob** | Banner + Interstitial + App Open + Rewarded + Native (AdMob direct, no mediation) |
-| **IAP** | 3 ad-free tiers (one-time, non-recurring purchases) |
-| **Payment fallback** | Paystack via local WebView + Inline.js (sideloaded installs) |
 | **Background** | WorkManager RSS polling + local push notifications |
 | **Connectivity** | Multi-endpoint probing — no false positives |
 | **Ad-block detect** | 4 ad-server probes; gates interstitials if 2+ fail |
@@ -117,14 +114,9 @@ RSS feeds — no API key required.
 
 | Tier | Product ID | Price |
 |---|---|---|
-| Ads (default) | — | Free; AdMob Finance CPM ~$8–25 |
-| 1-day ad-free | `rumuo_no_ads_1day` | $0.99 |
-| 7-day ad-free | `rumuo_no_ads_weekly` | $2.99 |
-| 30-day ad-free | `rumuo_no_ads_monthly` | $7.99 |
 
 Purchases are **one-time payments** — they do not auto-renew.
 Play Store installs → Google Play billing.
-Sideloaded installs → Paystack (local HTML + WebView checkout).
 
 ---
 
@@ -133,7 +125,6 @@ Sideloaded installs → Paystack (local HTML + WebView checkout).
 ```
 rumuo/
 ├── lib/
-│   ├── config/         ← app_config.dart (AdMob IDs, IAP IDs, Paystack key)
 │   ├── data/           ← resource_category_data.dart (loads all 60 JSON files)
 │   │                      book_insights_data.dart
 │   │                      category_playbook_data.dart
@@ -146,12 +137,8 @@ rumuo/
 │   │                      book_detail, book_detail_screen,
 │   │                      channel_videos, my_business,
 │   │                      settings, privacy_policy,
-│   │                      paystack_checkout
-│   ├── services/       ← ad_service, ad_block_service, rss_service,
 │   │                      blog_rss_service, iap_service,
-│   │                      install_source_service, paystack_service,
 │   │                      notification_service, background_service,
-│   │                      connectivity_service, consent_service,
 │   │                      engagement_service, user_profile_service
 │   ├── theme/          ← app_theme.dart (adaptive light/dark)
 │   ├── widgets/        ← connectivity_overlay, ad_block_overlay,
@@ -163,10 +150,8 @@ rumuo/
 │   ├── app/build.gradle        ← AGP 8.6.0, minSdk 23, targetSdk 36
 │   ├── settings.gradle         ← Kotlin 2.4.0
 │   └── app/src/main/
-│       ├── AndroidManifest.xml ← permissions, AdMob app ID, WorkManager
 │       └── kotlin/             ← MainActivity.kt, MainApplication.kt
 ├── ios/
-│   └── Runner/Info.plist       ← AdMob ID, ATT usage string, BGTask identifiers
 ├── assets/
 │   ├── data/
 │   │   ├── resource_categories.json   ← 60-category taxonomy manifest
@@ -265,9 +250,7 @@ flutter pub get
 flutter run
 ```
 
-> **Note:** AdMob test mode is controlled by `kDebugAds` in `lib/config/app_config.dart`.
 > All production ad unit IDs and IAP product IDs are live on Android.
-> For iOS, create a separate AdMob app and update `app_config.dart` + `Info.plist`.
 
 ---
 

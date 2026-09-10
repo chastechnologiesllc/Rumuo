@@ -10,7 +10,6 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import '../models/channel.dart';
 import '../models/video.dart';
 import '../screens/channel_videos_screen.dart';
-import '../services/ad_service.dart';
 import '../services/network_policy.dart';
 import '../theme/app_theme.dart';
 import 'video_thumbnail_image.dart';
@@ -258,7 +257,6 @@ class _InlineVideoCardState extends State<InlineVideoCard>
     // Ad trigger on playing → paused transition.
     if (_prevState == PlayerState.playing &&
         currentState == PlayerState.paused) {
-      unawaited(AdService.instance.onVideoTapped());
     }
     _prevState = currentState;
   }

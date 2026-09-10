@@ -12,14 +12,11 @@ import '../data/book_insights_data.dart';
 import '../data/category_playbook_data.dart';
 import '../models/video.dart';
 import '../providers/feed_provider.dart';
-import '../services/ad_service.dart';
 import '../services/book_reader_content.dart';
 import '../services/engagement_service.dart';
-import '../services/pdf_download_service.dart';
 import '../services/pdf_io_stub.dart'
     if (dart.library.io) '../services/pdf_io_io.dart' as pdf_io;
 import '../theme/app_theme.dart';
-import '../widgets/banner_ad_widget.dart';
 import '../widgets/book_cover_image.dart';
 import '../widgets/web_iframe_view.dart';
 import 'blog_reader_screen.dart';
@@ -260,7 +257,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
       // Web uses pdfrx.uri in-place; opening a new tab here would bypass the
       // app and make the reading experience inconsistent with native builds.
       if (kIsWeb) {
-        unawaited(AdService.instance.onBookRead());
+
         if (mounted) {
           setState(() {
             _showReader = true;
@@ -271,13 +268,13 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
       }
       // Already downloaded → go straight to the reader
       if (_localPdfPath != null) {
-        unawaited(AdService.instance.onBookRead());
+
         setState(() { _showReader = true; _isLoading = true; });
         return;
       }
 
       // Start download with progress UI
-      unawaited(AdService.instance.onBookRead());
+
       setState(() { _isDownloading = true; _downloadProgress = 0.0; });
 
       final path = await PdfDownloadService.downloadPdf(
@@ -316,7 +313,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
 
     // ── Case 2: direct EPUB URL — keep it inside the structured reader ─────
     if (_isEpubUrl(url)) {
-      unawaited(AdService.instance.onBookRead());
+
       if (mounted) {
         setState(() {
           _showReader = true;
@@ -337,7 +334,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     }
 
     // ── Case 3: HTML/TXT/book landing page — render controlled content ─────
-    unawaited(AdService.instance.onBookRead());
+
     await Navigator.of(context).push(MaterialPageRoute(
       builder: (_) => BookContentReaderScreen(
         url: _webReadableBookUrl(url),
@@ -585,7 +582,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                             unawaited(_handleExternalBook());
                             return;
                           }
-                          unawaited(AdService.instance.onBookRead());
+
                           setState(() {
                             _showReader = true;
                             _isLoading  = true;
@@ -618,12 +615,6 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
               ),
             ),
           ),
-          ListenableBuilder(
-            listenable: AdService.instance,
-            builder: (_, __) => AdService.instance.adsRemoved
-                ? const SizedBox.shrink()
-                : const LabelledBannerAd(),
-          ),
         ],
       ),
     );
@@ -649,12 +640,6 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
         children: [
           Expanded(
             child: WebIframeView(url: url, title: widget.book.title),
-          ),
-          ListenableBuilder(
-            listenable: AdService.instance,
-            builder: (_, __) => AdService.instance.adsRemoved
-                ? const SizedBox.shrink()
-                : const StickyBannerBar(),
           ),
         ],
       ),
@@ -859,12 +844,6 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
             ),
           ),
           // Banner ad inside reader
-          ListenableBuilder(
-            listenable: AdService.instance,
-            builder: (_, __) => AdService.instance.adsRemoved
-                ? const SizedBox.shrink()
-                : const StickyBannerBar(),
-          ),
         ],
       ),
     );
@@ -1014,12 +993,6 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
               },
             ),
           ),
-          ListenableBuilder(
-            listenable: AdService.instance,
-            builder: (_, __) => AdService.instance.adsRemoved
-                ? const SizedBox.shrink()
-                : const StickyBannerBar(),
-          ),
         ],
       ),
     );
@@ -1128,8 +1101,6 @@ class _InsightsReaderScreen extends StatefulWidget {
 }
 
 class _InsightsReaderScreenState extends State<_InsightsReaderScreen> {
-  final int _adEveryN = 4;
-
   Future<void> _openPurchaseLink() async {
     final uri = Uri.parse(widget.insight.purchaseUrl);
     if (await canLaunchUrl(uri)) await launchUrl(uri);
@@ -1187,26 +1158,11 @@ class _InsightsReaderScreenState extends State<_InsightsReaderScreen> {
                     const SizedBox(height: 16),
                   ];
 
-                  // Insert inline banner ad every _adEveryN chapters
-                  if (!AdService.instance.adsRemoved &&
-                      (i + 1) % _adEveryN == 0 &&
-                      i != insight.chapters.length - 1) {
-                    widgets.add(ListenableBuilder(
-                      listenable: AdService.instance,
-                      builder: (_, __) => AdService.instance.adsRemoved
-                          ? const SizedBox.shrink()
-                          : const Column(mainAxisSize: MainAxisSize.min, children: [
-                              StickyBannerBar(),
-                              SizedBox(height: 16),
-                            ]),
-                    ));
-                  }
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     children: widgets,
                   );
                 }),
-
                 // ── Buy the full book CTA (only when there's a real book) ─
                 if (insight.purchaseUrl.isNotEmpty)
                   _BuyFullBookCard(
@@ -1217,13 +1173,6 @@ class _InsightsReaderScreenState extends State<_InsightsReaderScreen> {
             ),
           ),
 
-          // Sticky banner at bottom of reader
-          ListenableBuilder(
-            listenable: AdService.instance,
-            builder: (_, __) => AdService.instance.adsRemoved
-                ? const SizedBox.shrink()
-                : const StickyBannerBar(),
-          ),
         ],
       ),
     );

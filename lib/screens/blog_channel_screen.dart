@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 import '../providers/feed_provider.dart';
-import '../services/ad_service.dart';
 import '../services/blog_rss_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/blog_thumbnail_image.dart';
@@ -76,7 +75,7 @@ class _BlogChannelScreenState extends State<BlogChannelScreen> {
   }
 
   void _openArticle(BlogArticle article) {
-    unawaited(AdService.instance.onBlogTapped());
+
     Navigator.push(
       context,
       MaterialPageRoute(

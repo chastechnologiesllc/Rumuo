@@ -12,19 +12,15 @@ import 'data/resource_category_data.dart';
 import 'providers/feed_provider.dart';
 import 'screens/main_shell.dart';
 import 'screens/my_business_screen.dart';
-import 'services/ad_block_service.dart';
-import 'services/ad_service.dart';
 import 'services/background_service.dart';
 import 'services/connectivity_service.dart';
 import 'services/engagement_service.dart';
-import 'services/iap_service.dart';
 import 'services/network_policy.dart';
 import 'services/notification_service.dart';
 import 'services/notification_store.dart';
 import 'services/user_profile_service.dart';
 import 'services/web_boot.dart';
 import 'theme/app_theme.dart';
-import 'widgets/ad_block_overlay.dart';
 import 'widgets/connectivity_overlay.dart';
 
 /// Startup stays minimal so runApp() fires on the first frame.
@@ -168,7 +164,7 @@ class _StartupGateState extends State<_StartupGate> {
     }
 
     // ── Group B: everything else — must never block FeedProvider ────────────
-    // Ads/IAP/Notifications/Connectivity can be genuinely slow (external
+    // Notifications/Connectivity can be genuinely slow (external
     // SDKs, a flaky network call during setup) without that ever being a
     // reason FeedProvider should wait — so this group is fully
     // fire-and-forget with its own separate ceiling, run concurrently with
@@ -184,15 +180,12 @@ class _StartupGateState extends State<_StartupGate> {
           // Load persisted notification inbox + unread count so the bell
           // badge is correct from the very first frame of the shell.
           _safeInit('NotificationStore',  NotificationStore.instance.init),
-          _safeInit('Ads',                _initAdsAfterNetwork),
-          _safeInit('IAP',                IapService.instance.init),
         ]).timeout(const Duration(seconds: 6));
       } on TimeoutException {
         debugPrint('[startup] Connectivity/Background/Notifications/Ads/IAP '
             'exceeded 6s — continuing without waiting further.');
       }
     }());
-    unawaited(AdBlockService.instance.init());
 
     // Build the feed provider here so it can start fetching immediately.
     // Group A above is guaranteed to have either finished or hit its own
@@ -239,11 +232,6 @@ class _StartupGateState extends State<_StartupGate> {
   Future<void> _initNetworkServicesInternal() async {
     await ConnectivityService.instance.init();
     await NetworkPolicy.instance.init();
-  }
-
-  Future<void> _initAdsAfterNetwork() async {
-    await _initNetworkServices();
-    await AdService.instance.init();
   }
 
   /// Runs [fn] and swallows any error. A single misbehaving service (no
@@ -294,15 +282,11 @@ class _StartupGateState extends State<_StartupGate> {
       return MultiProvider(
         providers: [
           ChangeNotifierProvider.value(value: _feedProvider!),
-          ChangeNotifierProvider.value(value: IapService.instance),
-          ChangeNotifierProvider.value(value: AdService.instance),
           ChangeNotifierProvider.value(value: UserProfileService.instance),
           ChangeNotifierProvider.value(value: EngagementService.instance),
           ChangeNotifierProvider.value(value: NetworkPolicy.instance),
         ],
-        child: const ConnectivityOverlay(
-          child: AdBlockOverlay(child: _AppRoot()),
-        ),
+        child: const ConnectivityOverlay(child: _AppRoot()),
       );
     }
 
@@ -340,12 +324,6 @@ class _AppRootState extends State<_AppRoot> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      // A purchased ad-free window can lapse while the app sits in the
-      // background — recheck against the wall clock on every resume so
-      // ads correctly resume the moment it expires, not only on a full
-      // app restart.
-      unawaited(AdService.instance.refreshStatus());
-      unawaited(AdService.instance.showAppOpenAd());
       // Refreshes the feeds only after a cooldown. Cached content remains
       // visible across rapid app-switches instead of triggering another burst
       // of RSS requests each time the app resumes.

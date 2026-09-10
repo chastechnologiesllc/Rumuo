@@ -26,7 +26,7 @@ class FeedProvider extends ChangeNotifier {
   /// Last constructed instance — VideoPlayerScreen is pushed as a route
   /// outside MultiProvider (sibling of home under MaterialApp's navigator),
   /// so context.read<FeedProvider>() fails there. Same pattern as
-  /// AdService.instance / EngagementService.instance.
+  /// EngagementService.instance.
   static FeedProvider? instance;
 
   FeedProvider() {

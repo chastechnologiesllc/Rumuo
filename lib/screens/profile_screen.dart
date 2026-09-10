@@ -7,15 +7,11 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../config/app_config.dart';
 import '../data/resource_category_data.dart';
-import '../screens/ad_free_screen.dart';
 import '../screens/my_business_screen.dart';
 import '../screens/privacy_policy_screen.dart';
-import '../services/ad_service.dart';
-import '../services/consent_service.dart';
 import '../services/network_policy.dart';
 import '../services/user_profile_service.dart';
 import '../theme/app_theme.dart';
-import '../widgets/banner_ad_widget.dart';
 import '../widgets/rumuo_mark.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -27,13 +23,11 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   String _version = '';
-  bool _privacyOptionsRequired = false;
 
   @override
   void initState() {
     super.initState();
     _loadVersion();
-    _loadPrivacyOptionsRequirement();
   }
 
   Future<void> _loadVersion() async {
@@ -43,16 +37,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _version = 'v${info.version.replaceAll('-debug', '')}';
       });
     }
-  }
-
-  /// Google UMP policy requires this entry point be shown ONLY for users
-  /// where a privacy-options choice is actually applicable (EEA/UK/
-  /// Switzerland, roughly) — everyone else should see nothing at all, per
-  /// Google's own guidance. Checked once per screen visit; cheap local
-  /// SDK call, no network round-trip.
-  Future<void> _loadPrivacyOptionsRequirement() async {
-    final required = await ConsentService.instance.isPrivacyOptionsRequired();
-    if (mounted) setState(() => _privacyOptionsRequired = required);
   }
 
   Future<void> _launch(String url) async {
@@ -77,7 +61,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final adsGone = context.watch<AdService>().adsRemoved;
     final networkPolicy = context.watch<NetworkPolicy>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -114,29 +97,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 SliverToBoxAdapter(
                   child: Column(
                     children: [
-
-                      // ── Profile ─────────────────────────────────────────
-                      const _SectionHeader('Profile'),
-                      _SettingsTile(
-                        icon: adsGone
-                            ? Icons.verified_rounded
-                            : Icons.block_rounded,
-                        iconColor: AppTheme.textColor(context),
-                        title: adsGone ? 'Ad-Free Active' : 'Go Ad-Free',
-                        subtitle: adsGone
-                            ? 'Enjoy uninterrupted Rumuo content'
-                            : 'Remove ads and explore Rumuo without interruption',
-                        trailing: const Icon(Icons.chevron_right_rounded),
-                        onTap: () async {
-                          await Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const AdFreeScreen(),
-                            ),
-                          );
-                          if (mounted) setState(() {});
-                        },
-                      ),
-
                       // ── Personalize ──────────────────────────────────────
                       const _SectionHeader('Personalize'),
                       _SettingsTile(
@@ -219,20 +179,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                       ),
-                      // Only shown when Google's UMP SDK reports it's
-                      // actually applicable for this user (EEA/UK/
-                      // Switzerland) — required so those users can revisit
-                      // their ad-consent choice at any time, not just once.
-                      if (_privacyOptionsRequired)
-                        _SettingsTile(
-                          icon: Icons.shield_outlined,
-                          iconColor: AppTheme.textColor(context),
-                          title: 'Privacy Options',
-                          subtitle: 'Manage your ad consent choices',
-                          trailing: const Icon(Icons.chevron_right_rounded,
-                              size: 20),
-                          onTap: ConsentService.instance.showPrivacyOptionsForm,
-                        ),
                       _SettingsTile(
                         icon: Icons.description_rounded,
                         iconColor: AppTheme.textColor(context),
@@ -271,9 +217,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
           ),
-
-          // Sticky banner at bottom for non-subscribers.
-          if (!adsGone) const StickyBannerBar(),
         ],
       ),
     );

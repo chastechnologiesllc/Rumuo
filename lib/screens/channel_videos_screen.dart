@@ -6,10 +6,8 @@ import 'package:timeago/timeago.dart' as timeago;
 import '../models/channel.dart';
 import '../models/video.dart';
 import '../providers/feed_provider.dart';
-import '../services/ad_service.dart';
 import '../services/rss_service.dart';
 import '../theme/app_theme.dart';
-import '../widgets/banner_ad_widget.dart';
 import '../widgets/bookmark_button.dart';
 import '../widgets/channel_avatar.dart';
 import '../widgets/rumuo_shimmer.dart';
@@ -60,14 +58,14 @@ class _ChannelVideosScreenState extends State<ChannelVideosScreen>
   }
 
   void _openVideo(Video video) {
-    unawaited(AdService.instance.onContentTapped());
+
     Navigator.push(context, NoFlashPageRoute(
       builder: (_) => VideoPlayerScreen(video: video, channel: widget.channel),
     ));
   }
 
   void _openShort(int index) {
-    unawaited(AdService.instance.onContentTapped());
+
     Navigator.push(context, NoFlashPageRoute(
       builder: (_) => ShortsPlayerScreen(shorts: _shorts, initialIndex: index),
     ));
@@ -116,13 +114,6 @@ class _ChannelVideosScreenState extends State<ChannelVideosScreen>
                 ],
               ),
       ),
-      bottomNavigationBar:
-          ListenableBuilder(
-            listenable: AdService.instance,
-            builder: (_, __) => AdService.instance.adsRemoved
-                ? const SizedBox.shrink()
-                : const LabelledBannerAd(),
-          ),
     );
   }
 

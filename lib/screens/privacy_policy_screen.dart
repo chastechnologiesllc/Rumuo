@@ -35,16 +35,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
               'categories, stored locally on your device to personalise your feed. '
               'This data is never transmitted to our servers.\n\n'
               '• Notification Preferences — Whether you have enabled or disabled '
-              'push notifications. Stored locally on your device.\n\n'
-              '• Purchase Records — If you purchase an ad-free period, the payment '
-              'is processed by Google Play (for Play Store installs) or by Paystack '
-              '(for sideloaded installs). We only receive confirmation of the '
-              'purchase; we do not store your payment card details.\n\n'
-              'We do not require account registration. We do not collect your name, '
-              'email address, or any other personally identifiable information unless '
-              'you contact us directly, or unless you choose to pay via Paystack '
-              '(which requires an email address to process the transaction — see '
-              'Section 3 below).',
+              'push notifications. Stored locally on your device.',
         ),
         _LegalSection(
           heading: '2. How We Use Your Information',
@@ -52,53 +43,20 @@ class PrivacyPolicyScreen extends StatelessWidget {
               'The information we collect is used solely to:\n\n'
               '• Deliver and personalise the Rumuo content feed across videos, '
               'shorts, blogs, and books.\n'
-              '• Serve relevant advertisements via Google AdMob (free tier only).\n'
-              '• Process and verify in-app purchases.\n'
               '• Diagnose crashes and performance issues.\n'
               '• Send push notifications about new content when you have opted in.\n'
               '• Respond to support requests you send us.',
         ),
         _LegalSection(
-          heading: '3. Advertising & Third-Party SDKs',
-          body:
-              'Free users see ads delivered by Google AdMob. AdMob may collect '
-              'and process certain device identifiers to serve personalised ads '
-              'in accordance with its privacy policy.\n\n'
-              'Where required by applicable law (for example in the EEA, UK, and '
-              'Switzerland), we ask for your consent via a form shown on first '
-              'launch. You can change your choice at any time from Settings → '
-              'Privacy Options. You can also opt out of personalised advertising '
-              'through your device\'s ad settings.\n\n'
-              'We also use the following third-party services:\n\n'
-              '• Google AdMob — advertising\n'
-              '• Google Play In-App Purchases — payment processing for Play Store '
-              'installs\n'
-              '• Paystack — payment processing for sideloaded installs. Paystack '
-              'receives the email address and payment details you provide directly; '
-              'we do not see or store your card details\n'
-              '• YouTube — Rumuo displays publicly available video titles, '
-              'thumbnails, and descriptions from YouTube channels\' public RSS '
-              'feeds, and links out to the YouTube app or website to play videos\n'
-              '• Third-party blog and book sources — content is aggregated from '
-              'publicly available RSS feeds and free resource URLs\\n'
-              '• CORS proxy services (web version only) — when you read blog '
-              'articles or RSS feeds in a web browser, requests are routed through '
-              'corsproxy.io and/or api.allorigins.win to retrieve the content, since '
-              'browsers block most cross-site requests directly. These services see '
-              'the URL being requested but are not used on the Android or iOS apps',
-        ),
-        _LegalSection(
-          heading: '4. Data Retention',
+          heading: '3. Data Retention',
           body:
               'Analytics data is retained in aggregated form for up to 12 months. '
-              'Purchase records are retained for as long as your purchased ad-free '
-              'period is active and for up to 12 months afterwards for accounting '
-              'purposes. Locally stored preferences — including category selections, '
+              'Locally stored preferences — including category selections, '
               'notification settings, and saved content — remain on your device '
               'until the app is uninstalled.',
         ),
         _LegalSection(
-          heading: '5. Children\'s Privacy',
+          heading: '4. Children\'s Privacy',
           body:
               'Rumuo is not directed at children under the age of 13. We do not '
               'knowingly collect personal information from children. If you believe '
@@ -106,7 +64,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
               'and we will delete it promptly.',
         ),
         _LegalSection(
-          heading: '6. Data Security',
+          heading: '5. Data Security',
           body:
               'We implement industry-standard technical and organisational measures '
               'to protect your information. However, no method of electronic '
@@ -114,18 +72,17 @@ class PrivacyPolicyScreen extends StatelessWidget {
               'security.',
         ),
         _LegalSection(
-          heading: '7. Your Rights',
+          heading: '6. Your Rights',
           body:
               'Depending on your jurisdiction, you may have the right to:\n\n'
               '• Access the personal data we hold about you.\n'
               '• Request correction of inaccurate data.\n'
               '• Request deletion of your data.\n'
-              '• Opt out of personalised advertising.\n\n'
               'To exercise any of these rights, contact us at '
               'chastechnologiesllc@gmail.com.',
         ),
         _LegalSection(
-          heading: '8. Changes to This Policy',
+          heading: '7. Changes to This Policy',
           body:
               'We may update this Privacy Policy from time to time. We will notify '
               'you of significant changes by updating the "Last Updated" date at the '
@@ -133,7 +90,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
               'your acceptance of the revised policy.',
         ),
         _LegalSection(
-          heading: '9. Contact Us',
+          heading: '8. Contact Us',
           body:
               'If you have any questions about this Privacy Policy, please '
               'contact us at:\n\nchastechnologiesllc@gmail.com',
@@ -182,7 +139,6 @@ class TermsOfServiceScreen extends StatelessWidget {
               '• Reproduce, distribute, or sell any content aggregated by Rumuo.\n'
               '• Attempt to reverse-engineer, decompile, or tamper with the app.\n'
               '• Use the app for any unlawful or fraudulent purpose.\n'
-              '• Circumvent or disable any advertising or in-app purchase system.\n'
               '• Scrape, harvest, or systematically extract content from the app.',
         ),
         _LegalSection(
@@ -201,19 +157,6 @@ class TermsOfServiceScreen extends StatelessWidget {
         _LegalSection(
           heading: '4. Purchases & Payments',
           body:
-              'Rumuo offers optional one-time ad-free purchases. These are not '
-              'subscriptions and do not renew automatically.\n\n'
-              'If Rumuo is installed from the Google Play Store, purchases are '
-              'processed through Google Play and are subject to Google Play\'s billing '
-              'terms. If Rumuo is installed outside the Play Store, purchases are '
-              'processed through Paystack.\n\n'
-              '• 24 Hours Ad-Free — \$0.99\n'
-              '• 1 Week Ad-Free — \$2.99\n'
-              '• 1 Month Ad-Free — \$7.99\n\n'
-              'Each purchase grants ad-free access for the selected period from the '
-              'date of purchase. All payments are one-time and non-refundable except '
-              'where required by applicable law. Google Play purchases may be eligible '
-              'for a refund under Google Play\'s refund policy. For Paystack purchases, '
               'contact us using the details in Section 9 of our Privacy Policy.',
         ),
         _LegalSection(

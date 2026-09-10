@@ -32,11 +32,9 @@ Updated to describe its actual sole remaining consumer
 All 5 iOS production ad unit IDs (banner, interstitial, rewarded,
 rewardedInterstitial, and `nativeAdUnitId` — unused anywhere but had the
 same bug) silently duplicated the Android production ID, which is invalid
-in AdMob. Replaced with explicit `REPLACE_WITH_IOS_..._AD_UNIT_ID`
 placeholders that fail safely (no-fill, not a crash) until real iOS units
 are created.
 
-### `lib/services/ad_service.dart`
 3 of 5 tap-counter doc comments didn't match their actual
 `AppConfig` thresholds (video/blog said "8, 16, 24", actually fire at
 "4, 8, 12"; book said "4, 8, 12", actually fires at "6, 12, 18"). Corrected

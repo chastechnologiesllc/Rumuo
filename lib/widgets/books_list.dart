@@ -6,9 +6,7 @@ import 'package:provider/provider.dart';
 import '../models/video.dart';
 import '../providers/feed_provider.dart';
 import '../screens/book_detail_screen.dart';
-import '../services/ad_service.dart';
 import '../theme/app_theme.dart';
-import 'banner_ad_widget.dart';
 import 'book_cover_image.dart';
 
 /// The Books list — same rendering as the old Books tab, extracted so it
@@ -24,27 +22,19 @@ class BooksList extends StatelessWidget {
       return;
     }
     if (video.channelId == 'books') {
-      unawaited(AdService.instance.onVideoTapped());
+
       Navigator.push(context, MaterialPageRoute(builder: (_) => BookDetailScreen(book: video)));
       return;
     }
-    unawaited(AdService.instance.onVideoTapped());
+
   }
 
   @override
   Widget build(BuildContext context) {
     final books = context.watch<FeedProvider>().feedVideos;
-    final adsRemoved = context.watch<AdService>().adsRemoved;
     if (books.isEmpty) {
       return Center(
           child: Text('No books found.', style: Theme.of(context).textTheme.bodyMedium));
-    }
-    final items = <({Video? book, bool isAd})>[];
-    for (var i = 0; i < books.length; i++) {
-      items.add((book: books[i], isAd: false));
-      if (i > 0 && (i + 1) % 3 == 0 && !adsRemoved) {
-        items.add((book: null, isAd: true));
-      }
     }
 
     return RefreshIndicator(
@@ -53,22 +43,13 @@ class BooksList extends StatelessWidget {
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
-        itemCount: items.length,
+        itemCount: books.length,
         // ignore: deprecated_member_use
         cacheExtent: 400,
         addAutomaticKeepAlives: false,
         addRepaintBoundaries: false,
         itemBuilder: (context, idx) {
-          final item = items[idx];
-
-          if (item.isAd) {
-            return const Padding(
-              padding: EdgeInsets.only(bottom: 12),
-              child: LabelledBannerAd(),
-            );
-          }
-
-          final book = item.book!;
+          final book = books[idx];
           return Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: RepaintBoundary(

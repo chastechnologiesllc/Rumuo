@@ -52,7 +52,7 @@ class MainActivity : FlutterActivity() {
 
         // Lets the Dart side (InstallSourceService) tell a Play Store
         // install apart from a sideloaded APK, so it can choose between
-        // Google Play Billing and the Paystack fallback for purchases.
+        // Native launch and notification services.
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, installSourceChannel)
             .setMethodCallHandler { call, result ->
                 if (call.method == "getInstallerPackageName") {

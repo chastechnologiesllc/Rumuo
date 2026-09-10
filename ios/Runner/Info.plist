@@ -24,31 +24,6 @@
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 
-	<!-- ── AdMob App ID ────────────────────────────────────────────────────── -->
-	<key>GADApplicationIdentifier</key>
-	<string>ca-app-pub-2492078126313994~4602974422</string>
-
-	<!-- ── SKAdNetwork IDs (required for iOS 14+ attribution) ─────────── -->
-	<key>SKAdNetworkItems</key>
-	<array>
-		<dict>
-			<key>SKAdNetworkIdentifier</key>
-			<string>cstr6suwn9.skadnetwork</string>
-		</dict>
-		<dict>
-			<key>SKAdNetworkIdentifier</key>
-			<string>4fzdc2evr5.skadnetwork</string>
-		</dict>
-		<dict>
-			<key>SKAdNetworkIdentifier</key>
-			<string>4pfyvq9l8r.skadnetwork</string>
-		</dict>
-	</array>
-
-	<!-- ── NSUserTrackingUsageDescription (ATT) ──────────────────────── -->
-	<key>NSUserTrackingUsageDescription</key>
-	<string>Rumuo uses your advertising identifier to show you relevant ads and to help us measure ad performance. You can opt out at any time in Settings.</string>
-
 	<!-- ── Background Modes (for WorkManager / notifications) ─────────── -->
 	<key>UIBackgroundModes</key>
 	<array>

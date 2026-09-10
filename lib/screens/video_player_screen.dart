@@ -11,10 +11,8 @@ import '../data/channel_data.dart';
 import '../models/channel.dart';
 import '../models/video.dart';
 import '../providers/feed_provider.dart';
-import '../services/ad_service.dart';
 import '../services/engagement_service.dart';
 import '../theme/app_theme.dart';
-import '../widgets/banner_ad_widget.dart';
 import '../widgets/channel_avatar.dart';
 import '../widgets/no_flash_page_route.dart';
 import '../widgets/video_thumbnail_image.dart';
@@ -229,7 +227,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       _forceSoundOn();
       _controller.play();
     }
-    unawaited(AdService.instance.onVideoPlayPauseTapped());
 
     setState(() {
       _intendedPlaying = !willPause;
@@ -520,16 +517,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                   ],
                 ),
               ),
-            ),
-
-            ListenableBuilder(
-              listenable: AdService.instance,
-              builder: (_, __) => AdService.instance.adsRemoved
-                  ? const SizedBox.shrink()
-                  : const SizedBox(
-                      width: double.infinity,
-                      child: LabelledBannerAd(),
-                    ),
             ),
             ], // end if (!_isLandscape)
           ],

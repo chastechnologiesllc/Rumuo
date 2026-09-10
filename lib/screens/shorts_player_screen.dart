@@ -7,7 +7,6 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../models/video.dart';
 import '../providers/feed_provider.dart';
-import '../services/ad_service.dart';
 import '../services/engagement_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/bookmark_button.dart';
@@ -229,7 +228,7 @@ class _ShortsPlayerScreenState extends State<ShortsPlayerScreen> {
           _isDragging = false;
         });
         _syncControllerPool();
-        unawaited(AdService.instance.onShortScrolled());
+
       },
       itemBuilder: (context, index) => _ShortPage(
         key: ValueKey(widget.shorts[index].id),

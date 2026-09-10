@@ -5,10 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 import '../providers/feed_provider.dart';
-import '../services/ad_service.dart';
 import '../services/blog_rss_service.dart';
 import '../theme/app_theme.dart';
-import '../widgets/banner_ad_widget.dart';
 import '../widgets/blog_thumbnail_image.dart';
 import '../widgets/rumuo_shimmer.dart';
 import 'blog_channel_screen.dart';
@@ -171,12 +169,6 @@ class _BlogFeedScreenState extends State<BlogFeedScreen> {
             key: ValueKey(article.url),
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Banner after every 3rd article (items 3, 6, 9 …)
-              if (i > 0 && i % 3 == 0)
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 14),
-                  child: const LabelledBannerAd(placement: InlineBannerPlacement.large),
-                ),
               RepaintBoundary(
                 child: _BlogCard(
                   article: article,
@@ -202,7 +194,7 @@ class _BlogFeedScreenState extends State<BlogFeedScreen> {
                   },
                   onTap: () {
                     // Interstitial on tap 4, 8, 12 … (blog-specific counter)
-                    unawaited(AdService.instance.onBlogTapped());
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(

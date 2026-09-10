@@ -7,7 +7,6 @@ import '../data/resource_category_data.dart';
 import '../models/channel.dart';
 import '../models/resource_category.dart';
 import '../models/video.dart';
-import '../services/ad_service.dart';
 import '../services/blog_rss_service.dart';
 import '../services/engagement_service.dart';
 import '../services/user_profile_service.dart';
@@ -208,7 +207,7 @@ class _PlaybookCard extends StatelessWidget {
     final video = matches.first;
     return GestureDetector(
       onTap: () {
-        unawaited(AdService.instance.onVideoTapped());
+
         Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => BookDetailScreen(book: video)),
         );
@@ -340,7 +339,7 @@ class _FreeBookTile extends StatelessWidget {
 
   void _open(BuildContext context) {
     if (book.freeSourceUrl.isEmpty) return;
-    unawaited(AdService.instance.onVideoTapped());
+
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => BookDetailScreen(book: _toVideo()),

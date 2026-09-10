@@ -49,7 +49,6 @@ android {
         multiDexEnabled true
 
         // ── Size: restrict native libs to real phone/tablet architectures ──
-        // google_mobile_ads and flutter_inappwebview each ship native .so
         // files for 4 ABIs (arm64-v8a, armeabi-v7a, x86, x86_64).
         // x86/x86_64 only matter for emulators — essentially zero real
         // phones/tablets run them. Combined with --split-per-abi in CI,
@@ -106,14 +105,6 @@ configurations.all {
     resolutionStrategy {
         force 'androidx.work:work-runtime:2.8.1'
         force 'androidx.work:work-runtime-ktx:2.8.1'
-        // ── Google Play Billing Library 8.0.0 ───────────────────────────────
-        // Google Play requires billing library ≥8.0.0 from Aug 31, 2026.
-        // in_app_purchase's transitive dependency resolves to an older version;
-        // forcing here overrides it without waiting for the plugin to publish
-        // its own update. Billing 8 maintains backward compatibility for the
-        // core purchase APIs that in_app_purchase uses.
-        force 'com.android.billingclient:billing:8.0.0'
-        force 'com.android.billingclient:billing-ktx:8.0.0'
     }
 }
 

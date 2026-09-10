@@ -7,9 +7,7 @@ import 'package:timeago/timeago.dart' as timeago;
 import '../data/channel_data.dart';
 import '../models/saved_bookmark.dart';
 import '../providers/feed_provider.dart';
-import '../services/ad_service.dart';
 import '../theme/app_theme.dart';
-import '../widgets/banner_ad_widget.dart';
 import '../widgets/blog_thumbnail_image.dart';
 import '../widgets/book_cover_image.dart';
 import '../widgets/no_flash_page_route.dart';
@@ -52,7 +50,7 @@ class _SavedScreenState extends State<SavedScreen> {
       if (bookmark.channelId == 'verified_book' ||
           video.channelId == 'verified_book') {
         if ((bookmark.url ?? '').isEmpty) return;
-        unawaited(AdService.instance.onBookRead());
+
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -60,7 +58,7 @@ class _SavedScreenState extends State<SavedScreen> {
           ),
         );
       } else {
-        unawaited(AdService.instance.onVideoTapped());
+
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => BookDetailScreen(book: video)),
@@ -70,7 +68,7 @@ class _SavedScreenState extends State<SavedScreen> {
     }
 
     if (bookmark.isShort) {
-      unawaited(AdService.instance.onShortTapped());
+
       Navigator.push(
         context,
         NoFlashPageRoute(
@@ -84,7 +82,7 @@ class _SavedScreenState extends State<SavedScreen> {
     }
 
     final channel = ChannelData.byId[video.channelId] ?? ChannelData.fallback;
-    unawaited(AdService.instance.onVideoTapped());
+
     Navigator.push(
       context,
       NoFlashPageRoute(
@@ -131,12 +129,6 @@ class _SavedScreenState extends State<SavedScreen> {
                         onTap: _openBookmark,
                         onRemove: provider.toggleBookmark,
                       ),
-          ),
-          ListenableBuilder(
-            listenable: AdService.instance,
-            builder: (_, __) => AdService.instance.adsRemoved
-                ? const SizedBox.shrink()
-                : const LabelledBannerAd(),
           ),
         ],
       ),

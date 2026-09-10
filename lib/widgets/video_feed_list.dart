@@ -5,7 +5,6 @@ import 'package:share_plus/share_plus.dart';
 import '../data/channel_data.dart';
 import '../providers/feed_provider.dart';
 import '../theme/app_theme.dart';
-import 'banner_ad_widget.dart';
 import 'inline_video_card.dart';
 import 'shimmer_loader.dart';
 
@@ -60,16 +59,10 @@ class _VideoFeedListState extends State<VideoFeedList> {
         itemBuilder: (context, i) {
           final video = videos[i];
           final channel = ChannelData.byId[video.channelId] ?? ChannelData.fallback;
-          final isAdSlot = i > 0 && (i + 1) % 3 == 0;
           return Column(
             key: ValueKey('v_${video.id}'),
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (isAdSlot)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 10),
-                  child: LabelledBannerAd(placement: InlineBannerPlacement.large),
-                ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 14),
                 child: InlineVideoCard(

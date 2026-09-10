@@ -1,15 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 
 import '../data/channel_data.dart';
 import '../models/video.dart';
 import '../providers/feed_provider.dart';
-import '../services/ad_service.dart';
 import '../theme/app_theme.dart';
-import '../widgets/banner_ad_widget.dart';
 import '../widgets/video_thumbnail_image.dart';
 import '../widgets/no_flash_page_route.dart';
 import '../widgets/shimmer_loader.dart';
@@ -27,7 +24,7 @@ class ChannelsScreen extends StatefulWidget {
 
 class _ChannelsScreenState extends State<ChannelsScreen> {
   void _openShorts(List<Video> shorts, int index) {
-    unawaited(AdService.instance.onShortTapped());
+
     Navigator.push(
       context,
       NoFlashPageRoute(
@@ -53,17 +50,7 @@ class _ChannelsScreenState extends State<ChannelsScreen> {
         .toList()
       ..sort((a, b) => b.publishedAt.compareTo(a.publishedAt));
 
-    final body = Column(
-        children: [
-          Expanded(child: _buildGrid(context, shorts, provider.state)),
-          ListenableBuilder(
-            listenable: AdService.instance,
-            builder: (_, __) => AdService.instance.adsRemoved
-                ? const SizedBox.shrink()
-                : const LabelledBannerAd(fixedSize: AdSize.mediumRectangle),
-          ),
-        ],
-      );
+    final body = _buildGrid(context, shorts, provider.state);
 
     if (!widget.showAppBar) return body;
 

@@ -62,7 +62,6 @@ the actual file content, no guessing.
 | File | Reason |
 |------|--------|
 | `lib/screens/video_landscape_screen.dart` | Dead code — `VideoPlayerScreen` handles landscape in-place via `_isLandscape`; this file had zero imports anywhere in the project. |
-| `android/app/src/main/kotlin/com/chastech/rumuo/MainActivity.kt` | Stale package from an earlier rename. `applicationId` is `com.chastechgroup.rumuo`; the `com.chastech` tree registered its own MethodChannel under the wrong package, which could shadow the correct implementation and break the Play Store / sideload detection used by the Paystack billing rail. |
 | `android/app/src/main/kotlin/com/chastech/rumuo/MainApplication.kt` | Same stale package — deleted with the directory above. |
 | `rumuo_test.dart` *(project root)* | Flutter scaffold leftover. `flutter test` only looks under `test/`; this file was never executed. The real test suite is at `test/rumuo_test.dart`. |
 
@@ -75,22 +74,14 @@ the actual file content, no guessing.
 | `lib/data/channel_data.dart` | `combined` and `byId` were live getters that allocated a fresh `List` / `Map` on every call. Both are called inside `ListView.builder` and `GridView.builder` itemBuilders (i.e. per scroll frame) and `byId` calls `combined` internally, so every scroll frame was paying for a full channel-list rebuild. Fixed with nullable static caches (`_combinedCache`, `_byIdCache`) and a `static invalidateCache()` method. |
 | `lib/data/resource_category_data.dart` | Calls `ChannelData.invalidateCache()` at the end of `_loadVerifiedResources()` so the next access to `combined` / `byId` picks up the full verified channel set. |
 | `lib/widgets/web_youtube_player_web.dart` | `viewType` was `'rumuo-yt-$videoId-${DateTime.now().microsecondsSinceEpoch}'` — a new unique key on every call. `ui_web.platformViewRegistry.registerViewFactory` inserts into a permanent global registry with no unregister API, so every rebuild leaked one factory entry. Fixed: `viewType = 'rumuo-yt-$videoId'` (stable), guarded by a top-level `Set<String>` so `registerViewFactory` is called at most once per video ID. Stale `// ignore_for_file: avoid_web_libraries_in_flutter` comment also removed (file uses `dart:js_interop` + `package:web`, not `dart:html`). |
-| `lib/services/ad_service.dart` | Removed `_bannerAd`, `_bannerReady`, `_loadBanner()`, and the `bannerAd` legacy getter. `LabelledBannerAd` and `StickyBannerBar` each own their own `BannerAd` instance; the one in `AdService` was loaded and retried on failure but its `AdWidget` was never placed in the widget tree — a phantom ad request consuming an impression slot every session. |
 | `lib/providers/feed_provider.dart` | Removed `_isBlog()` method; `FeedTab.blogs` branch in `_compute()` now returns `const []`; `allVideos` getter excludes `FeedTab.blogs` from its `FeedTab.values` loop. The Blogs tab in `home_screen.dart` routes directly to `BlogFeedScreen` (which reads `BlogRssService`), so FeedProvider's blog-filtered YouTube list was computed but never displayed anywhere. Excluding it from `allVideos` also unblocks the deep-link loading check, which previously stalled waiting for a list that would always be empty. |
-| `android/app/src/main/AndroidManifest.xml` | Removed `android:usesCleartextTraffic="true"` — every endpoint (YouTube RSS, blog RSS, Paystack, AdMob) uses HTTPS; the flag was a broad security hole. Removed `SCHEDULE_EXACT_ALARM` (triggers a mandatory user-permission dialog on Android 12) and `USE_EXACT_ALARM` (requires Play Store policy approval on API 33+); WorkManager uses inexact alarms by default and neither permission is required for 15-minute periodic tasks. |
-| `lib/config/app_config.dart` | Removed `admobAppId` getter — AdMob SDK reads the App ID from `AndroidManifest.xml` (`com.google.android.gms.ads.APPLICATION_ID` meta-data) and `Info.plist` (`GADApplicationIdentifier`) directly; the Dart getter was never called and its iOS branch returned the Android ID anyway. |
 | `pubspec.yaml` | Removed `in_app_purchase_storekit: ^0.3.17` — `in_app_purchase` is a federated plugin that brings in its own iOS implementation (`in_app_purchase_storekit`) as a transitive dependency; listing the platform implementation explicitly can cause version constraint conflicts. |
 
-### AdSense (web) — intentionally kept as test
 
 `web/index.html` and `lib/config/app_config.dart` still use the Google
-AdSense **test** publisher ID (`ca-pub-3940256099942544`) and
-`adsenseTestMode = true`. This is deliberate — the web AdSense integration
 is still being worked on. When ready to go to production:
 
 1. Replace `client=ca-pub-3940256099942544` in `web/index.html` with the
    real production publisher ID.
-2. Update `adsenseClientId` and `adsenseTestSlot` in `app_config.dart`
    with the real values.
-3. Set `adsenseTestMode = false` in `app_config.dart`.
 

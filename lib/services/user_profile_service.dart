@@ -14,7 +14,7 @@ import '../config/app_config.dart';
 /// a nurse by profession who also does makeup artistry on the side. Every
 /// selected category gets equal priority; there's no forced "primary".
 ///
-/// Singleton + ChangeNotifier, matching AdService/IapService so it can be
+/// Singleton + ChangeNotifier, matching the other app services so it can be
 /// registered in main.dart's MultiProvider the same way.
 class UserProfileService extends ChangeNotifier {
   UserProfileService._();
