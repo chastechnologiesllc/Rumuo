@@ -49,18 +49,21 @@ class _MvpSubcategoryFeedState extends State<MvpSubcategoryFeed> {
     return RefreshIndicator(
       color: AppTheme.gold,
       onRefresh: () => provider.refresh(force: true),
-      child: ListView.builder(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
-        itemCount: videos.length + sources.length,
-        itemBuilder: (context, index) {
-          if (index < videos.length) {
-            final video = videos[index];
-            final channel = ChannelData.byId[video.channelId] ?? ChannelData.fallback;
-            final tag = widget.form == InformationForm.shorts ? 'Clips' : 'Long-form';
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 14),
-              child: InlineVideoCard(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final itemCount = videos.length + sources.length;
+          final desktop = constraints.maxWidth >= 600;
+          final padding = const EdgeInsets.fromLTRB(16, 12, 16, 120);
+
+          Widget card(int index) {
+            if (index < videos.length) {
+              final video = videos[index];
+              final channel =
+                  ChannelData.byId[video.channelId] ?? ChannelData.fallback;
+              final tag = widget.form == InformationForm.shorts
+                  ? 'Clips'
+                  : 'Long-form';
+              return InlineVideoCard(
                 video: video,
                 channel: channel,
                 subcategoryTag: tag,
@@ -68,13 +71,34 @@ class _MvpSubcategoryFeedState extends State<MvpSubcategoryFeed> {
                 activeVideoNotifier: _activeVideoNotifier,
                 onSave: () => provider.toggleSaved(video),
                 onShare: () {},
+              );
+            }
+            return _SourceCard(source: sources[index - videos.length]);
+          }
+
+          if (desktop) {
+            return GridView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: padding,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 14,
+                mainAxisSpacing: 14,
+                childAspectRatio: 0.82,
               ),
+              itemCount: itemCount,
+              itemBuilder: (_, index) => card(index),
             );
           }
-          final source = sources[index - videos.length];
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 14),
-            child: _SourceCard(source: source),
+
+          return ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: padding,
+            itemCount: itemCount,
+            itemBuilder: (_, index) => Padding(
+              padding: const EdgeInsets.only(bottom: 14),
+              child: card(index),
+            ),
           );
         },
       ),

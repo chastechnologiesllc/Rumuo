@@ -230,82 +230,53 @@ class _PrimaryTabs extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-        builder: (context, constraints) {
-          final desktop = constraints.maxWidth >= 600;
-          final halfWidth = (constraints.maxWidth - 6) / 2;
-
-          Widget tab(int index, {double? width}) {
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.fromLTRB(12, 2, 12, 6),
+        child: Row(
+          children: List.generate(forms.length, (index) {
             final selected = index == selectedIndex;
             final form = forms[index];
-            final pill = Semantics(
-              button: true,
-              selected: selected,
-              label: form.label,
-              child: GestureDetector(
-                onTap: () => onSelected(index),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  height: 30,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: selected
-                        ? AppTheme.gold
-                        : AppTheme.surfaceColor(context),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: selected
-                          ? AppTheme.gold
-                          : AppTheme.dividerColor(context),
-                    ),
-                  ),
-                  child: Text(
-                    form.label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: AppTheme.textColor(context),
-                      fontWeight: FontWeight.w800,
-                      fontSize: 12,
+            return Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(right: index == forms.length - 1 ? 0 : 6),
+                child: Semantics(
+                  button: true,
+                  selected: selected,
+                  label: form.label,
+                  child: GestureDetector(
+                    onTap: () => onSelected(index),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      height: 30,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: selected
+                            ? AppTheme.gold
+                            : AppTheme.surfaceColor(context),
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: selected
+                              ? AppTheme.gold
+                              : AppTheme.dividerColor(context),
+                        ),
+                      ),
+                      child: Text(
+                        form.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: AppTheme.textColor(context),
+                          fontWeight: FontWeight.w800,
+                          fontSize: 12,
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
             );
-            return width == null
-                ? Expanded(child: pill)
-                : SizedBox(width: width, child: pill);
-          }
-
-          return Padding(
-            padding: const EdgeInsets.fromLTRB(12, 2, 12, 6),
-            child: desktop
-                ? Column(
-                    children: [
-                      Row(
-                        children: [
-                          tab(0, width: halfWidth),
-                          const SizedBox(width: 6),
-                          tab(2, width: halfWidth),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      tab(1, width: constraints.maxWidth),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          tab(3, width: halfWidth),
-                          const SizedBox(width: 6),
-                          tab(4, width: halfWidth),
-                        ],
-                      ),
-                    ],
-                  )
-                : Row(
-                    children: List.generate(forms.length, (index) => tab(index)),
-                  ),
-          );
-        },
+          }),
+        ),
       );
 }
 
