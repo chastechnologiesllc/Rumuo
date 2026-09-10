@@ -53,6 +53,7 @@ class _MvpSubcategoryFeedState extends State<MvpSubcategoryFeed> {
         builder: (context, constraints) {
           final itemCount = videos.length + sources.length;
           final desktop = constraints.maxWidth >= 600;
+          final shortsDesktop = desktop && widget.form == InformationForm.shorts;
           final padding = const EdgeInsets.fromLTRB(16, 12, 16, 120);
 
           Widget card(int index) {
@@ -80,11 +81,11 @@ class _MvpSubcategoryFeedState extends State<MvpSubcategoryFeed> {
             return GridView.builder(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: padding,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 14,
-                mainAxisSpacing: 14,
-                childAspectRatio: 0.82,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: shortsDesktop ? 4 : 2,
+                crossAxisSpacing: shortsDesktop ? 10 : 14,
+                mainAxisSpacing: shortsDesktop ? 10 : 14,
+                childAspectRatio: shortsDesktop ? 0.62 : 0.82,
               ),
               itemCount: itemCount,
               itemBuilder: (_, index) => card(index),
