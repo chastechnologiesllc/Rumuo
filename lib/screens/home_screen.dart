@@ -233,7 +233,7 @@ class _PrimaryTabs extends StatelessWidget {
   Widget build(BuildContext context) => LayoutBuilder(
         builder: (context, constraints) {
           final desktop = constraints.maxWidth >= 600;
-          final tabWidth = (constraints.maxWidth - 6) / 2;
+          final halfWidth = (constraints.maxWidth - 6) / 2;
 
           Widget tab(int index, {double? width}) {
             final selected = index == selectedIndex;
@@ -272,17 +272,34 @@ class _PrimaryTabs extends StatelessWidget {
                 ),
               ),
             );
-            return width == null ? Expanded(child: pill) : SizedBox(width: width, child: pill);
+            return width == null
+                ? Expanded(child: pill)
+                : SizedBox(width: width, child: pill);
           }
 
           return Padding(
             padding: const EdgeInsets.fromLTRB(12, 2, 12, 6),
             child: desktop
-                ? Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: List.generate(
-                        forms.length, (index) => tab(index, width: tabWidth)),
+                ? Column(
+                    children: [
+                      Row(
+                        children: [
+                          tab(0, width: halfWidth),
+                          const SizedBox(width: 6),
+                          tab(2, width: halfWidth),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      tab(1, width: constraints.maxWidth),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          tab(3, width: halfWidth),
+                          const SizedBox(width: 6),
+                          tab(4, width: halfWidth),
+                        ],
+                      ),
+                    ],
                   )
                 : Row(
                     children: List.generate(forms.length, (index) => tab(index)),
