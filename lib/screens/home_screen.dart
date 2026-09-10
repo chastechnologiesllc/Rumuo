@@ -209,6 +209,8 @@ class _SearchBar extends StatelessWidget {
       );
 }
 
+}
+
 class _PrimaryTabs extends StatelessWidget {
   final List<InformationForm> forms;
   final int selectedIndex;
