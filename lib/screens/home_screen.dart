@@ -83,23 +83,44 @@ class _HeaderAndSearch extends StatelessWidget {
           ),
         );
 
+    final iconColor = AppTheme.textSecondary(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(10, 4, 8, 8),
+      padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          IconButton(
-            tooltip: 'Feed',
-            onPressed: () {},
-            icon: Icon(Icons.home_rounded,
-                color: AppTheme.textColor(context), size: 25),
+          SizedBox(
+            width: 40,
+            child: IconButton(
+              tooltip: 'Feed',
+              onPressed: () {},
+              padding: EdgeInsets.zero,
+              icon: Icon(Icons.home_rounded,
+                  color: AppTheme.textColor(context), size: 25),
+            ),
           ),
-          Expanded(child: _SearchBar(onTap: openSearch)),
-          IconButton(
-            tooltip: 'Saved',
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => const SavedScreen())),
-            icon: Icon(Icons.bookmark_rounded,
-                color: AppTheme.textColor(context), size: 25),
+          const SizedBox(width: 8),
+          Flexible(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 292),
+              child: _SearchBar(
+                onTap: openSearch,
+                action: openSearch,
+                actionTooltip: 'Temporary search',
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          SizedBox(
+            width: 40,
+            child: IconButton(
+              tooltip: 'Saved',
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => const SavedScreen())),
+              padding: EdgeInsets.zero,
+              icon: Icon(Icons.bookmark_rounded,
+                  color: iconColor, size: 25),
+            ),
           ),
         ],
       ),
@@ -109,7 +130,13 @@ class _HeaderAndSearch extends StatelessWidget {
 
 class _SearchBar extends StatelessWidget {
   final VoidCallback onTap;
-  const _SearchBar({required this.onTap});
+  final VoidCallback action;
+  final String actionTooltip;
+  const _SearchBar({
+    required this.onTap,
+    required this.action,
+    required this.actionTooltip,
+  });
 
   @override
   Widget build(BuildContext context) => Material(
@@ -154,9 +181,16 @@ class _SearchBar extends StatelessWidget {
                         color: AppTheme.textMuted(context), fontSize: 13),
                   ),
                 ),
-                const SizedBox(width: 6),
-                Icon(Icons.search_rounded,
-                    color: AppTheme.textColor(context), size: 20),
+                const SizedBox(width: 4),
+                IconButton(
+                  tooltip: actionTooltip,
+                  onPressed: action,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                      minWidth: 28, minHeight: 28),
+                  icon: Icon(Icons.visibility_off_rounded,
+                      color: AppTheme.textSecondary(context), size: 21),
+                ),
               ],
             ),
           ),

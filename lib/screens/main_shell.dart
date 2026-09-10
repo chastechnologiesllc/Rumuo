@@ -181,7 +181,7 @@ class _TopNavigation extends StatelessWidget {
                   child: IconButton(
                     tooltip: 'Notifications',
                     icon: const Icon(Icons.notifications_rounded),
-                    color: AppTheme.textColor(context),
+                    color: AppTheme.textSecondary(context),
                     onPressed: () => Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) => const NotificationsScreen())),
                   ),
@@ -205,6 +205,9 @@ class _TopNavButton extends StatelessWidget {
         tooltip: icon.$3,
         onPressed: onTap,
         icon: Icon(active ? icon.$2 : icon.$1,
-            color: AppTheme.textColor(context), size: 25),
+            color: active
+                ? AppTheme.textColor(context)
+                : AppTheme.textSecondary(context),
+            size: 25),
       );
 }
