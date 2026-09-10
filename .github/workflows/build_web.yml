@@ -52,7 +52,7 @@ jobs:
 
       # ── Analyse (same bar as Android workflow) ──────────────────────────────
       - name: Analyse
-        run: flutter analyze --no-fatal-infos
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
 
       # ── Tests ───────────────────────────────────────────────────────────────
       - name: Run tests

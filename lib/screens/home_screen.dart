@@ -88,9 +88,18 @@ class _HeaderAndSearch extends StatelessWidget {
         );
 
     final iconColor = AppTheme.textSecondary(context);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
-      child: LayoutBuilder(
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: AppTheme.dividerColor(context),
+            width: 0.7,
+          ),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 4, 20, 10),
+        child: LayoutBuilder(
         builder: (context, constraints) {
           final searchWidth =
               (constraints.maxWidth * 0.68).clamp(210.0, 420.0).toDouble();
@@ -132,6 +141,7 @@ class _HeaderAndSearch extends StatelessWidget {
             ],
           );
         },
+        ),
       ),
     );
   }
@@ -160,11 +170,11 @@ class _SearchBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(22),
           onTap: onTap,
           child: Container(
-            height: 44,
+            height: 56,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
               color: searchSurface,
-              borderRadius: BorderRadius.circular(22),
+              borderRadius: BorderRadius.circular(28),
               border: Border.all(
                 color: AppTheme.dividerColor(context),
                 width: 0.6,
@@ -181,8 +191,8 @@ class _SearchBar extends StatelessWidget {
                   ),
                   child: Image.asset(
                     'assets/icons/rumuo_bird_transparent.png',
-                    width: 24,
-                    height: 24,
+                    width: 28,
+                    height: 28,
                     fit: BoxFit.contain,
                     semanticLabel: 'Rumuo search',
                   ),
