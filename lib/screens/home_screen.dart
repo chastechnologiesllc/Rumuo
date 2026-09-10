@@ -153,14 +153,14 @@ class _SearchBar extends StatelessWidget {
     return Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(22),
           onTap: onTap,
           child: Container(
             height: 40,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
               color: searchSurface,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(22),
               border: Border.all(
                 color: AppTheme.dividerColor(context),
                 width: 0.6,
