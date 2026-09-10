@@ -94,7 +94,7 @@ class _HeaderAndSearch extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SizedBox(
-            width: 36,
+            width: 34,
             child: IconButton(
               tooltip: 'Feed',
               onPressed: () {},
@@ -103,10 +103,10 @@ class _HeaderAndSearch extends StatelessWidget {
                   color: AppTheme.textColor(context), size: 29),
             ),
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 2),
           Flexible(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 292),
+              constraints: const BoxConstraints(maxWidth: 276),
               child: _SearchBar(
                 onTap: openSearch,
                 action: openSearch,
@@ -114,9 +114,9 @@ class _HeaderAndSearch extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 2),
           SizedBox(
-            width: 36,
+            width: 34,
             child: IconButton(
               tooltip: 'Saved',
               onPressed: onOpenSaved ??
@@ -156,7 +156,7 @@ class _SearchBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(22),
           onTap: onTap,
           child: Container(
-            height: 40,
+            height: 44,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
               color: searchSurface,
@@ -189,7 +189,10 @@ class _SearchBar extends StatelessWidget {
                     "Search through the world's knowledge",
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                        color: AppTheme.textMuted(context), fontSize: 13),
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : Colors.black,
+                        fontSize: 13),
                   ),
                 ),
                 const SizedBox(width: 4),
