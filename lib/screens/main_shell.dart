@@ -198,6 +198,7 @@ class _TopNavigation extends StatelessWidget {
                         ? Icons.notifications_rounded
                         : Icons.notifications_outlined),
                     color: AppTheme.textSecondary(context),
+                    iconSize: 29,
                     onPressed: () => Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) => const NotificationsScreen())),
                   ),
@@ -224,6 +225,6 @@ class _TopNavButton extends StatelessWidget {
             color: active
                 ? AppTheme.textColor(context)
                 : AppTheme.textSecondary(context),
-            size: 25),
+            size: 29),
       );
 }
