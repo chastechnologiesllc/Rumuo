@@ -44,7 +44,7 @@ class AppTheme {
   static SystemUiOverlayStyle overlayStyleFor(Brightness brightness) {
     final isDark = brightness == Brightness.dark;
     return SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
+      statusBarColor: isDark ? darkBg : lightBg,
       statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
       statusBarBrightness:     isDark ? Brightness.dark  : Brightness.light,
       systemNavigationBarColor: isDark ? darkBg : lightBg,
@@ -75,7 +75,7 @@ class AppTheme {
         // paints fully through the status bar area instead of leaving a
         // visible grey/unstyled strip behind the time/signal/battery icons.
         systemOverlayStyle: SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
+          statusBarColor: lightBg,
           statusBarIconBrightness: Brightness.dark,
           statusBarBrightness: Brightness.light,
           systemNavigationBarColor: lightBg,
@@ -163,7 +163,7 @@ class AppTheme {
         foregroundColor: darkText,
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
+          statusBarColor: darkBg,
           statusBarIconBrightness: Brightness.light,
           statusBarBrightness: Brightness.dark,
           systemNavigationBarColor: darkBg,
