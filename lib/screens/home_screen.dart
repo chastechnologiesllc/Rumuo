@@ -106,7 +106,7 @@ class _HeaderAndSearch extends StatelessWidget {
           const SizedBox(width: 2),
           Flexible(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 276),
+              constraints: const BoxConstraints(maxWidth: 250),
               child: _SearchBar(
                 onTap: openSearch,
                 action: openSearch,
