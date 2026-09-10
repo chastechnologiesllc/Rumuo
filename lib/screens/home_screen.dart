@@ -53,6 +53,14 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: _HeaderAndSearch(onOpenSaved: widget.onOpenSaved),
             ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Divider(
+                height: 1,
+                thickness: 0.7,
+                color: AppTheme.dividerColor(context),
+              ),
+            ),
             _PrimaryTabs(
               forms: _forms,
               selectedIndex: _selectedIndex,
@@ -88,17 +96,8 @@ class _HeaderAndSearch extends StatelessWidget {
         );
 
     final iconColor = AppTheme.textSecondary(context);
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: AppTheme.dividerColor(context),
-            width: 0.7,
-          ),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 4, 20, 10),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 4, 20, 10),
         child: LayoutBuilder(
         builder: (context, constraints) {
           final searchWidth =
@@ -141,7 +140,6 @@ class _HeaderAndSearch extends StatelessWidget {
             ],
           );
         },
-        ),
       ),
     );
   }
