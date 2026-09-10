@@ -90,9 +90,13 @@ class _HeaderAndSearch extends StatelessWidget {
     final iconColor = AppTheme.textSecondary(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final searchWidth =
+              (constraints.maxWidth * 0.68).clamp(210.0, 420.0).toDouble();
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
           SizedBox(
             width: 34,
             child: IconButton(
@@ -104,14 +108,12 @@ class _HeaderAndSearch extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 2),
-          Flexible(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 250),
-              child: _SearchBar(
+          SizedBox(
+            width: searchWidth,
+            child: _SearchBar(
                 onTap: openSearch,
                 action: openSearch,
                 actionTooltip: 'Temporary search',
-              ),
             ),
           ),
           const SizedBox(width: 2),
@@ -127,7 +129,9 @@ class _HeaderAndSearch extends StatelessWidget {
                   color: iconColor, size: 29),
             ),
           ),
-        ],
+            ],
+          );
+        },
       ),
     );
   }
@@ -226,53 +230,65 @@ class _PrimaryTabs extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.fromLTRB(12, 2, 12, 6),
-        child: Row(
-          children: List.generate(forms.length, (index) {
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, constraints) {
+          final desktop = constraints.maxWidth >= 600;
+          final tabWidth = (constraints.maxWidth - 6) / 2;
+
+          Widget tab(int index, {double? width}) {
             final selected = index == selectedIndex;
             final form = forms[index];
-            return Expanded(
-              child: Padding(
-                padding: EdgeInsets.only(right: index == forms.length - 1 ? 0 : 6),
-                child: Semantics(
-                  button: true,
-                  selected: selected,
-                  label: form.label,
-                  child: GestureDetector(
-                    onTap: () => onSelected(index),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 180),
-                      height: 30,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: selected
-                            ? AppTheme.gold
-                            : AppTheme.surfaceColor(context),
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(
-                          color: selected
-                              ? AppTheme.gold
-                              : AppTheme.dividerColor(context),
-                        ),
-                      ),
-                      child: Text(
-                        form.label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: AppTheme.textColor(context),
-                          fontWeight: FontWeight.w800,
-                          fontSize: 12,
-                        ),
-                      ),
+            final pill = Semantics(
+              button: true,
+              selected: selected,
+              label: form.label,
+              child: GestureDetector(
+                onTap: () => onSelected(index),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  height: 30,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: selected
+                        ? AppTheme.gold
+                        : AppTheme.surfaceColor(context),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: selected
+                          ? AppTheme.gold
+                          : AppTheme.dividerColor(context),
+                    ),
+                  ),
+                  child: Text(
+                    form.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: AppTheme.textColor(context),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 12,
                     ),
                   ),
                 ),
               ),
             );
-          }),
-        ),
+            return width == null ? Expanded(child: pill) : SizedBox(width: width, child: pill);
+          }
+
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(12, 2, 12, 6),
+            child: desktop
+                ? Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: List.generate(
+                        forms.length, (index) => tab(index, width: tabWidth)),
+                  )
+                : Row(
+                    children: List.generate(forms.length, (index) => tab(index)),
+                  ),
+          );
+        },
       );
 }
 
