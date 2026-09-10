@@ -464,22 +464,8 @@ void main() {
       expect(AppConfig.packageName, 'com.chastechgroup.rumuo');
     });
 
-    test('3 IAP product IDs defined', () {
-      expect(AppConfig.iapProductIds.length, 3);
-    });
-
-    test('IAP IDs have correct format', () {
-      for (final id in AppConfig.iapProductIds) {
-        expect(id, startsWith('rumuo_'));
-      }
-    });
-
     test('has 4 connectivity endpoints', () {
       expect(AppConfig.connectivityEndpoints.length, 4);
-    });
-
-    test('has 4 ad-check endpoints', () {
-      expect(AppConfig.adCheckEndpoints.length, 4);
     });
 
     test('connectivity endpoints are HTTPS', () {

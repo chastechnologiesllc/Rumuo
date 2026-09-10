@@ -16,6 +16,7 @@ import '../services/book_reader_content.dart';
 import '../services/engagement_service.dart';
 import '../services/pdf_io_stub.dart'
     if (dart.library.io) '../services/pdf_io_io.dart' as pdf_io;
+import '../services/pdf_download_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/book_cover_image.dart';
 import '../widgets/web_iframe_view.dart';
