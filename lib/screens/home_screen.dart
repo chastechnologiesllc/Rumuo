@@ -54,10 +54,10 @@ class _HomeScreenState extends State<HomeScreen> {
               child: _HeaderAndSearch(onOpenSaved: widget.onOpenSaved),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
+              padding: const EdgeInsets.fromLTRB(0, 8, 0, 4),
               child: Divider(
                 height: 1,
-                thickness: 0.7,
+                thickness: 1.4,
                 color: AppTheme.dividerColor(context),
               ),
             ),
@@ -239,7 +239,7 @@ class _PrimaryTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.fromLTRB(12, 2, 12, 6),
+        padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
         child: Row(
           children: List.generate(forms.length, (index) {
             final selected = index == selectedIndex;

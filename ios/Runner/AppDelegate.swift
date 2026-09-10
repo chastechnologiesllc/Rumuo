@@ -1,6 +1,5 @@
 import UIKit
 import Flutter
-import GoogleMobileAds
 import workmanager_apple
 
 @UIApplicationMain
