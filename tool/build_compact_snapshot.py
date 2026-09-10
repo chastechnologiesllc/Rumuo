@@ -25,6 +25,11 @@ def main() -> None:
         default=Path('assets/data/resources/_general_boot.json'),
         type=Path,
     )
+    parser.add_argument(
+        '--general-catalog-output',
+        default=Path('assets/data/resources/_general_catalog.json'),
+        type=Path,
+    )
     args = parser.parse_args()
 
     root = Path(__file__).resolve().parents[1]
@@ -39,6 +44,32 @@ def main() -> None:
         general_output = root / general_output
     general_output.parent.mkdir(parents=True, exist_ok=True)
     general_output.write_text(json.dumps(boot, ensure_ascii=False, separators=(',', ':')) + '\n')
+
+    catalog = {
+        key: value for key, value in raw_general.items() if key != 'books'
+    }
+    catalog['books'] = [
+        {
+            key: book.get(key)
+            for key in (
+                'title',
+                'author',
+                'freeSourceUrl',
+                'freeSourceType',
+                'freeSourceNote',
+                'coverUrl',
+            )
+            if book.get(key) is not None
+        }
+        for book in raw_general.get('books', [])
+    ]
+    catalog_output = args.general_catalog_output
+    if not catalog_output.is_absolute():
+        catalog_output = root / catalog_output
+    catalog_output.parent.mkdir(parents=True, exist_ok=True)
+    catalog_output.write_text(
+        json.dumps(catalog, ensure_ascii=False, separators=(',', ':')) + '\n'
+    )
 
     snapshot = json.loads(args.input.read_text())
     hardcoded_ids = set(re.findall(
@@ -93,6 +124,7 @@ def main() -> None:
     output.write_text(json.dumps(compact, ensure_ascii=False, separators=(',', ':')) + '\n')
     print(f'Wrote {output} ({output.stat().st_size} bytes)')
     print(f'Wrote {general_output} ({general_output.stat().st_size} bytes)')
+    print(f'Wrote {catalog_output} ({catalog_output.stat().st_size} bytes)')
 
 
 if __name__ == '__main__':

@@ -120,8 +120,8 @@ class ResourceCategoryData {
   }
 
   /// Loads all verified resources for the full-text search and discovery
-  /// surfaces. The general payload is still the compact boot variant; the
-  /// large general book archive remains available from its own indexed source.
+  /// surfaces. The general payload uses a compact book catalog that retains
+  /// search, cover, and source fields without shipping verification prose.
   static Future<void> loadVerifiedResources() => _loadScopedResources(null);
 
   static Future<void> _loadScopedResources(Set<String>? selected) async {
@@ -181,9 +181,9 @@ class ResourceCategoryData {
 
     // Resource files are independent, so read the selected scope in parallel.
     // The startup path uses the small general boot file; full-load callers
-    // (notably search) still receive the complete general book archive.
+    // (notably search) receive the compact complete book catalog.
     final generalAsset = selectedCategoryIds == null
-        ? '_general.json'
+        ? '_general_catalog.json'
         : '_general_boot.json';
     final results = await Future.wait([
       for (final category in categoriesToLoad)
