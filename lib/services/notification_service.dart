@@ -15,6 +15,8 @@ import 'platform_notification.dart';
 import 'background_service.dart';
 import 'connectivity_service.dart';
 import 'network_policy.dart';
+import 'rss_service.dart';
+import 'user_profile_service.dart';
 
 enum NotificationPermissionState { granted, denied, defaultState, unsupported, unknown }
 

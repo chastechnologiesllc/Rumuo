@@ -88,8 +88,10 @@ class _InlineVideoCardState extends State<InlineVideoCard>
   bool _showSeekRight = false;
   Timer? _revealTimer;
   Timer? _seekFeedbackTimer;
+  Timer? _soundRetryTimer;
 
   int _soundRetryCount = 0;
+  bool _isPlaying = false;
 
   PlayerState _prevState = PlayerState.unknown;
 
@@ -112,6 +114,7 @@ class _InlineVideoCardState extends State<InlineVideoCard>
     widget.activeVideoNotifier.removeListener(_onActiveChanged);
     _revealTimer?.cancel();
     _seekFeedbackTimer?.cancel();
+    _soundRetryTimer?.cancel();
     _controller?.removeListener(_onControllerUpdate);
     _controller?.dispose();
     _controller = null;

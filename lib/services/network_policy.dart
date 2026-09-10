@@ -88,7 +88,10 @@ class NetworkPolicy extends ChangeNotifier {
       _mode = DataSaverMode.automatic;
     }
 
-    _transport = ConnectivityService.instance.transport;
+    _transport = ConnectivityService.instance.transport.firstWhere(
+      (item) => item != ConnectivityResult.none,
+      orElse: () => ConnectivityResult.none,
+    );
     _transportSub = ConnectivityService.instance.transportStream.listen((result) {
       final next = result.firstWhere(
         (item) => item != ConnectivityResult.none,
