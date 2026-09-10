@@ -12,7 +12,6 @@ import '../data/resource_category_data.dart';
 import '../models/video.dart';
 import 'notification_store.dart';
 import 'platform_notification.dart';
-import 'background_service.dart';
 import 'connectivity_service.dart';
 import 'network_policy.dart';
 import 'rss_service.dart';
