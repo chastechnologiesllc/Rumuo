@@ -8,6 +8,7 @@ import '../theme/app_theme.dart';
 import '../widgets/mvp_subcategory_feed.dart';
 import 'content_search_screen.dart';
 import 'channels_screen.dart';
+import 'saved_screen.dart';
 
 /// The Feed screen uses horizontal primary tabs, matching the original Rumuo
 /// navigation: Videos, Shorts, Audio, Written, and Datasets. Blogs and Books
@@ -83,15 +84,22 @@ class _HeaderAndSearch extends StatelessWidget {
         );
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 10, 10),
+      padding: const EdgeInsets.fromLTRB(10, 4, 8, 8),
       child: Row(
         children: [
+          IconButton(
+            tooltip: 'Feed',
+            onPressed: () {},
+            icon: Icon(Icons.home_rounded,
+                color: AppTheme.textColor(context), size: 25),
+          ),
           Expanded(child: _SearchBar(onTap: openSearch)),
           IconButton(
-            tooltip: 'Temporary search',
-            onPressed: openSearch,
-            icon: Icon(Icons.visibility_off_outlined,
-                color: AppTheme.textMuted(context), size: 22),
+            tooltip: 'Saved',
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => const SavedScreen())),
+            icon: Icon(Icons.bookmark_rounded,
+                color: AppTheme.textColor(context), size: 25),
           ),
         ],
       ),
@@ -110,8 +118,8 @@ class _SearchBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           onTap: onTap,
           child: Container(
-            height: 46,
-            padding: const EdgeInsets.symmetric(horizontal: 14),
+            height: 40,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
               color: AppTheme.surfaceColor(context),
               borderRadius: BorderRadius.circular(14),
@@ -131,21 +139,24 @@ class _SearchBar extends StatelessWidget {
                   ),
                   child: Image.asset(
                     'assets/icons/rumuo_bird_transparent.png',
-                    width: 20,
-                    height: 20,
+                    width: 18,
+                    height: 18,
                     fit: BoxFit.contain,
                     semanticLabel: 'Rumuo search',
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     "Search through the world's knowledge",
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                        color: AppTheme.textMuted(context), fontSize: 14),
+                        color: AppTheme.textMuted(context), fontSize: 13),
                   ),
                 ),
+                const SizedBox(width: 6),
+                Icon(Icons.search_rounded,
+                    color: AppTheme.textColor(context), size: 20),
               ],
             ),
           ),
@@ -200,11 +211,8 @@ class _PrimaryTabs extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: selected
-                              ? Colors.black
-                              : AppTheme.textSecondary(context),
-                          fontWeight:
-                              selected ? FontWeight.w800 : FontWeight.w500,
+                          color: AppTheme.textColor(context),
+                          fontWeight: FontWeight.w800,
                           fontSize: 12,
                         ),
                       ),

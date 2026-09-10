@@ -173,10 +173,6 @@ class _TopNavigation extends StatelessWidget {
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontSize: 28, fontWeight: FontWeight.w800)),
               const Spacer(),
-              _TopNavButton(
-                  icon: _items[0], active: currentIndex == 0, onTap: () => onTap(0)),
-              _TopNavButton(
-                  icon: _items[1], active: currentIndex == 1, onTap: () => onTap(1)),
               ValueListenableBuilder<int>(
                 valueListenable: NotificationStore.instance.unreadCount,
                 builder: (_, count, __) => Badge(
@@ -184,10 +180,8 @@ class _TopNavigation extends StatelessWidget {
                   label: Text(count > 99 ? '99+' : '$count'),
                   child: IconButton(
                     tooltip: 'Notifications',
-                    icon: Icon(count > 0
-                        ? Icons.notifications_rounded
-                        : Icons.notifications_outlined),
-                    color: count > 0 ? AppTheme.gold : AppTheme.textMuted(context),
+                    icon: const Icon(Icons.notifications_rounded),
+                    color: AppTheme.textColor(context),
                     onPressed: () => Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) => const NotificationsScreen())),
                   ),
@@ -211,6 +205,6 @@ class _TopNavButton extends StatelessWidget {
         tooltip: icon.$3,
         onPressed: onTap,
         icon: Icon(active ? icon.$2 : icon.$1,
-            color: active ? AppTheme.gold : AppTheme.textMuted(context)),
+            color: AppTheme.textColor(context), size: 25),
       );
 }
