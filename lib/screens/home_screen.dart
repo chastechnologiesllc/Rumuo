@@ -171,8 +171,8 @@ class _SearchBar extends StatelessWidget {
                   ),
                   child: Image.asset(
                     'assets/icons/rumuo_bird_transparent.png',
-                    width: 18,
-                    height: 18,
+                    width: 24,
+                    height: 24,
                     fit: BoxFit.contain,
                     semanticLabel: 'Rumuo search',
                   ),

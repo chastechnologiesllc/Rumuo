@@ -176,9 +176,16 @@ class _TopNavigation extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 10, 10, 2),
           child: Row(
             children: [
-              Text('Rumuo',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontSize: 28, fontWeight: FontWeight.w800)),
+              InkWell(
+                onTap: () => onTap(0),
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+                  child: Text('Rumuo',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontSize: 28, fontWeight: FontWeight.w800)),
+                ),
+              ),
               const Spacer(),
               ValueListenableBuilder<int>(
                 valueListenable: NotificationStore.instance.unreadCount,
