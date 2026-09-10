@@ -166,6 +166,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         trailing: Switch.adaptive(
                           value: networkPolicy.isDataSaverEnabled,
                           onChanged: (_) => networkPolicy.toggle(),
+                          activeColor: AppTheme.textColor(context),
+                          activeTrackColor:
+                              AppTheme.textColor(context).withValues(alpha: 0.35),
                         ),
                       ),
 

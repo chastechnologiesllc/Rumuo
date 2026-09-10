@@ -14,7 +14,9 @@ import 'saved_screen.dart';
 /// navigation: Videos, Shorts, Audio, Written, and Datasets. Blogs and Books
 /// are subcategories inside Written rather than primary tabs of their own.
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final VoidCallback? onOpenSaved;
+
+  const HomeScreen({super.key, this.onOpenSaved});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -49,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ? child
                     : const SizedBox(width: double.infinity, height: 0),
               ),
-              child: const _HeaderAndSearch(),
+              child: _HeaderAndSearch(onOpenSaved: widget.onOpenSaved),
             ),
             _PrimaryTabs(
               forms: _forms,
@@ -71,7 +73,9 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class _HeaderAndSearch extends StatelessWidget {
-  const _HeaderAndSearch();
+  final VoidCallback? onOpenSaved;
+
+  const _HeaderAndSearch({this.onOpenSaved});
 
   @override
   Widget build(BuildContext context) {
@@ -115,8 +119,9 @@ class _HeaderAndSearch extends StatelessWidget {
             width: 40,
             child: IconButton(
               tooltip: 'Saved',
-              onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (_) => const SavedScreen())),
+              onPressed: onOpenSaved ??
+                  () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => const SavedScreen())),
               padding: EdgeInsets.zero,
               icon: Icon(Icons.bookmark_rounded,
                   color: iconColor, size: 25),
@@ -227,7 +232,7 @@ class _PrimaryTabs extends StatelessWidget {
                     onTap: () => onSelected(index),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 180),
-                      height: 34,
+                      height: 30,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: selected

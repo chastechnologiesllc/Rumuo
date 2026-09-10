@@ -186,7 +186,9 @@ class _NotificationSettingsScreenState
                     Switch(
                       value: _enabled,
                       onChanged: _saving ? null : _toggle,
-                      activeThumbColor: AppTheme.textColor(context),
+                      activeColor: AppTheme.textColor(context),
+                      activeTrackColor:
+                          AppTheme.textColor(context).withValues(alpha: 0.35),
                     ),
                   ],
                 ),

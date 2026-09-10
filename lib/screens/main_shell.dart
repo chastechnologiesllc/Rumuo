@@ -28,17 +28,24 @@ class _MainShellState extends State<MainShell> {
   int _index = 0;
   bool _handlingPendingDeepLink = false;
 
-  static const _screens = [
-    HomeScreen(),
-    SavedScreen(),
-    ProfileScreen(),
-  ];
+  late final List<Widget> _screens;
 
   @override
   void initState() {
     super.initState();
+    _screens = [
+      HomeScreen(onOpenSaved: _openSaved),
+      const SavedScreen(),
+      const ProfileScreen(),
+    ];
     // Handles cold-launch deep link (app was not running when notif was tapped).
     _schedulePendingDeepLink(waitForColdStart: true);
+  }
+
+  void _openSaved() {
+    if (!mounted) return;
+    ScrollVisibilityService.instance.show();
+    setState(() => _index = 1);
   }
 
   void _schedulePendingDeepLink({bool waitForColdStart = false}) {
