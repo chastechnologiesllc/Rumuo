@@ -94,16 +94,16 @@ class _HeaderAndSearch extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SizedBox(
-            width: 40,
+            width: 36,
             child: IconButton(
               tooltip: 'Feed',
               onPressed: () {},
               padding: EdgeInsets.zero,
               icon: Icon(Icons.home_rounded,
-                  color: AppTheme.textColor(context), size: 25),
+                  color: AppTheme.textColor(context), size: 29),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 4),
           Flexible(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 292),
@@ -114,9 +114,9 @@ class _HeaderAndSearch extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 4),
           SizedBox(
-            width: 40,
+            width: 36,
             child: IconButton(
               tooltip: 'Saved',
               onPressed: onOpenSaved ??
@@ -124,7 +124,7 @@ class _HeaderAndSearch extends StatelessWidget {
                       builder: (_) => const SavedScreen())),
               padding: EdgeInsets.zero,
               icon: Icon(Icons.bookmark_outline_rounded,
-                  color: iconColor, size: 25),
+                  color: iconColor, size: 29),
             ),
           ),
         ],
