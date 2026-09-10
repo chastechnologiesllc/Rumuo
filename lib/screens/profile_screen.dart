@@ -121,7 +121,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         icon: adsGone
                             ? Icons.verified_rounded
                             : Icons.block_rounded,
-                        iconColor: adsGone ? AppTheme.success : AppTheme.gold,
+                        iconColor: AppTheme.textColor(context),
                         title: adsGone ? 'Ad-Free Active' : 'Go Ad-Free',
                         subtitle: adsGone
                             ? 'Enjoy uninterrupted Rumuo content'
@@ -141,7 +141,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const _SectionHeader('Personalize'),
                       _SettingsTile(
                         icon: Icons.storefront_rounded,
-                        iconColor: AppTheme.gold,
+                        iconColor: AppTheme.textColor(context),
                         title: 'My Business',
                         subtitle: _myBusinessSubtitle(),
                         trailing: const Icon(Icons.chevron_right_rounded),
@@ -158,7 +158,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const _SectionHeader('Data usage'),
                       _SettingsTile(
                         icon: Icons.data_saver_on_rounded,
-                        iconColor: const Color(0xFF42C98A),
+                        iconColor: AppTheme.textColor(context),
                         title: 'Data Saver',
                         subtitle: networkPolicy.isDataSaverEnabled
                             ? 'On — no video preloading, lighter feeds'
@@ -173,7 +173,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const _SectionHeader('Support'),
                       _SettingsTile(
                         icon: Icons.star_rounded,
-                        iconColor: AppTheme.gold,
+                        iconColor: AppTheme.textColor(context),
                         title: 'Rate Rumuo',
                         subtitle: 'Enjoying the app? Leave us a review!',
                         trailing: const Icon(Icons.chevron_right_rounded,
@@ -190,7 +190,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       _SettingsTile(
                         icon: Icons.headset_mic_rounded,
-                        iconColor: const Color(0xFF60A5FA),
+                        iconColor: AppTheme.textColor(context),
                         title: 'Contact Support',
                         subtitle: 'Need help, support, questions or issues',
                         trailing: const Icon(Icons.chevron_right_rounded,
@@ -205,7 +205,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const _SectionHeader('Legal'),
                       _SettingsTile(
                         icon: Icons.privacy_tip_rounded,
-                        iconColor: AppTheme.gold,
+                        iconColor: AppTheme.textColor(context),
                         title: 'Privacy Policy',
                         subtitle: 'How we collect and use your data',
                         trailing: const Icon(Icons.chevron_right_rounded,
@@ -223,7 +223,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       if (_privacyOptionsRequired)
                         _SettingsTile(
                           icon: Icons.shield_outlined,
-                          iconColor: AppTheme.gold,
+                          iconColor: AppTheme.textColor(context),
                           title: 'Privacy Options',
                           subtitle: 'Manage your ad consent choices',
                           trailing: const Icon(Icons.chevron_right_rounded,
@@ -232,7 +232,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       _SettingsTile(
                         icon: Icons.description_rounded,
-                        iconColor: AppTheme.gold,
+                        iconColor: AppTheme.textColor(context),
                         title: 'Terms of Service',
                         subtitle: 'App usage terms and conditions',
                         trailing: const Icon(Icons.chevron_right_rounded,
@@ -245,7 +245,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       _SettingsTile(
                         icon: Icons.gavel_rounded,
-                        iconColor: AppTheme.gold,
+                        iconColor: AppTheme.textColor(context),
                         title: 'Content Disclaimer',
                         subtitle: 'Videos are for educational purposes only',
                         trailing: const Icon(Icons.chevron_right_rounded,

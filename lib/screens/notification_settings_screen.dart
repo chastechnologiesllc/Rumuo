@@ -154,8 +154,7 @@ class _NotificationSettingsScreenState
                         _enabled
                             ? Icons.notifications_active_rounded
                             : Icons.notifications_off_rounded,
-                        color:
-                            _enabled ? AppTheme.gold : AppTheme.textMuted(context),
+                        color: AppTheme.textColor(context),
                         size: 20,
                       ),
                     ),
@@ -187,7 +186,7 @@ class _NotificationSettingsScreenState
                     Switch(
                       value: _enabled,
                       onChanged: _saving ? null : _toggle,
-                      activeThumbColor: AppTheme.gold,
+                      activeThumbColor: AppTheme.textColor(context),
                     ),
                   ],
                 ),
