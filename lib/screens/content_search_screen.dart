@@ -527,17 +527,54 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
         backgroundColor: AppTheme.bgColor(context),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
+        leadingWidth: 52,
+        leading: IconButton(
+          tooltip: 'Feed',
+          icon: const Icon(Icons.home_rounded),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         titleSpacing: 0,
         title: _SearchBar(controller: _ctrl),
         actions: [
-          if (_ctrl.text.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.close_rounded),
-              onPressed: () {
+          IconButton(
+            tooltip: 'Temporary search',
+            icon: const Icon(Icons.visibility_off_rounded),
+            onPressed: () {},
+          ),
+          IconButton(
+            tooltip: 'Search history',
+            icon: const Icon(Icons.history_rounded),
+            onPressed: () {},
+          ),
+          IconButton(
+            tooltip: 'Saved content',
+            icon: const Icon(Icons.bookmark_border_rounded),
+            onPressed: () {},
+          ),
+          PopupMenuButton<String>(
+            tooltip: 'Search options',
+            icon: const Icon(Icons.more_vert_rounded),
+            onSelected: (value) {
+              if (value == 'clear') {
                 _ctrl.clear();
-                setState(() { _query = ''; _left = []; _right = []; });
-              },
-            ),
+              }
+            },
+            itemBuilder: (_) => [
+              if (_ctrl.text.isNotEmpty)
+                const PopupMenuItem(
+                  value: 'clear',
+                  child: Text('Clear search'),
+                ),
+              const PopupMenuItem(
+                value: 'history',
+                child: Text('Search history'),
+              ),
+              const PopupMenuItem(
+                value: 'saved',
+                child: Text('Saved content'),
+              ),
+            ],
+          ),
         ],
       ),
       body: _buildBody(),
@@ -739,13 +776,13 @@ class _SearchBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(right: 8),
+      padding: const EdgeInsets.only(right: 6),
       child: Container(
-        height: 40,
+        height: 48,
         decoration: BoxDecoration(
           color: AppTheme.surfaceColor(context),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppTheme.dividerColor(context), width: 0.5),
+          borderRadius: BorderRadius.circular(26),
+          border: Border.all(color: AppTheme.dividerColor(context), width: 0.7),
         ),
         child: TextField(
           controller:    controller,
@@ -755,8 +792,8 @@ class _SearchBar extends StatelessWidget {
           decoration: InputDecoration(
             hintText:    'Search videos, shorts, blogs, books, channels, categories…',
             hintStyle:   TextStyle(color: AppTheme.textMuted(context), fontSize: 14),
-            prefixIcon:  Icon(Icons.search_rounded,
-                              color: AppTheme.textMuted(context), size: 20),
+            prefixIcon: Icon(Icons.search_rounded,
+                color: AppTheme.textMuted(context), size: 23),
             border:      InputBorder.none,
             isDense:     true,
             contentPadding: const EdgeInsets.symmetric(vertical: 10),
