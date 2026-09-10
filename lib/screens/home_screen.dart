@@ -144,7 +144,13 @@ class _SearchBar extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => Material(
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final searchSurface = isDark
+        ? const Color(0xFF2B2C30)
+        : const Color(0xFFF1F3F4);
+
+    return Material(
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(14),
@@ -153,7 +159,7 @@ class _SearchBar extends StatelessWidget {
             height: 40,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: AppTheme.surfaceColor(context),
+              color: searchSurface,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color: AppTheme.dividerColor(context),
