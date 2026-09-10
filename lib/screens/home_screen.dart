@@ -123,7 +123,7 @@ class _HeaderAndSearch extends StatelessWidget {
                   () => Navigator.of(context).push(MaterialPageRoute(
                       builder: (_) => const SavedScreen())),
               padding: EdgeInsets.zero,
-              icon: Icon(Icons.bookmark_rounded,
+              icon: Icon(Icons.bookmark_outline_rounded,
                   color: iconColor, size: 25),
             ),
           ),

@@ -194,7 +194,9 @@ class _TopNavigation extends StatelessWidget {
                   label: Text(count > 99 ? '99+' : '$count'),
                   child: IconButton(
                     tooltip: 'Notifications',
-                    icon: const Icon(Icons.notifications_rounded),
+                    icon: Icon(count > 0
+                        ? Icons.notifications_rounded
+                        : Icons.notifications_outlined),
                     color: AppTheme.textSecondary(context),
                     onPressed: () => Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) => const NotificationsScreen())),
