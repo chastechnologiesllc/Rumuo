@@ -527,10 +527,14 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
         backgroundColor: AppTheme.bgColor(context),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        leadingWidth: 52,
+        leadingWidth: 58,
         leading: IconButton(
           tooltip: 'Feed',
-          icon: const Icon(Icons.home_rounded),
+          icon: Icon(
+            Icons.home_rounded,
+            size: 32,
+            color: AppTheme.textColor(context),
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         titleSpacing: 0,
@@ -773,7 +777,7 @@ class _SearchBar extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(right: 6),
       child: Container(
-        height: 48,
+        height: 42,
         decoration: BoxDecoration(
           color: Theme.of(context).brightness == Brightness.dark
               ? const Color(0xFF303134)
@@ -788,15 +792,41 @@ class _SearchBar extends StatelessWidget {
           controller:    controller,
           autofocus:     true,
           textAlignVertical: TextAlignVertical.center,
-          style: TextStyle(color: AppTheme.textColor(context), fontSize: 16),
+          style: TextStyle(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white
+                : Colors.black,
+            fontSize: 16,
+          ),
           decoration: InputDecoration(
             hintText:    'Search videos,…',
-            hintStyle:   TextStyle(color: AppTheme.textMuted(context), fontSize: 16),
-            prefixIcon: Icon(Icons.search_rounded,
-                color: AppTheme.textMuted(context), size: 24),
+            hintStyle: TextStyle(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white
+                  : Colors.black,
+              fontSize: 16,
+            ),
+            prefixIcon: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: ColorFiltered(
+                colorFilter: ColorFilter.mode(
+                  Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black,
+                  BlendMode.srcIn,
+                ),
+                child: Image.asset(
+                  'assets/icons/rumuo_bird_transparent.png',
+                  width: 24,
+                  height: 24,
+                  fit: BoxFit.contain,
+                  semanticLabel: 'Rumuo search',
+                ),
+              ),
+            ),
             border:      InputBorder.none,
             isDense:     true,
-            contentPadding: const EdgeInsets.symmetric(vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(vertical: 8),
           ),
         ),
       ),
