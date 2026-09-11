@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/channel_data.dart';
 import '../models/channel.dart';
@@ -132,6 +133,7 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
   bool _loading = false;
   bool _fetchingBlogs = false;
   bool _typing = false;
+  int _searchSessionCount = 0;
   int _searchGeneration = 0;
 
   List<_SearchItem> _left  = [];
@@ -146,10 +148,33 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
   void initState() {
     super.initState();
     _ctrl.addListener(_onInput);
+    unawaited(_loadSearchSessionCount());
     _lastFeedState = _fp.state;
     // Listen to feed so we re-search automatically when it finishes loading
     // on a cold launch where the user typed before videos were in memory.
     _fp.addListener(_onFeedChanged);
+  }
+
+  Future<void> _loadSearchSessionCount() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() {
+      _searchSessionCount =
+          (prefs.getStringList('rumuo_search_sessions') ?? const <String>[])
+              .length;
+    });
+  }
+
+  Future<void> _recordSearchSession(String query) async {
+    final normalized = query.trim().toLowerCase();
+    if (normalized.length < 2) return;
+    final prefs = await SharedPreferences.getInstance();
+    final sessions = prefs.getStringList('rumuo_search_sessions') ?? <String>[];
+    sessions.remove(normalized);
+    sessions.insert(0, normalized);
+    if (sessions.length > 99) sessions.removeRange(99, sessions.length);
+    await prefs.setStringList('rumuo_search_sessions', sessions);
+    if (mounted) setState(() => _searchSessionCount = sessions.length);
   }
 
   @override
@@ -208,7 +233,10 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
     // responsive while avoiding one full index pass per keystroke.
     _debounce = Timer(
       const Duration(milliseconds: 200),
-      () => unawaited(_search(q, generation)),
+      () {
+        unawaited(_recordSearchSession(q));
+        unawaited(_search(q, generation));
+      },
     );
   }
 
@@ -536,12 +564,7 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
           ),
           color: AppTheme.textColor(context),
           splashRadius: 24,
-          overlayColor: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.pressed)) {
-              return Colors.black.withValues(alpha: 0.22);
-            }
-            return Colors.transparent;
-          }),
+          highlightColor: Colors.black.withValues(alpha: 0.22),
           onPressed: () => Navigator.of(context).pop(),
         ),
         titleSpacing: 0,
@@ -554,7 +577,11 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
           ),
           IconButton(
             tooltip: 'Search history',
-            icon: const Icon(Icons.history_rounded),
+            icon: Badge.count(
+              count: _searchSessionCount,
+              isLabelVisible: _searchSessionCount > 0,
+              child: const Icon(Icons.history_rounded),
+            ),
             onPressed: () {},
           ),
           PopupMenuButton<String>(
