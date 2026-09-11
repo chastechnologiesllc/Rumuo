@@ -108,53 +108,17 @@ class RumuoApp extends StatelessWidget {
   }
 }
 
-/// Scales the complete app surface on large screens, including routes,
-/// overlays, dialogs, app bars, and content cards. Mobile remains unchanged;
-/// desktop gets a modest zoom without forcing every screen to duplicate a
-/// desktop-only layout.
+/// Keeps the complete app surface inside the viewport. Desktop enlargement is
+/// provided by responsive grids and wider layouts rather than an automatic
+/// transform, so the default state never hides controls at the right or
+/// bottom edge. Browser/native platform zoom remains natural and can reveal
+/// less content only after the user explicitly zooms in.
 class _DesktopZoom extends StatelessWidget {
   final Widget child;
   const _DesktopZoom({required this.child});
 
-  EdgeInsets _scaleInsets(EdgeInsets insets, double scale) => EdgeInsets.fromLTRB(
-        insets.left / scale,
-        insets.top / scale,
-        insets.right / scale,
-        insets.bottom / scale,
-      );
-
   @override
-  Widget build(BuildContext context) {
-    final media = MediaQuery.of(context);
-    final width = media.size.width;
-    if (width < 800) return child;
-
-    // Keep a modest desktop enlargement, but never let the transformed
-    // surface approach the viewport edge enough to hide controls or cards.
-    final scale = (1 + ((width - 800) / 5000)).clamp(1.0, 1.12).toDouble();
-    final logicalSize = Size(media.size.width / scale, media.size.height / scale);
-    final zoomedMedia = media.copyWith(
-      size: logicalSize,
-      padding: _scaleInsets(media.padding, scale),
-      viewPadding: _scaleInsets(media.viewPadding, scale),
-      viewInsets: _scaleInsets(media.viewInsets, scale),
-      systemGestureInsets: _scaleInsets(media.systemGestureInsets, scale),
-    );
-
-    return SizedBox(
-      width: media.size.width,
-      height: media.size.height,
-      child: Transform.scale(
-        alignment: Alignment.topLeft,
-        scale: scale,
-        child: SizedBox(
-          width: logicalSize.width,
-          height: logicalSize.height,
-          child: MediaQuery(data: zoomedMedia, child: child),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => child;
 }
 
 /// Startup gate for initialization. Native platforms show their initiation
