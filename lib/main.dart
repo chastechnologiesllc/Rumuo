@@ -101,9 +101,56 @@ class RumuoApp extends StatelessWidget {
         final brightness = MediaQuery.platformBrightnessOf(context);
         return AnnotatedRegion<SystemUiOverlayStyle>(
           value: AppTheme.overlayStyleFor(brightness),
-          child: child ?? const SizedBox.shrink(),
+          child: _DesktopZoom(child: child ?? const SizedBox.shrink()),
         );
       },
+    );
+  }
+}
+
+/// Scales the complete app surface on large screens, including routes,
+/// overlays, dialogs, app bars, and content cards. Mobile remains unchanged;
+/// desktop gets a modest zoom without forcing every screen to duplicate a
+/// desktop-only layout.
+class _DesktopZoom extends StatelessWidget {
+  final Widget child;
+  const _DesktopZoom({required this.child});
+
+  EdgeInsets _scaleInsets(EdgeInsets insets, double scale) => EdgeInsets.fromLTRB(
+        insets.left / scale,
+        insets.top / scale,
+        insets.right / scale,
+        insets.bottom / scale,
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final media = MediaQuery.of(context);
+    final width = media.size.width;
+    if (width < 800) return child;
+
+    final scale = (1 + ((width - 800) / 3333)).clamp(1.0, 1.28).toDouble();
+    final logicalSize = Size(media.size.width / scale, media.size.height / scale);
+    final zoomedMedia = media.copyWith(
+      size: logicalSize,
+      padding: _scaleInsets(media.padding, scale),
+      viewPadding: _scaleInsets(media.viewPadding, scale),
+      viewInsets: _scaleInsets(media.viewInsets, scale),
+      systemGestureInsets: _scaleInsets(media.systemGestureInsets, scale),
+    );
+
+    return SizedBox(
+      width: media.size.width,
+      height: media.size.height,
+      child: Transform.scale(
+        alignment: Alignment.topLeft,
+        scale: scale,
+        child: SizedBox(
+          width: logicalSize.width,
+          height: logicalSize.height,
+          child: MediaQuery(data: zoomedMedia, child: child),
+        ),
+      ),
     );
   }
 }
