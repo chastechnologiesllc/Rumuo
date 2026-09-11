@@ -56,8 +56,8 @@ class _HomeScreenState extends State<HomeScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(0, 8, 0, 4),
               child: Divider(
-                height: 1,
-                thickness: 1.4,
+                height: 3,
+                thickness: 2.4,
                 color: AppTheme.dividerColor(context),
               ),
             ),
@@ -170,7 +170,7 @@ class _SearchBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(22),
           onTap: onTap,
           child: Container(
-            height: 56,
+            height: 64,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
               color: searchSurface,
