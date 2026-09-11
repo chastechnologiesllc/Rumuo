@@ -135,5 +135,5 @@ class _ToolTile extends StatelessWidget {
   final IconData icon; final String title; final String subtitle; final VoidCallback onTap;
   const _ToolTile({required this.icon, required this.title, required this.subtitle, required this.onTap});
   @override
-  Widget build(BuildContext context) => Card(margin: const EdgeInsets.only(bottom: 10), child: ListTile(contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 7), leading: Icon(icon, color: AppTheme.textColor(context)), title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)), subtitle: Text(subtitle), trailing: const Icon(Icons.chevron_right_rounded), onTap: onTap);
+  Widget build(BuildContext context) => Card(margin: const EdgeInsets.only(bottom: 10), child: ListTile(contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 7), leading: Icon(icon, color: AppTheme.textColor(context)), title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)), subtitle: Text(subtitle), trailing: const Icon(Icons.chevron_right_rounded), onTap: onTap));
 }
