@@ -40,7 +40,7 @@ class HelpFeedbackScreen extends StatelessWidget {
                           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Feedback address copied')));
                         }
                       },
-                      icon: const Icon(Icons.copy_rounded),
+                      icon: Icon(Icons.copy_rounded, color: AppTheme.textColor(context)),
                       label: const Text('Copy support address'),
                     ),
                   ),
@@ -69,7 +69,7 @@ class _HelpCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(18),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(children: [Icon(icon, color: AppTheme.gold), const SizedBox(width: 12), Expanded(child: Text(title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)))]),
+            Row(children: [Icon(icon, color: AppTheme.textColor(context)), const SizedBox(width: 12), Expanded(child: Text(title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)))]),
             const SizedBox(height: 12),
             Text(body, style: TextStyle(color: AppTheme.textSecondary(context), height: 1.45)),
             if (action != null) Align(alignment: Alignment.centerLeft, child: action!),

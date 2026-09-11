@@ -19,21 +19,26 @@ class SearchToolsScreen extends StatelessWidget {
     return SafeArea(
       child: Material(
         color: AppTheme.surfaceColor(context),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(12, 10, 12, 18),
+          padding: const EdgeInsets.fromLTRB(12, 28, 12, 18),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(width: 42, height: 4, decoration: BoxDecoration(color: AppTheme.dividerColor(context), borderRadius: BorderRadius.circular(4))),
-              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: IconButton(
+                  tooltip: 'Close',
+                  icon: Icon(Icons.close_rounded, color: AppTheme.textColor(context)),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
               _ToolTile(icon: Icons.add_rounded, title: 'New search', onTap: () {
                 Navigator.pop(context);
                 Navigator.of(context).push(MaterialPageRoute(builder: (_) => ContentSearchScreen(feedProvider: feedProvider)));
               }),
               _ToolTile(icon: Icons.delete_sweep_outlined, title: 'Delete browsing data', onTap: () {
                 Navigator.pop(context);
-                showModalBottomSheet<void>(context: context, isScrollControlled: true, builder: (_) => const DeleteBrowsingDataSheet());
+                showDialog<void>(context: context, builder: (_) => const Dialog(child: DeleteBrowsingDataSheet()));
               }),
               _ToolTile(icon: Icons.bookmark_border_rounded, title: 'Bookmarks', onTap: () {
                 Navigator.pop(context);
@@ -149,7 +154,7 @@ class _SearchSettingsScreenState extends State<SearchSettingsScreen> {
                 children: [
                   Card(child: SwitchListTile.adaptive(value: _privateDefault, onChanged: (value) async { setState(() => _privateDefault = value); await SearchSessionStore.setPrivateSearchEnabled(value); }, title: const Text('Offer private search first'), subtitle: const Text('Keep private search available from the search bar.'))),
                   const SizedBox(height: 12),
-                  const Card(child: ListTile(leading: Icon(Icons.lock_outline_rounded), title: Text('Local session storage'), subtitle: Text('Normal sessions stay on this device and can be deleted from the overflow menu.'))),
+                  Card(child: ListTile(leading: Icon(Icons.lock_outline_rounded, color: AppTheme.textColor(context)), title: const Text('Local session storage'), subtitle: const Text('Normal sessions stay on this device and can be deleted from the overflow menu.'))),
                 ],
               ),
       );
@@ -161,5 +166,5 @@ class _ToolTile extends StatelessWidget {
   final VoidCallback onTap;
   const _ToolTile({required this.icon, required this.title, required this.onTap});
   @override
-  Widget build(BuildContext context) => ListTile(leading: Icon(icon, color: AppTheme.textColor(context)), title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)), trailing: const Icon(Icons.chevron_right_rounded), onTap: onTap);
+  Widget build(BuildContext context) => ListTile(leading: Icon(icon, color: AppTheme.textColor(context)), title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)), trailing: Icon(Icons.chevron_right_rounded, color: AppTheme.textColor(context)), onTap: onTap);
 }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
@@ -602,13 +603,26 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
           IconButton(
             tooltip: 'Search options',
             icon: const Icon(Icons.more_vert_rounded),
-            onPressed: () => showModalBottomSheet<void>(
+            onPressed: () => showGeneralDialog<void>(
               context: context,
-              isScrollControlled: true,
-              backgroundColor: Colors.transparent,
-              builder: (_) => SearchToolsScreen(
-                feedProvider: widget.feedProvider,
-                query: _query.isEmpty ? null : _query,
+              barrierDismissible: true,
+              barrierLabel: 'Search options',
+              barrierColor: Colors.black54,
+              transitionDuration: const Duration(milliseconds: 220),
+              pageBuilder: (_, __, ___) => Align(
+                alignment: Alignment.centerRight,
+                child: SizedBox(
+                  width: math.min(MediaQuery.of(context).size.width * 0.88, 380),
+                  height: double.infinity,
+                  child: SearchToolsScreen(
+                    feedProvider: widget.feedProvider,
+                    query: _query.isEmpty ? null : _query,
+                  ),
+                ),
+              ),
+              transitionBuilder: (_, animation, __, child) => SlideTransition(
+                position: Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero).animate(animation),
+                child: child,
               ),
             ),
           ),
@@ -837,7 +851,7 @@ class _SearchBar extends StatelessWidget {
             fontSize: 16,
           ),
           decoration: InputDecoration(
-            hintText:    'Search videos,…',
+            hintText: "Search through the world's knowledge",
             hintStyle: TextStyle(
               color: Theme.of(context).brightness == Brightness.dark
                   ? Colors.white
