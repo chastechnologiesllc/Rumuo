@@ -610,9 +610,9 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
               barrierColor: Colors.black54,
               transitionDuration: const Duration(milliseconds: 220),
               pageBuilder: (_, __, ___) => Align(
-                alignment: Alignment.centerRight,
+                alignment: Alignment.topRight,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.only(top: 16),
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
                       maxWidth: math.min(MediaQuery.of(context).size.width * 0.76, 320),
