@@ -530,11 +530,18 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
         leadingWidth: 58,
         leading: IconButton(
           tooltip: 'Feed',
-          icon: Icon(
+          icon: const Icon(
             Icons.home_rounded,
             size: 32,
-            color: AppTheme.textColor(context),
           ),
+          color: AppTheme.textColor(context),
+          splashRadius: 24,
+          overlayColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.pressed)) {
+              return Colors.black.withValues(alpha: 0.22);
+            }
+            return Colors.transparent;
+          }),
           onPressed: () => Navigator.of(context).pop(),
         ),
         titleSpacing: 0,
