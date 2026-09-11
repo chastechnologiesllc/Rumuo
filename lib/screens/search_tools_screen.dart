@@ -19,8 +19,10 @@ class SearchToolsScreen extends StatelessWidget {
     return SafeArea(
       child: Material(
         color: AppTheme.surfaceColor(context),
+        clipBehavior: Clip.antiAlias,
+        borderRadius: const BorderRadius.horizontal(left: Radius.circular(22)),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(12, 28, 12, 18),
+          padding: const EdgeInsets.fromLTRB(10, 10, 10, 12),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -28,7 +30,7 @@ class SearchToolsScreen extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child: IconButton(
                   tooltip: 'Close',
-                  icon: Icon(Icons.close_rounded, color: AppTheme.textColor(context)),
+                  icon: Icon(Icons.close_rounded, color: AppTheme.textColor(context), size: 21),
                   onPressed: () => Navigator.pop(context),
                 ),
               ),
@@ -166,5 +168,12 @@ class _ToolTile extends StatelessWidget {
   final VoidCallback onTap;
   const _ToolTile({required this.icon, required this.title, required this.onTap});
   @override
-  Widget build(BuildContext context) => ListTile(leading: Icon(icon, color: AppTheme.textColor(context)), title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)), trailing: Icon(Icons.chevron_right_rounded, color: AppTheme.textColor(context)), onTap: onTap);
+  Widget build(BuildContext context) => ListTile(
+        dense: true,
+        visualDensity: const VisualDensity(horizontal: -1, vertical: -1),
+        leading: Icon(icon, color: AppTheme.textColor(context), size: 21),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+        trailing: Icon(Icons.chevron_right_rounded, color: AppTheme.textColor(context), size: 20),
+        onTap: onTap,
+      );
 }

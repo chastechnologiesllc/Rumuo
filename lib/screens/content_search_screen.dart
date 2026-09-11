@@ -611,12 +611,19 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
               transitionDuration: const Duration(milliseconds: 220),
               pageBuilder: (_, __, ___) => Align(
                 alignment: Alignment.centerRight,
-                child: SizedBox(
-                  width: math.min(MediaQuery.of(context).size.width * 0.88, 380),
-                  height: double.infinity,
-                  child: SearchToolsScreen(
-                    feedProvider: widget.feedProvider,
-                    query: _query.isEmpty ? null : _query,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: math.min(MediaQuery.of(context).size.width * 0.76, 320),
+                      maxHeight: MediaQuery.of(context).size.height - 32,
+                    ),
+                    child: IntrinsicHeight(
+                      child: SearchToolsScreen(
+                        feedProvider: widget.feedProvider,
+                        query: _query.isEmpty ? null : _query,
+                      ),
+                    ),
                   ),
                 ),
               ),
