@@ -615,7 +615,7 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
                   padding: const EdgeInsets.only(top: 16),
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
-                      maxWidth: math.min(MediaQuery.of(context).size.width * 0.76, 320),
+                      maxWidth: math.min(MediaQuery.of(context).size.width * 0.68, 280),
                       maxHeight: MediaQuery.of(context).size.height - 32,
                     ),
                     child: IntrinsicHeight(
