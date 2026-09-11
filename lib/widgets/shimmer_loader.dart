@@ -59,7 +59,7 @@ class ShimmerLoader extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,
-          childAspectRatio: 0.92,
+          childAspectRatio: 1.08,
           crossAxisSpacing: 18,
           mainAxisSpacing: 20,
         ),
@@ -72,7 +72,7 @@ class ShimmerLoader extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,
-          childAspectRatio: 0.9,
+          childAspectRatio: 1.08,
           crossAxisSpacing: 18,
           mainAxisSpacing: 18,
         ),
@@ -86,7 +86,7 @@ class ShimmerLoader extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: columns,
-          childAspectRatio: 9 / 16,
+          childAspectRatio: columns == 4 ? 0.62 : 1.08,
           crossAxisSpacing: 8,
           mainAxisSpacing: 8,
         ),

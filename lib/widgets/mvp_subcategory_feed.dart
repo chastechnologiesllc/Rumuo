@@ -93,7 +93,7 @@ class _MvpSubcategoryFeedState extends State<MvpSubcategoryFeed> {
                 crossAxisCount: shortsDesktop ? 4 : 3,
                 crossAxisSpacing: shortsDesktop ? 10 : 14,
                 mainAxisSpacing: shortsDesktop ? 10 : 14,
-                childAspectRatio: shortsDesktop ? 0.62 : 0.82,
+                childAspectRatio: shortsDesktop ? 0.62 : 1.08,
               ),
               itemCount: itemCount,
               itemBuilder: (_, index) => card(index),

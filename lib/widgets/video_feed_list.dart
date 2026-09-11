@@ -76,7 +76,7 @@ class _VideoFeedListState extends State<VideoFeedList> {
                 crossAxisCount: 3,
                 crossAxisSpacing: 14,
                 mainAxisSpacing: 14,
-                childAspectRatio: 0.82,
+                childAspectRatio: 1.08,
               ),
               itemCount: videos.length,
               itemBuilder: (_, i) => card(i),
