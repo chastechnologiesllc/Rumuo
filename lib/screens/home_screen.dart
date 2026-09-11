@@ -247,10 +247,12 @@ class _PrimaryTabs extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
-        child: Row(
-          children: List.generate(forms.length, (index) {
+  Widget build(BuildContext context) {
+    final desktop = MediaQuery.sizeOf(context).width >= 800;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+      child: Row(
+        children: List.generate(forms.length, (index) {
             final selected = index == selectedIndex;
             final form = forms[index];
             return Expanded(
@@ -277,24 +279,34 @@ class _PrimaryTabs extends StatelessWidget {
                               : AppTheme.dividerColor(context),
                         ),
                       ),
-                      child: Text(
-                        form.label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: AppTheme.textColor(context),
-                          fontWeight: FontWeight.w800,
-                          fontSize: 12,
-                        ),
-                      ),
+                      child: desktop
+                          ? Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(form.icon, size: 14, color: AppTheme.textColor(context)),
+                                const SizedBox(width: 5),
+                                Flexible(child: Text(form.label, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: AppTheme.textColor(context), fontWeight: FontWeight.w800, fontSize: 12))),
+                              ],
+                            )
+                          : Text(
+                              form.label,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: AppTheme.textColor(context),
+                                fontWeight: FontWeight.w800,
+                                fontSize: 12,
+                              ),
+                            ),
                     ),
                   ),
                 ),
               ),
             );
-          }),
-        ),
-      );
+        }),
+      ),
+    );
+  }
 }
 
 class _TabContent extends StatelessWidget {

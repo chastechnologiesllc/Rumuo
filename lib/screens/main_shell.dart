@@ -170,12 +170,15 @@ class _TopNavigation extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) => SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 10, 10, 2),
-          child: Row(
-            children: [
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, constraints) {
+          final desktop = constraints.maxWidth >= 800;
+          return SafeArea(
+            bottom: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 10, 10, 2),
+              child: Row(
+                children: [
               InkWell(
                 onTap: () => onTap(0),
                 borderRadius: BorderRadius.circular(8),
@@ -204,11 +207,17 @@ class _TopNavigation extends StatelessWidget {
                   ),
                 ),
               ),
-              _TopNavButton(
-                  icon: _items[2], active: currentIndex == 2, onTap: () => onTap(2)),
-            ],
-          ),
-        ),
+                  if (desktop) ...[
+                    _TopNavButton(icon: _items[0], active: currentIndex == 0, onTap: () => onTap(0)),
+                    _TopNavButton(icon: _items[1], active: currentIndex == 1, onTap: () => onTap(1)),
+                  ],
+                  _TopNavButton(
+                      icon: _items[2], active: currentIndex == 2, onTap: () => onTap(2)),
+                ],
+              ),
+            ),
+          );
+        },
       );
 }
 
