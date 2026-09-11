@@ -546,11 +546,6 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
             icon: const Icon(Icons.history_rounded),
             onPressed: () {},
           ),
-          IconButton(
-            tooltip: 'Saved content',
-            icon: const Icon(Icons.bookmark_border_rounded),
-            onPressed: () {},
-          ),
           PopupMenuButton<String>(
             tooltip: 'Search options',
             icon: const Icon(Icons.more_vert_rounded),
@@ -781,9 +776,13 @@ class _SearchBar extends StatelessWidget {
         height: 48,
         decoration: BoxDecoration(
           color: Theme.of(context).brightness == Brightness.dark
-              ? const Color(0xFF2B2C30)
+              ? const Color(0xFF303134)
               : const Color(0xFFF1F3F4),
           borderRadius: BorderRadius.circular(26),
+          border: Border.all(
+            color: AppTheme.dividerColor(context).withValues(alpha: 0.55),
+            width: 0.6,
+          ),
         ),
         child: TextField(
           controller:    controller,
