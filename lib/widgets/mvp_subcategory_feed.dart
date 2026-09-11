@@ -40,7 +40,15 @@ class _MvpSubcategoryFeedState extends State<MvpSubcategoryFeed> {
     final sources = _sourceContent();
 
     if (provider.state == FeedState.loading && videos.isEmpty && sources.isEmpty) {
-      return const ShimmerLoader();
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final desktop = constraints.maxWidth >= 600;
+          return ShimmerLoader(
+            variant: desktop ? ShimmerVariant.grid : ShimmerVariant.videoFeed,
+            columns: desktop && widget.form == InformationForm.shorts ? 4 : 2,
+          );
+        },
+      );
     }
     if (videos.isEmpty && sources.isEmpty) {
       return _emptyState(context, provider);

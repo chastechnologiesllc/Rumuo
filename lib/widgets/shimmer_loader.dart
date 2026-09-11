@@ -11,11 +11,13 @@ enum ShimmerVariant { videoFeed, blogFeed, grid }
 class ShimmerLoader extends StatelessWidget {
   final int count;
   final ShimmerVariant variant;
+  final int columns;
 
   const ShimmerLoader({
     super.key,
     this.count = 4,
     this.variant = ShimmerVariant.videoFeed,
+    this.columns = 2,
   });
 
   @override
@@ -48,7 +50,7 @@ class ShimmerLoader extends StatelessWidget {
                 itemBuilder: (_, __) => _BlogShimmerCard(placeholderColor: skeleton),
               );
       case ShimmerVariant.grid:
-        child = _buildPlaceholderGrid(skeleton, count, isDesktop ? 4 : 2);
+        child = _buildPlaceholderGrid(skeleton, count, columns);
     }
 
     return RumuoShimmer(child: child);

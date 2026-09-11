@@ -780,23 +780,24 @@ class _SearchBar extends StatelessWidget {
       child: Container(
         height: 48,
         decoration: BoxDecoration(
-          color: AppTheme.surfaceColor(context),
+          color: Theme.of(context).brightness == Brightness.dark
+              ? const Color(0xFF2B2C30)
+              : const Color(0xFFF1F3F4),
           borderRadius: BorderRadius.circular(26),
-          border: Border.all(color: AppTheme.dividerColor(context), width: 0.7),
         ),
         child: TextField(
           controller:    controller,
           autofocus:     true,
           textAlignVertical: TextAlignVertical.center,
-          style: TextStyle(color: AppTheme.textColor(context), fontSize: 14),
+          style: TextStyle(color: AppTheme.textColor(context), fontSize: 16),
           decoration: InputDecoration(
-            hintText:    'Search videos, shorts, blogs, books, channels, categories…',
-            hintStyle:   TextStyle(color: AppTheme.textMuted(context), fontSize: 14),
+            hintText:    'Search videos,…',
+            hintStyle:   TextStyle(color: AppTheme.textMuted(context), fontSize: 16),
             prefixIcon: Icon(Icons.search_rounded,
-                color: AppTheme.textMuted(context), size: 23),
+                color: AppTheme.textMuted(context), size: 24),
             border:      InputBorder.none,
             isDense:     true,
-            contentPadding: const EdgeInsets.symmetric(vertical: 10),
+            contentPadding: const EdgeInsets.symmetric(vertical: 12),
           ),
         ),
       ),
@@ -1013,20 +1014,7 @@ class _ContentCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Stack(
-                  children: [
-                    _buildThumb(context),
-                    if (item.canBookmark)
-                      Positioned(
-                        top: 4,
-                        right: 4,
-                        child: _SearchBookmarkButton(
-                          saved: saved,
-                          onPressed: onSave,
-                        ),
-                      ),
-                  ],
-                ),
+                _buildThumb(context),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
                   child: Column(
