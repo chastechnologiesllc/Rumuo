@@ -69,7 +69,16 @@ class _ChannelsScreenState extends State<ChannelsScreen> {
   Widget _buildGrid(
       BuildContext context, List<Video> shorts, FeedState state) {
     if (state == FeedState.loading && shorts.isEmpty) {
-      return const ShimmerLoader(count: 6);
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final desktop = constraints.maxWidth >= 600;
+          return ShimmerLoader(
+            variant: desktop ? ShimmerVariant.grid : ShimmerVariant.videoFeed,
+            columns: desktop ? 4 : 2,
+            count: desktop ? 12 : 8,
+          );
+        },
+      );
     }
     if (shorts.isEmpty) {
       return Center(
@@ -87,31 +96,36 @@ class _ChannelsScreenState extends State<ChannelsScreen> {
       );
     }
 
-    return RefreshIndicator(
-      color: AppTheme.gold,
-      onRefresh: () => context.read<FeedProvider>().refresh(force: true),
-      child: GridView.builder(
-        padding: const EdgeInsets.fromLTRB(10, 10, 10, 110),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 9 / 16,
-          crossAxisSpacing: 8,
-          mainAxisSpacing: 8,
-        ),
-        itemCount: shorts.length,
-        itemBuilder: (context, i) {
-          final video = shorts[i];
-          final channel =
-              ChannelData.byId[video.channelId] ?? ChannelData.fallback;
-          return RepaintBoundary(
-            child: _ShortCard(
-              video: video,
-              channelColor: channel.accentColor,
-              onTap: () => _openShorts(shorts, i),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final desktop = constraints.maxWidth >= 600;
+        return RefreshIndicator(
+          color: AppTheme.gold,
+          onRefresh: () => context.read<FeedProvider>().refresh(force: true),
+          child: GridView.builder(
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 110),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: desktop ? 4 : 2,
+              childAspectRatio: 9 / 16,
+              crossAxisSpacing: desktop ? 10 : 8,
+              mainAxisSpacing: desktop ? 10 : 8,
             ),
-          );
-        },
-      ),
+            itemCount: shorts.length,
+            itemBuilder: (context, i) {
+              final video = shorts[i];
+              final channel =
+                  ChannelData.byId[video.channelId] ?? ChannelData.fallback;
+              return RepaintBoundary(
+                child: _ShortCard(
+                  video: video,
+                  channelColor: channel.accentColor,
+                  onTap: () => _openShorts(shorts, i),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

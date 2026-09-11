@@ -129,7 +129,9 @@ class _DesktopZoom extends StatelessWidget {
     final width = media.size.width;
     if (width < 800) return child;
 
-    final scale = (1 + ((width - 800) / 3333)).clamp(1.0, 1.28).toDouble();
+    // Keep a modest desktop enlargement, but never let the transformed
+    // surface approach the viewport edge enough to hide controls or cards.
+    final scale = (1 + ((width - 800) / 5000)).clamp(1.0, 1.12).toDouble();
     final logicalSize = Size(media.size.width / scale, media.size.height / scale);
     final zoomedMedia = media.copyWith(
       size: logicalSize,
