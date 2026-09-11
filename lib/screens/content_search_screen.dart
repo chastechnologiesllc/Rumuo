@@ -24,7 +24,6 @@ import 'book_detail_screen.dart';
 import 'category_detail_screen.dart';
 import 'channel_videos_screen.dart';
 import 'shorts_player_screen.dart';
-import 'private_search_screen.dart';
 import 'search_sessions_screen.dart';
 import 'search_tools_screen.dart';
 import 'video_player_screen.dart';
@@ -577,33 +576,41 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
         titleSpacing: 0,
         title: _SearchBar(controller: _ctrl),
         actions: [
-          IconButton(
-            tooltip: 'Temporary search',
-            icon: const Icon(Icons.visibility_off_rounded),
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => PrivateSearchScreen(feedProvider: widget.feedProvider),
-            )),
-          ),
-          IconButton(
-            tooltip: 'Search history',
-            icon: Badge.count(
-              count: _searchSessionCount,
-              isLabelVisible: _searchSessionCount > 0,
-              child: const Icon(Icons.history_rounded),
+          if (!widget.privateMode)
+            IconButton(
+              tooltip: 'Temporary search',
+              icon: const Icon(Icons.visibility_off_rounded),
+              onPressed: () => Navigator.of(context).pushReplacement(MaterialPageRoute(
+                builder: (_) => ContentSearchScreen(
+                  feedProvider: widget.feedProvider,
+                  privateMode: true,
+                ),
+              )),
             ),
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => SearchSessionsScreen(feedProvider: widget.feedProvider),
-            )),
-          ),
+          if (!widget.privateMode)
+            IconButton(
+              tooltip: 'Search sessions',
+              icon: Badge.count(
+                count: _searchSessionCount,
+                isLabelVisible: _searchSessionCount > 0,
+                child: const Icon(Icons.history_rounded),
+              ),
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => SearchSessionsScreen(feedProvider: widget.feedProvider),
+              )),
+            ),
           IconButton(
             tooltip: 'Search options',
             icon: const Icon(Icons.more_vert_rounded),
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+            onPressed: () => showModalBottomSheet<void>(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
               builder: (_) => SearchToolsScreen(
                 feedProvider: widget.feedProvider,
                 query: _query.isEmpty ? null : _query,
               ),
-            )),
+            ),
           ),
         ],
       ),
@@ -623,7 +630,7 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
   }
 
   Widget _buildBody() {
-    if (_query.isEmpty) return _EmptyPrompt();
+    if (_query.isEmpty) return _EmptyPrompt(privateMode: widget.privateMode);
 
     final hasResults = _left.isNotEmpty || _right.isNotEmpty;
     final feedLoading = _fp.state == FeedState.loading ||
@@ -1405,6 +1412,9 @@ class _SearchProgress extends StatelessWidget {
 // ── Empty prompt ────────────────────────────────────────────────────────────
 
 class _EmptyPrompt extends StatelessWidget {
+  final bool privateMode;
+  const _EmptyPrompt({this.privateMode = false});
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -1421,8 +1431,10 @@ class _EmptyPrompt extends StatelessWidget {
                     fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
             Text(
-              'Type a keyword — "how to price", "solar install", '
-              '"fashion business" — to find videos, shorts, blogs, books, channels, and categories.',
+              privateMode
+                  ? 'Rumuo will not add searches from this session to your saved history or tabs.'
+                  : 'Type a keyword — "how to price", "solar install", '
+                      '"fashion business" — to find videos, shorts, blogs, books, channels, and categories.',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: AppTheme.textMuted(context), height: 1.6),

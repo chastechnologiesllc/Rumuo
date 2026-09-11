@@ -122,7 +122,14 @@ class _HeaderAndSearch extends StatelessWidget {
             width: searchWidth,
             child: _SearchBar(
                 onTap: openSearch,
-                action: openSearch,
+                action: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => ContentSearchScreen(
+                      feedProvider: context.read<FeedProvider>(),
+                      privateMode: true,
+                    ),
+                  ),
+                ),
                 actionTooltip: 'Temporary search',
             ),
           ),

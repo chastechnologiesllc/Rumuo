@@ -4,7 +4,6 @@ import '../providers/feed_provider.dart';
 import '../services/search_session_store.dart';
 import '../theme/app_theme.dart';
 import 'content_search_screen.dart';
-import 'private_search_screen.dart';
 
 class SearchSessionsScreen extends StatefulWidget {
   final FeedProvider feedProvider;
@@ -33,113 +32,121 @@ class _SearchSessionsScreenState extends State<SearchSessionsScreen> {
     });
   }
 
-  Future<void> _clearAll() async {
-    await SearchSessionStore.clear();
-    if (mounted) setState(() => _sessions = const []);
-  }
-
   Future<void> _remove(String query) async {
     await SearchSessionStore.remove(query);
-    if (mounted) setState(() => _sessions = _sessions.where((item) => item != query).toList());
+    if (mounted) {
+      setState(() => _sessions = _sessions.where((item) => item != query).toList());
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       backgroundColor: AppTheme.bgColor(context),
       appBar: AppBar(
-        title: const Text('Sessions and tabs'),
+        title: const Text('Session'),
         actions: [
-          if (_sessions.isNotEmpty)
-            TextButton(onPressed: _clearAll, child: const Text('Clear all')),
+          IconButton(
+            tooltip: 'Feed',
+            icon: Icon(
+              Icons.home_outlined,
+              color: dark ? Colors.white : Colors.black,
+              size: 30,
+            ),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
         ],
       ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final maxWidth = constraints.maxWidth >= 720 ? 680.0 : double.infinity;
-          return Center(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: maxWidth),
-              child: _loading
-                  ? const Center(child: CircularProgressIndicator(color: AppTheme.gold))
-                  : ListView(
-                      padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
-                      children: [
-                        _SectionCard(
-                          icon: Icons.visibility_off_rounded,
-                          title: 'Private search',
-                          subtitle: 'Search without saving this session to your history.',
-                          onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                            builder: (_) => PrivateSearchScreen(feedProvider: widget.feedProvider),
-                          )),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator(color: AppTheme.gold))
+          : LayoutBuilder(
+              builder: (context, constraints) {
+                final columns = constraints.maxWidth >= 700 ? 4 : 2;
+                return _sessions.isEmpty
+                    ? const _EmptySessions()
+                    : GridView.builder(
+                        padding: const EdgeInsets.fromLTRB(14, 16, 14, 32),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: columns,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 1.18,
                         ),
-                        const SizedBox(height: 24),
-                        Text('Recent searches', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
-                        const SizedBox(height: 8),
-                        if (_sessions.isEmpty)
-                          _EmptySessions()
-                        else
-                          ..._sessions.map((query) => ListTile(
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                                leading: const Icon(Icons.history_rounded),
-                                title: Text(query, maxLines: 1, overflow: TextOverflow.ellipsis),
-                                trailing: IconButton(
-                                  tooltip: 'Remove search',
-                                  icon: const Icon(Icons.close_rounded),
-                                  onPressed: () => _remove(query),
-                                ),
-                                onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (_) => ContentSearchScreen(
-                                    feedProvider: widget.feedProvider,
-                                    initialQuery: query,
-                                  ),
-                                )),
-                              )),
-                      ],
-                    ),
+                        itemCount: _sessions.length,
+                        itemBuilder: (_, index) => _SessionCard(
+                          query: _sessions[index],
+                          onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                            builder: (_) => ContentSearchScreen(
+                              feedProvider: widget.feedProvider,
+                              initialQuery: _sessions[index],
+                            ),
+                          )),
+                          onRemove: () => _remove(_sessions[index]),
+                        ),
+                      );
+              },
             ),
-          );
-        },
-      ),
     );
   }
 }
 
-class _SectionCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
+class _SessionCard extends StatelessWidget {
+  final String query;
   final VoidCallback onTap;
-  const _SectionCard({required this.icon, required this.title, required this.subtitle, required this.onTap});
+  final VoidCallback onRemove;
+  const _SessionCard({required this.query, required this.onTap, required this.onRemove});
 
   @override
   Widget build(BuildContext context) => Card(
-        child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-          leading: CircleAvatar(
-            backgroundColor: AppTheme.gold.withValues(alpha: 0.14),
-            child: Icon(icon, color: AppTheme.gold),
-          ),
-          title: Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
-          subtitle: Padding(padding: const EdgeInsets.only(top: 4), child: Text(subtitle)),
-          trailing: const Icon(Icons.chevron_right_rounded),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
           onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.history_rounded, size: 22, color: AppTheme.textSecondary(context)),
+                    const Spacer(),
+                    IconButton(
+                      tooltip: 'Remove session',
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                      icon: const Icon(Icons.close_rounded, size: 18),
+                      onPressed: onRemove,
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                Text(query, maxLines: 3, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700, height: 1.25)),
+                const SizedBox(height: 4),
+                Text('Open search', style: TextStyle(color: AppTheme.textMuted(context), fontSize: 12)),
+              ],
+            ),
+          ),
         ),
       );
 }
 
 class _EmptySessions extends StatelessWidget {
+  const _EmptySessions();
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 42, horizontal: 24),
-        child: Column(
-          children: [
-            Icon(Icons.history_toggle_off_rounded, size: 48, color: AppTheme.textMuted(context)),
-            const SizedBox(height: 12),
-            const Text('No saved sessions yet', style: TextStyle(fontWeight: FontWeight.w700)),
-            const SizedBox(height: 6),
-            Text('Your normal searches will appear here. Private searches stay out of this list.', textAlign: TextAlign.center, style: TextStyle(color: AppTheme.textMuted(context))),
-          ],
+  Widget build(BuildContext context) => Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.history_toggle_off_rounded, size: 52, color: AppTheme.textMuted(context)),
+              const SizedBox(height: 12),
+              const Text('No sessions yet', style: TextStyle(fontWeight: FontWeight.w700)),
+              const SizedBox(height: 6),
+              Text('Your normal searches will appear here.', textAlign: TextAlign.center, style: TextStyle(color: AppTheme.textMuted(context))),
+            ],
+          ),
         ),
       );
 }

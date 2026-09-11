@@ -95,8 +95,6 @@ class _SavedScreenState extends State<SavedScreen> {
   Widget build(BuildContext context) {
     final provider = context.watch<FeedProvider>();
     final saved = provider.savedBookmarks;
-    final shorts = saved.where((item) => item.isShort).toList(growable: false);
-    final others = saved.where((item) => !item.isShort).toList(growable: false);
 
     return Scaffold(
       appBar: AppBar(
@@ -117,15 +115,8 @@ class _SavedScreenState extends State<SavedScreen> {
           Expanded(
             child: saved.isEmpty
                 ? const _EmptySaved()
-                : shorts.isEmpty
-                    ? _SingleBookmarkColumn(
-                        items: others,
-                        onTap: _openBookmark,
-                        onRemove: provider.toggleBookmark,
-                      )
-                    : _TwoColumnBookmarks(
-                        shorts: shorts,
-                        others: others,
+                    : _SavedGrid(
+                        items: saved,
                         onTap: _openBookmark,
                         onRemove: provider.toggleBookmark,
                       ),
@@ -161,6 +152,46 @@ class _SavedScreenState extends State<SavedScreen> {
     );
     if (confirmed ?? false) await provider.clearSaved();
   }
+}
+
+class _SavedGrid extends StatelessWidget {
+  final List<SavedBookmark> items;
+  final ValueChanged<SavedBookmark> onTap;
+  final Future<void> Function(SavedBookmark) onRemove;
+
+  const _SavedGrid({required this.items, required this.onTap, required this.onRemove});
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, constraints) {
+          final columns = constraints.maxWidth >= 760 ? 4 : 2;
+          return GridView.builder(
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 120),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: columns,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              childAspectRatio: 0.84,
+            ),
+            itemCount: items.length,
+            itemBuilder: (_, index) {
+              final item = items[index];
+              if (item.isShort) {
+                return _SavedShortCard(
+                  bookmark: item,
+                  onTap: () => onTap(item),
+                  onRemove: () => onRemove(item),
+                );
+              }
+              return _SavedContentCard(
+                bookmark: item,
+                onTap: () => onTap(item),
+                onRemove: () => onRemove(item),
+              );
+            },
+          );
+        },
+      );
 }
 
 class _SingleBookmarkColumn extends StatelessWidget {

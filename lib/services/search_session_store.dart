@@ -10,6 +10,8 @@ class SearchSessionStore {
 
   static const String _sessionsKey = 'rumuo_search_sessions';
   static const String _privateSearchKey = 'rumuo_private_search_enabled';
+  static const String _cookiesKey = 'rumuo_search_cookies';
+  static const String _cacheKey = 'rumuo_search_cache';
   static const int maxSessions = 99;
 
   static Future<List<String>> loadSessions() async {
@@ -37,9 +39,22 @@ class SearchSessionStore {
     await prefs.setStringList(_sessionsKey, sessions);
   }
 
-  static Future<void> clear() async {
+  static Future<void> clearSessions() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_sessionsKey);
+  }
+
+  static Future<void> clearBrowsingData({
+    bool sessions = true,
+    bool cookies = true,
+    bool cache = true,
+    bool privatePreference = true,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (sessions) await prefs.remove(_sessionsKey);
+    if (cookies) await prefs.remove(_cookiesKey);
+    if (cache) await prefs.remove(_cacheKey);
+    if (privatePreference) await prefs.remove(_privateSearchKey);
   }
 
   static Future<bool> privateSearchEnabled() async {
