@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/channel_data.dart';
 import '../models/channel.dart';
@@ -11,6 +10,7 @@ import '../models/video.dart';
 import '../providers/feed_provider.dart';
 import '../services/blog_rss_service.dart';
 import '../services/platform_search_index.dart';
+import '../services/search_session_store.dart';
 import '../theme/app_theme.dart';
 import '../widgets/blog_thumbnail_image.dart';
 import '../widgets/book_cover_image.dart';
@@ -24,6 +24,9 @@ import 'book_detail_screen.dart';
 import 'category_detail_screen.dart';
 import 'channel_videos_screen.dart';
 import 'shorts_player_screen.dart';
+import 'private_search_screen.dart';
+import 'search_sessions_screen.dart';
+import 'search_tools_screen.dart';
 import 'video_player_screen.dart';
 
 // ── Unified search result ───────────────────────────────────────────────────
@@ -120,7 +123,14 @@ class _SearchItem {
 /// MultiProvider) rather than via context.read() in initState().
 class ContentSearchScreen extends StatefulWidget {
   final FeedProvider feedProvider;
-  const ContentSearchScreen({required this.feedProvider, super.key});
+  final String? initialQuery;
+  final bool privateMode;
+  const ContentSearchScreen({
+    required this.feedProvider,
+    this.initialQuery,
+    this.privateMode = false,
+    super.key,
+  });
 
   @override
   State<ContentSearchScreen> createState() => _ContentSearchScreenState();
@@ -147,8 +157,14 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.initialQuery != null && widget.initialQuery!.trim().isNotEmpty) {
+      _ctrl.text = widget.initialQuery!.trim();
+    }
     _ctrl.addListener(_onInput);
     unawaited(_loadSearchSessionCount());
+    if (_ctrl.text.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _onInput());
+    }
     _lastFeedState = _fp.state;
     // Listen to feed so we re-search automatically when it finishes loading
     // on a cold launch where the user typed before videos were in memory.
@@ -156,24 +172,15 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
   }
 
   Future<void> _loadSearchSessionCount() async {
-    final prefs = await SharedPreferences.getInstance();
+    final sessions = await SearchSessionStore.loadSessions();
     if (!mounted) return;
-    setState(() {
-      _searchSessionCount =
-          (prefs.getStringList('rumuo_search_sessions') ?? const <String>[])
-              .length;
-    });
+    setState(() => _searchSessionCount = sessions.length);
   }
 
   Future<void> _recordSearchSession(String query) async {
-    final normalized = query.trim().toLowerCase();
-    if (normalized.length < 2) return;
-    final prefs = await SharedPreferences.getInstance();
-    final sessions = prefs.getStringList('rumuo_search_sessions') ?? <String>[];
-    sessions.remove(normalized);
-    sessions.insert(0, normalized);
-    if (sessions.length > 99) sessions.removeRange(99, sessions.length);
-    await prefs.setStringList('rumuo_search_sessions', sessions);
+    if (widget.privateMode) return;
+    await SearchSessionStore.add(query);
+    final sessions = await SearchSessionStore.loadSessions();
     if (mounted) setState(() => _searchSessionCount = sessions.length);
   }
 
@@ -573,7 +580,9 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
           IconButton(
             tooltip: 'Temporary search',
             icon: const Icon(Icons.visibility_off_rounded),
-            onPressed: () {},
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => PrivateSearchScreen(feedProvider: widget.feedProvider),
+            )),
           ),
           IconButton(
             tooltip: 'Search history',
@@ -582,31 +591,19 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
               isLabelVisible: _searchSessionCount > 0,
               child: const Icon(Icons.history_rounded),
             ),
-            onPressed: () {},
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => SearchSessionsScreen(feedProvider: widget.feedProvider),
+            )),
           ),
-          PopupMenuButton<String>(
+          IconButton(
             tooltip: 'Search options',
             icon: const Icon(Icons.more_vert_rounded),
-            onSelected: (value) {
-              if (value == 'clear') {
-                _ctrl.clear();
-              }
-            },
-            itemBuilder: (_) => [
-              if (_ctrl.text.isNotEmpty)
-                const PopupMenuItem(
-                  value: 'clear',
-                  child: Text('Clear search'),
-                ),
-              const PopupMenuItem(
-                value: 'history',
-                child: Text('Search history'),
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => SearchToolsScreen(
+                feedProvider: widget.feedProvider,
+                query: _query.isEmpty ? null : _query,
               ),
-              const PopupMenuItem(
-                value: 'saved',
-                child: Text('Saved content'),
-              ),
-            ],
+            )),
           ),
         ],
       ),
