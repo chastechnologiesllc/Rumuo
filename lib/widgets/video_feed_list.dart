@@ -50,33 +50,48 @@ class _VideoFeedListState extends State<VideoFeedList> {
     return RefreshIndicator(
       color: AppTheme.gold,
       onRefresh: () => provider.refresh(force: true),
-      child: ListView.builder(
-        physics: const ClampingScrollPhysics(),
-        // ignore: deprecated_member_use
-        cacheExtent: 280,
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
-        itemCount: videos.length,
-        itemBuilder: (context, i) {
-          final video = videos[i];
-          final channel = ChannelData.byId[video.channelId] ?? ChannelData.fallback;
-          return Column(
-            key: ValueKey('v_${video.id}'),
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 14),
-                child: InlineVideoCard(
-                  key: ValueKey(video.id),
-                  video: video,
-                  channel: channel,
-                  subcategoryTag: 'Long-form',
-                  saved: provider.isVideoSaved(video.id),
-                  activeVideoNotifier: _activeVideoNotifier,
-                  onSave: () => provider.toggleSaved(video),
-                  onShare: () => Share.share('${video.title}\n${video.watchUrl}'),
-                ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final desktop = constraints.maxWidth >= 600;
+          Widget card(int i) {
+            final video = videos[i];
+            final channel = ChannelData.byId[video.channelId] ?? ChannelData.fallback;
+            return InlineVideoCard(
+              key: ValueKey(video.id),
+              video: video,
+              channel: channel,
+              subcategoryTag: 'Long-form',
+              saved: provider.isVideoSaved(video.id),
+              activeVideoNotifier: _activeVideoNotifier,
+              onSave: () => provider.toggleSaved(video),
+              onShare: () => Share.share('${video.title}\n${video.watchUrl}'),
+            );
+          }
+
+          if (desktop) {
+            return GridView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 14,
+                mainAxisSpacing: 14,
+                childAspectRatio: 0.82,
               ),
-            ],
+              itemCount: videos.length,
+              itemBuilder: (_, i) => card(i),
+            );
+          }
+
+          return ListView.builder(
+            physics: const ClampingScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+            itemCount: videos.length,
+            itemBuilder: (_, i) => Padding(
+              key: ValueKey('v_${videos[i].id}'),
+              padding: const EdgeInsets.only(bottom: 14),
+              child: card(i),
+            ),
           );
         },
       ),

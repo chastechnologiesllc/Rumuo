@@ -31,10 +31,9 @@ class ShimmerLoader extends StatelessWidget {
         child = isDesktop
             ? _buildVideoGrid(skeleton, count)
             : ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                itemCount: count,
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
+                itemCount: count < 8 ? 8 : count,
                 separatorBuilder: (_, __) => const SizedBox(height: 16),
                 itemBuilder: (_, __) => _VideoShimmerCard(placeholderColor: skeleton),
               );
@@ -42,10 +41,9 @@ class ShimmerLoader extends StatelessWidget {
         child = isDesktop
             ? _buildBlogGrid(skeleton, count)
             : ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                itemCount: count,
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
+                itemCount: count < 8 ? 8 : count,
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (_, __) => _BlogShimmerCard(placeholderColor: skeleton),
               );
@@ -57,45 +55,42 @@ class ShimmerLoader extends StatelessWidget {
   }
 
   Widget _buildVideoGrid(Color skeleton, int itemCount) => GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,
           childAspectRatio: 0.92,
           crossAxisSpacing: 18,
           mainAxisSpacing: 20,
         ),
-        itemCount: itemCount,
+        itemCount: itemCount < 12 ? 12 : itemCount,
         itemBuilder: (_, __) => _VideoShimmerCard(placeholderColor: skeleton),
       );
 
   Widget _buildBlogGrid(Color skeleton, int itemCount) => GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,
           childAspectRatio: 0.9,
           crossAxisSpacing: 18,
           mainAxisSpacing: 18,
         ),
-        itemCount: itemCount,
+        itemCount: itemCount < 12 ? 12 : itemCount,
         itemBuilder: (_, __) => _BlogShimmerCard(placeholderColor: skeleton),
       );
 
   Widget _buildPlaceholderGrid(Color skeleton, int itemCount, int columns) =>
       GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(12),
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: columns,
           childAspectRatio: 9 / 16,
           crossAxisSpacing: 8,
           mainAxisSpacing: 8,
         ),
-        itemCount: itemCount,
+        itemCount: itemCount < columns * 4 ? columns * 4 : itemCount,
         itemBuilder: (_, __) => Container(
           decoration: BoxDecoration(
             color: skeleton,

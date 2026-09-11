@@ -45,7 +45,7 @@ class _MvpSubcategoryFeedState extends State<MvpSubcategoryFeed> {
           final desktop = constraints.maxWidth >= 600;
           return ShimmerLoader(
             variant: desktop ? ShimmerVariant.grid : ShimmerVariant.videoFeed,
-            columns: desktop && widget.form == InformationForm.shorts ? 4 : 2,
+            columns: desktop && widget.form == InformationForm.shorts ? 4 : 3,
           );
         },
       );
@@ -90,7 +90,7 @@ class _MvpSubcategoryFeedState extends State<MvpSubcategoryFeed> {
               physics: const AlwaysScrollableScrollPhysics(),
               padding: padding,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: shortsDesktop ? 4 : 2,
+                crossAxisCount: shortsDesktop ? 4 : 3,
                 crossAxisSpacing: shortsDesktop ? 10 : 14,
                 mainAxisSpacing: shortsDesktop ? 10 : 14,
                 childAspectRatio: shortsDesktop ? 0.62 : 0.82,
