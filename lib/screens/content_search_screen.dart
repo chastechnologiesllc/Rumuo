@@ -559,7 +559,7 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
         leading: IconButton(
           tooltip: 'Feed',
           icon: const Icon(
-            Icons.home_rounded,
+            Icons.home_outlined,
             size: 32,
           ),
           color: AppTheme.textColor(context),

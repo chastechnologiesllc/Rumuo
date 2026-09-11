@@ -111,7 +111,7 @@ class _HeaderAndSearch extends StatelessWidget {
               tooltip: 'Feed',
               onPressed: () {},
               padding: EdgeInsets.zero,
-              icon: const Icon(Icons.home_rounded, size: 32),
+              icon: const Icon(Icons.home_outlined, size: 32),
               color: AppTheme.textColor(context),
               splashRadius: 24,
               highlightColor: Colors.black.withValues(alpha: 0.22),
