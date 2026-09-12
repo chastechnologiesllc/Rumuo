@@ -134,6 +134,7 @@ class _StartupGateState extends State<_StartupGate> {
   bool _initDone = false;
   bool _webBootReadySent = false;
   bool _nativeLaunchReadySent = false;
+  bool _startupWatchdogFired = false;
 
   // Holds fully-initialised providers, set after init completes.
   FeedProvider? _feedProvider;
@@ -144,6 +145,23 @@ class _StartupGateState extends State<_StartupGate> {
     super.initState();
     // Fire-and-forget — native initiation remains visible while startup runs.
     unawaited(_initialize());
+    // A browser can pause or indefinitely delay a storage/plugin operation.
+    // Never let that keep the static web splash above the app forever.
+    unawaited(_startupWatchdog());
+  }
+
+  Future<void> _startupWatchdog() async {
+    await Future<void>.delayed(const Duration(seconds: 8));
+    if (!mounted || _initDone) return;
+    debugPrint('[startup] watchdog opened the shell after 8s');
+    _startupWatchdogFired = true;
+    final provider = FeedProvider();
+    unawaited(_safeInit('FeedProvider (watchdog)', provider.init));
+    setState(() {
+      _feedProvider = provider;
+      _initDone = true;
+    });
+    _maybeTransition();
   }
 
   Future<void> _initialize() async {
@@ -153,8 +171,10 @@ class _StartupGateState extends State<_StartupGate> {
     // reading progress just won't persist — that must never be allowed to
     // strand the user on the native initiation screen forever.
     try {
-      await Hive.initFlutter();
-      await Hive.openBox<String>('reading_progress');
+      await Future<void>(() async {
+        await Hive.initFlutter();
+        await Hive.openBox<String>('reading_progress');
+      }).timeout(const Duration(seconds: 3));
     } on Object catch (e) {
       debugPrint('[startup] Hive init failed (non-fatal): $e');
     }
@@ -223,7 +243,7 @@ class _StartupGateState extends State<_StartupGate> {
       }
     }());
 
-    if (!mounted) return;
+    if (!mounted || _initDone || _startupWatchdogFired) return;
     setState(() {
       _feedProvider = provider;
       _initDone = true;

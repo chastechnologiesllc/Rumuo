@@ -167,6 +167,12 @@
           if (boot.parentNode) boot.parentNode.removeChild(boot);
         }, 220);
       }
+      // Flutter normally sends this event after its first usable frame. The
+      // fallback prevents a paused tab, blocked storage adapter, or extension
+      // from trapping the user on the static splash indefinitely.
+      window.setTimeout(function () {
+        if (!boot.classList.contains('is-hidden')) hideBoot();
+      }, 10000);
       // This is the only Web splash. Keep it in place until Flutter has
       // painted the first usable onboarding or shell frame; hiding on an
       // earlier engine frame would create a blank/second-page transition.
