@@ -290,7 +290,7 @@ class _AppleMark extends StatelessWidget {
   Widget build(BuildContext context) => Icon(
         Icons.apple,
         color: color,
-        size: 28,
+        size: 34,
         semanticLabel: 'Apple',
       );
 }

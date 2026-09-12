@@ -10,6 +10,8 @@ import '../data/resource_category_data.dart';
 import '../screens/my_business_screen.dart';
 import '../screens/privacy_policy_screen.dart';
 import '../screens/auth_screen.dart';
+import '../screens/monetization_screen.dart';
+import '../screens/settings_screen.dart';
 import '../services/network_policy.dart';
 import '../services/user_profile_service.dart';
 import '../theme/app_theme.dart';
@@ -128,6 +130,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           );
                           if (mounted) setState(() {});
                         },
+                      ),
+
+                      const _SectionHeader('Rumuo'),
+                      _SettingsTile(
+                        icon: Icons.tune_rounded,
+                        iconColor: AppTheme.textColor(context),
+                        title: 'Settings',
+                        subtitle: 'Privacy, personalization, search and data controls',
+                        trailing: const Icon(Icons.chevron_right_rounded),
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                        ),
+                      ),
+                      _SettingsTile(
+                        icon: Icons.auto_awesome_rounded,
+                        iconColor: AppTheme.gold,
+                        title: 'Rumuo plans',
+                        subtitle: 'Explore Pro research and future professional tools',
+                        trailing: const Icon(Icons.chevron_right_rounded),
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const MonetizationScreen()),
+                        ),
                       ),
 
                       // ── Data usage ────────────────────────────────────────
