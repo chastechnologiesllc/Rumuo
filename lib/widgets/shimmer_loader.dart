@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
 import 'rumuo_shimmer.dart';
 
 /// Fix 2 — Shimmer skeletons with correct 16:9 aspect ratio and blog variant.
@@ -23,35 +24,44 @@ class ShimmerLoader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skeleton = RumuoShimmer.fillColor(context);
-    final isDesktop = MediaQuery.sizeOf(context).width >= 700;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isDesktop = constraints.maxWidth >= 700;
+        Widget child;
+        switch (variant) {
+          case ShimmerVariant.videoFeed:
+            child = isDesktop
+                ? _buildVideoGrid(skeleton, count)
+                : ListView.separated(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
+                    itemCount: count < 8 ? 8 : count,
+                    separatorBuilder: (_, __) => const SizedBox(height: 16),
+                    itemBuilder: (_, __) => _VideoShimmerCard(placeholderColor: skeleton),
+                  );
+          case ShimmerVariant.blogFeed:
+            child = isDesktop
+                ? _buildBlogGrid(skeleton, count)
+                : ListView.separated(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
+                    itemCount: count < 8 ? 8 : count,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (_, __) => _BlogShimmerCard(placeholderColor: skeleton),
+                  );
+          case ShimmerVariant.grid:
+            child = _buildPlaceholderGrid(skeleton, count, columns);
+        }
 
-    Widget child;
-    switch (variant) {
-      case ShimmerVariant.videoFeed:
-        child = isDesktop
-            ? _buildVideoGrid(skeleton, count)
-            : ListView.separated(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
-                itemCount: count < 8 ? 8 : count,
-                separatorBuilder: (_, __) => const SizedBox(height: 16),
-                itemBuilder: (_, __) => _VideoShimmerCard(placeholderColor: skeleton),
-              );
-      case ShimmerVariant.blogFeed:
-        child = isDesktop
-            ? _buildBlogGrid(skeleton, count)
-            : ListView.separated(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
-                itemCount: count < 8 ? 8 : count,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
-                itemBuilder: (_, __) => _BlogShimmerCard(placeholderColor: skeleton),
-              );
-      case ShimmerVariant.grid:
-        child = _buildPlaceholderGrid(skeleton, count, columns);
-    }
-
-    return RumuoShimmer(child: child);
+        // The scroll view already preserves the existing card geometry. The
+        // outer colour makes the loading state occupy every pixel of the
+        // screen, including the viewport below the last skeleton row.
+        return ColoredBox(
+          color: AppTheme.bgColor(context),
+          child: RumuoShimmer(child: child),
+        );
+      },
+    );
   }
 
   Widget _buildVideoGrid(Color skeleton, int itemCount) => GridView.builder(
