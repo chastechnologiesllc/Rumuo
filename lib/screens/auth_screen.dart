@@ -68,13 +68,19 @@ class _AuthScreenState extends State<AuthScreen> {
       ),
       body: SafeArea(
         top: false,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final desktop = constraints.maxWidth >= 720;
+            return SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(desktop ? 32 : 24, 12, desktop ? 32 : 24, 32),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 560),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
                 const _RumuoSplashMark(),
                 const SizedBox(height: 24),
                 Text(
@@ -200,10 +206,13 @@ class _AuthScreenState extends State<AuthScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(color: muted, fontSize: 11, height: 1.45),
                 ),
-              ],
-            ),
-          ),
-        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
       ),
     );
   }
@@ -289,13 +298,14 @@ class _RumuoSplashMark extends StatelessWidget {
   const _RumuoSplashMark();
 
   @override
-  Widget build(BuildContext context) => ClipRRect(
-        borderRadius: BorderRadius.circular(18),
+  Widget build(BuildContext context) => SizedBox(
+        width: 72,
+        height: 72,
         child: Image.asset(
           'assets/icons/rumuo_native_launch.png',
-          width: 56,
-          height: 56,
-          fit: BoxFit.cover,
+          width: 72,
+          height: 72,
+          fit: BoxFit.contain,
           semanticLabel: 'Rumuo',
         ),
       );
