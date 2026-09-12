@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
-import '../widgets/rumuo_mark.dart';
 
 /// Front-end-only authentication surface. Wire the buttons to the auth service
 /// when the backend is ready; the navigation entry remains intentionally scoped
@@ -76,7 +75,7 @@ class _AuthScreenState extends State<AuthScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const RumuoMark(size: 56, borderRadius: 18),
+                _RumuoPlatformMark(color: text),
                 const SizedBox(height: 24),
                 Text(
                   _isSignUp ? 'Create your account' : 'Welcome back',
@@ -256,39 +255,33 @@ class _FieldLabel extends StatelessWidget {
   Widget build(BuildContext context) => Text(label, style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w700));
 }
 
-/// The four-colour Google G mark, drawn locally so the auth screen does not
-/// depend on a remote image or an additional icon package.
 class _GoogleMark extends StatelessWidget {
   const _GoogleMark();
   @override
-  Widget build(BuildContext context) => CustomPaint(size: const Size(22, 22), painter: _GoogleMarkPainter());
+  Widget build(BuildContext context) => Image.asset(
+        'assets/icons/google_g_mark.png',
+        width: 22,
+        height: 22,
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.high,
+        semanticLabel: 'Google',
+      );
 }
 
-class _GoogleMarkPainter extends CustomPainter {
+class _RumuoPlatformMark extends StatelessWidget {
+  final Color color;
+
+  const _RumuoPlatformMark({required this.color});
+
   @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width * .36;
-    final stroke = size.width * .18;
-    final segments = <(Color, double, double)>[
-      (const Color(0xFF4285F4), -0.42, 1.42),
-      (const Color(0xFF34A853), 1.00, 0.62),
-      (const Color(0xFFFBBC05), 1.62, 0.80),
-      (const Color(0xFFEA4335), 2.42, 1.31),
-    ];
-    for (final segment in segments) {
-      final paint = Paint();
-      paint.color = segment.$1;
-      paint.style = PaintingStyle.stroke;
-      paint.strokeWidth = stroke;
-      paint.strokeCap = StrokeCap.butt;
-      canvas.drawArc(Rect.fromCircle(center: center, radius: radius), segment.$2, segment.$3, false, paint);
-    }
-    final blue = Paint();
-    blue.color = const Color(0xFF4285F4);
-    blue.style = PaintingStyle.fill;
-    canvas.drawRect(Rect.fromLTWH(size.width * .5, size.height * .42, size.width * .42, stroke), blue);
-  }
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  Widget build(BuildContext context) => ColorFiltered(
+        colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+        child: Image.asset(
+          'assets/icons/rumuo_bird_transparent.png',
+          width: 56,
+          height: 56,
+          fit: BoxFit.contain,
+          semanticLabel: 'Rumuo',
+        ),
+      );
 }
