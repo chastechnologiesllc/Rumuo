@@ -151,9 +151,9 @@ class _StartupGateState extends State<_StartupGate> {
   }
 
   Future<void> _startupWatchdog() async {
-    await Future<void>.delayed(const Duration(seconds: 8));
+    await Future<void>.delayed(const Duration(seconds: 6));
     if (!mounted || _initDone) return;
-    debugPrint('[startup] watchdog opened the shell after 8s');
+    debugPrint('[startup] watchdog opened the shell after 6s');
     _startupWatchdogFired = true;
     final provider = FeedProvider();
     unawaited(_safeInit('FeedProvider (watchdog)', provider.init));
@@ -323,11 +323,52 @@ class _StartupGateState extends State<_StartupGate> {
       );
     }
 
-    // Web keeps the static HTML boot screen over this transparent Flutter
-    // first frame until _maybeTransition signals the first usable shell.
-    // Android/iOS show their native initiation screen before Flutter and then
-    // render the shell directly without a second Flutter splash.
-    return const SizedBox.shrink();
+    // Keep a real Flutter frame underneath the static/native splash. If a
+    // browser delays a plugin, storage adapter, or provider, removing the
+    // outer splash must reveal a useful state rather than a white void.
+    return const _StartupFallback();
+  }
+}
+
+class _StartupFallback extends StatelessWidget {
+  const _StartupFallback();
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return Scaffold(
+      backgroundColor: dark ? AppTheme.darkBg : AppTheme.lightBg,
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              'assets/icons/app_icon.png',
+              width: 72,
+              height: 72,
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => const Icon(
+                Icons.auto_awesome_rounded,
+                size: 52,
+                color: AppTheme.gold,
+              ),
+            ),
+            const SizedBox(height: 18),
+            Text(
+              'Opening Rumuo…',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+            ),
+            const SizedBox(height: 16),
+            const SizedBox(
+              width: 96,
+              child: LinearProgressIndicator(color: AppTheme.gold),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
