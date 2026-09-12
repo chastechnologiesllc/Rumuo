@@ -145,7 +145,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       _SettingsTile(
                         icon: Icons.auto_awesome_rounded,
-                        iconColor: AppTheme.gold,
+                        iconColor: AppTheme.textColor(context),
                         title: 'Rumuo plans',
                         subtitle: 'Explore Pro research and future professional tools',
                         trailing: const Icon(Icons.chevron_right_rounded),
@@ -166,7 +166,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         trailing: Switch.adaptive(
                           value: networkPolicy.isDataSaverEnabled,
                           onChanged: (_) => networkPolicy.toggle(),
-                          activeColor: AppTheme.textColor(context),
+                              activeColor: AppTheme.textColor(context),
                           activeTrackColor:
                               AppTheme.textColor(context).withValues(alpha: 0.35),
                         ),
@@ -330,11 +330,11 @@ class _SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 28, 20, 10),
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 10),
       child: Text(
         title.toUpperCase(),
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: AppTheme.gold,
+              color: AppTheme.textColor(context),
               letterSpacing: 1.4,
               fontWeight: FontWeight.w800,
               fontSize: 11,

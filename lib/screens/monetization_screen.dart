@@ -73,7 +73,7 @@ class _HeroCard extends StatelessWidget {
           border: Border.all(color: AppTheme.gold.withValues(alpha: 0.35)),
         ),
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Container(width: 54, height: 54, alignment: Alignment.center, decoration: BoxDecoration(color: AppTheme.gold, borderRadius: BorderRadius.circular(17)), child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 28)),
+          Container(width: 54, height: 54, alignment: Alignment.center, decoration: BoxDecoration(color: AppTheme.surfaceColor(context), borderRadius: BorderRadius.circular(17), border: Border.all(color: AppTheme.dividerColor(context))), child: Icon(Icons.auto_awesome_rounded, color: AppTheme.textColor(context), size: 28)),
           const SizedBox(width: 15),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text('Pay for capability, not basic discovery.', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800)),
@@ -103,13 +103,13 @@ class _PlanCard extends StatelessWidget {
         color: AppTheme.surfaceColor(context),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: AppTheme.dividerColor(context))),
         child: Padding(padding: const EdgeInsets.all(18), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [Icon(icon, color: AppTheme.gold), const SizedBox(width: 9), Text(eyebrow, style: const TextStyle(color: AppTheme.gold, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.1))]),
+          Row(children: [Icon(icon, color: AppTheme.textColor(context)), const SizedBox(width: 9), Text(eyebrow, style: TextStyle(color: AppTheme.textColor(context), fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.1))]),
           const SizedBox(height: 12),
           Text(title, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
           const SizedBox(height: 6),
           Text(description, style: TextStyle(color: AppTheme.textMuted(context), height: 1.35)),
           const SizedBox(height: 14),
-          ...features.map((feature) => Padding(padding: const EdgeInsets.only(bottom: 8), child: Row(children: [const Icon(Icons.check_circle_outline_rounded, color: AppTheme.gold, size: 18), const SizedBox(width: 8), Expanded(child: Text(feature))]))),
+          ...features.map((feature) => Padding(padding: const EdgeInsets.only(bottom: 8), child: Row(children: [Icon(Icons.check_circle_outline_rounded, color: AppTheme.textColor(context), size: 18), const SizedBox(width: 8), Expanded(child: Text(feature))]))),
           const SizedBox(height: 7),
           SizedBox(width: double.infinity, child: onPressed == null ? OutlinedButton(onPressed: null, child: Text(action)) : OutlinedButton(onPressed: onPressed, child: Text(action))),
         ])),
@@ -127,7 +127,7 @@ class _FutureCard extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: AppTheme.dividerColor(context))),
         child: ListTile(
           contentPadding: const EdgeInsets.fromLTRB(18, 12, 10, 12),
-          leading: const Icon(Icons.apartment_rounded, color: AppTheme.gold, size: 28),
+          leading: Icon(Icons.apartment_rounded, color: AppTheme.textColor(context), size: 28),
           title: const Text('Enterprise intelligence', style: TextStyle(fontWeight: FontWeight.w800)),
           subtitle: const Padding(padding: EdgeInsets.only(top: 4), child: Text('Monitored research spaces, team workspaces, alerts and structured discovery for organizations.')),
           trailing: IconButton(tooltip: 'Learn more', onPressed: onEnterprise, icon: const Icon(Icons.chevron_right_rounded)),
