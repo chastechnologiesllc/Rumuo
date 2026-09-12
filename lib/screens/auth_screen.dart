@@ -57,9 +57,13 @@ class _AuthScreenState extends State<AuthScreen> {
 
     return Scaffold(
       backgroundColor: AppTheme.bgColor(context),
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        shadowColor: Colors.transparent,
         leading: IconButton(
           tooltip: 'Back to Profile',
           icon: const Icon(Icons.arrow_back_rounded),
@@ -67,12 +71,17 @@ class _AuthScreenState extends State<AuthScreen> {
         ),
       ),
       body: SafeArea(
-        top: false,
+        top: true,
         child: LayoutBuilder(
           builder: (context, constraints) {
             final desktop = constraints.maxWidth >= 720;
             return SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(desktop ? 32 : 24, 12, desktop ? 32 : 24, 32),
+              padding: EdgeInsets.fromLTRB(
+                desktop ? 32 : 24,
+                kToolbarHeight + 12,
+                desktop ? 32 : 24,
+                32,
+              ),
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 560),
