@@ -876,7 +876,7 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
 
 // ── Search bar ──────────────────────────────────────────────────────────────
 
-class _SearchBar extends StatelessWidget {
+class _SearchBar extends StatefulWidget {
   final TextEditingController controller;
   final ValueChanged<String> onSubmitted;
   final VoidCallback onSearch;
@@ -885,6 +885,45 @@ class _SearchBar extends StatelessWidget {
     required this.onSubmitted,
     required this.onSearch,
   });
+
+  @override
+  State<_SearchBar> createState() => _SearchBarState();
+}
+
+class _SearchBarState extends State<_SearchBar> {
+  bool _showSearchButton = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _showSearchButton = widget.controller.text.isNotEmpty;
+    widget.controller.addListener(_onTextChanged);
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onTextChanged);
+    super.dispose();
+  }
+
+  void _onTextChanged() {
+    if (!mounted) return;
+    if (widget.controller.text.isEmpty) {
+      if (_showSearchButton) setState(() => _showSearchButton = false);
+      return;
+    }
+    if (!_showSearchButton) setState(() => _showSearchButton = true);
+  }
+
+  void _submit() {
+    widget.onSearch();
+    if (mounted) setState(() => _showSearchButton = false);
+  }
+
+  void _submitText(String value) {
+    widget.onSubmitted(value);
+    if (mounted) setState(() => _showSearchButton = false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -903,10 +942,10 @@ class _SearchBar extends StatelessWidget {
           ),
         ),
         child: TextField(
-          controller:    controller,
+          controller:    widget.controller,
           autofocus:     true,
           textInputAction: TextInputAction.search,
-          onSubmitted: onSubmitted,
+          onSubmitted: _submitText,
           textAlignVertical: TextAlignVertical.center,
           style: TextStyle(
             color: Theme.of(context).brightness == Brightness.dark
@@ -940,11 +979,13 @@ class _SearchBar extends StatelessWidget {
                 ),
               ),
             ),
-            suffixIcon: IconButton(
-              tooltip: 'Search',
-              onPressed: onSearch,
-              icon: const Icon(Icons.search_rounded),
-            ),
+            suffixIcon: _showSearchButton
+                ? IconButton(
+                    tooltip: 'Search',
+                    onPressed: _submit,
+                    icon: const Icon(Icons.search_rounded),
+                  )
+                : null,
             border:      InputBorder.none,
             isDense:     true,
             contentPadding: const EdgeInsets.symmetric(vertical: 8),
