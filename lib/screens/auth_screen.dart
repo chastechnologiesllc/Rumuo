@@ -57,19 +57,6 @@ class _AuthScreenState extends State<AuthScreen> {
 
     return Scaffold(
       backgroundColor: AppTheme.bgColor(context),
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        shadowColor: Colors.transparent,
-        leading: IconButton(
-          tooltip: 'Back to Profile',
-          icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
       body: SafeArea(
         top: true,
         child: LayoutBuilder(
@@ -78,7 +65,7 @@ class _AuthScreenState extends State<AuthScreen> {
             return SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(
                 desktop ? 32 : 24,
-                kToolbarHeight + 12,
+                12,
                 desktop ? 32 : 24,
                 32,
               ),
@@ -90,6 +77,14 @@ class _AuthScreenState extends State<AuthScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: IconButton(
+                    tooltip: 'Back to Profile',
+                    icon: const Icon(Icons.arrow_back_rounded),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ),
                 const _RumuoSplashMark(),
                 const SizedBox(height: 24),
                 Text(
