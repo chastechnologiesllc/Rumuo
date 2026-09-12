@@ -257,8 +257,9 @@ class _SourceCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppTheme.surfaceColor(context),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppTheme.dividerColor(context), width: 0.6),
+            border: Border.all(color: AppTheme.dividerColor(context), width: 0.5),
           ),
+          clipBehavior: Clip.hardEdge,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -268,22 +269,50 @@ class _SourceCard extends StatelessWidget {
                   children: [
                     AspectRatio(
                       aspectRatio: 16 / 9,
-                      child: _thumbnail(context),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          _thumbnail(context),
+                          Positioned(
+                            left: 6,
+                            top: 6,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.62),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 7, vertical: 4),
+                                child: Text(
+                                  source.subcategoryName,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
+              Container(height: 3, color: AppTheme.gold),
               Padding(
-                padding: const EdgeInsets.fromLTRB(14, 12, 12, 14),
+                padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(source.title,
-                        maxLines: 3,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w800, height: 1.28)),
-                    const SizedBox(height: 12),
+                            height: 1.35, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 10),
                     Row(children: [
                       Container(
                         width: 7,
