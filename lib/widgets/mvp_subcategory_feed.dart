@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -5,10 +7,13 @@ import '../data/channel_data.dart';
 import '../data/resource_category_data.dart';
 import '../models/information_form.dart';
 import '../models/resource_category.dart';
+import '../models/saved_bookmark.dart';
 import '../models/video.dart';
 import '../providers/feed_provider.dart';
 import '../screens/blog_reader_screen.dart';
 import '../theme/app_theme.dart';
+import 'book_cover_image.dart';
+import 'blog_thumbnail_image.dart';
 import 'inline_video_card.dart';
 import 'shimmer_loader.dart';
 
@@ -82,7 +87,25 @@ class _MvpSubcategoryFeedState extends State<MvpSubcategoryFeed> {
                 onShare: () {},
               );
             }
-            return _SourceCard(source: sources[index - videos.length]);
+            final source = sources[index - videos.length];
+            final isData = widget.form == InformationForm.structured;
+            final bookmark = SavedBookmark(
+              id: source.url.isNotEmpty ? source.url : source.title,
+              kind: SavedBookmarkKind.blog,
+              title: source.title,
+              description: source.description,
+              sourceName: source.subcategoryName,
+              url: source.url,
+              thumbnailUrl: source.thumbnailUrl,
+              publishedAt: DateTime(2000),
+            );
+            return _SourceCard(
+              source: source,
+              saved: isData && provider.isBookmarkSaved(bookmark.stableKey),
+              onBookmark: isData
+                  ? () => unawaited(provider.toggleBookmark(bookmark))
+                  : null,
+            );
           }
 
           if (desktop) {
@@ -195,8 +218,14 @@ class _MvpSubcategoryFeedState extends State<MvpSubcategoryFeed> {
 
 class _SourceCard extends StatelessWidget {
   final VerifiedSubcategorySource source;
+  final bool saved;
+  final VoidCallback? onBookmark;
 
-  const _SourceCard({required this.source});
+  const _SourceCard({
+    required this.source,
+    this.saved = false,
+    this.onBookmark,
+  });
 
   Future<void> _open(BuildContext context) async {
     final uri = Uri.tryParse(source.url);
@@ -240,16 +269,7 @@ class _SourceCard extends StatelessWidget {
                   children: [
                     AspectRatio(
                       aspectRatio: 16 / 9,
-                      child: Image.network(
-                        _thumbnailUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          color: AppTheme.gold.withValues(alpha: 0.12),
-                          alignment: Alignment.center,
-                          child: const Icon(Icons.public_rounded,
-                              color: AppTheme.gold, size: 34),
-                        ),
-                      ),
+                      child: _thumbnail(context),
                     ),
                   ],
                 ),
@@ -279,8 +299,26 @@ class _SourceCard extends StatelessWidget {
                                   fontWeight: FontWeight.w800,
                                   fontSize: 13)),
                         ),
-                        Icon(Icons.more_vert_rounded,
-                            size: 19, color: AppTheme.textMuted(context)),
+                        if (onBookmark != null)
+                          IconButton(
+                            tooltip: saved ? 'Remove bookmark' : 'Bookmark',
+                            onPressed: onBookmark,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(
+                                minWidth: 30, minHeight: 30),
+                            icon: Icon(
+                              saved
+                                  ? Icons.bookmark_rounded
+                                  : Icons.bookmark_border_rounded,
+                              size: 20,
+                              color: saved
+                                  ? AppTheme.gold
+                                  : AppTheme.textMuted(context),
+                            ),
+                          )
+                        else
+                          Icon(Icons.more_vert_rounded,
+                              size: 19, color: AppTheme.textMuted(context)),
                       ],
                     ),
                   ],
@@ -289,5 +327,35 @@ class _SourceCard extends StatelessWidget {
             ],
           ),
         ),
+  );
+
+  Widget _thumbnail(BuildContext context) {
+    final isBook = source.subcategoryId == 'written_books';
+    final isBlog = source.subcategoryId == 'written_blogs';
+    if (isBook) {
+      return BookCoverImage(
+        url: source.thumbnailUrl ?? '',
+        sourceUrl: source.url,
+        fit: BoxFit.cover,
       );
+    }
+    if (isBlog) {
+      return BlogThumbnailImage(
+        url: source.thumbnailUrl,
+        width: double.infinity,
+        height: double.infinity,
+        fit: BoxFit.cover,
+      );
+    }
+    return Image.network(
+      _thumbnailUrl,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => Container(
+        color: AppTheme.gold.withValues(alpha: 0.12),
+        alignment: Alignment.center,
+        child: const Icon(Icons.public_rounded,
+            color: AppTheme.gold, size: 34),
+      ),
+    );
+  }
 }
