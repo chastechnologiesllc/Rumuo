@@ -250,6 +250,8 @@ class _SourceCard extends StatelessWidget {
         : 'https://www.google.com/s2/favicons?domain=$host&sz=256';
   }
 
+  Color get _accentColor => ChannelData.fallback.accentColor;
+
   @override
   Widget build(BuildContext context) => GestureDetector(
         onTap: () => _open(context),
@@ -301,7 +303,7 @@ class _SourceCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Container(height: 3, color: AppTheme.gold),
+              Container(height: 3, color: _accentColor),
               Padding(
                 padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
                 child: Column(
@@ -317,8 +319,8 @@ class _SourceCard extends StatelessWidget {
                       Container(
                         width: 7,
                         height: 7,
-                        decoration: const BoxDecoration(
-                          color: AppTheme.gold,
+                        decoration: BoxDecoration(
+                          color: _accentColor,
                           shape: BoxShape.circle,
                         ),
                       ),
