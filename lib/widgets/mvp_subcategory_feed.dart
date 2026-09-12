@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../data/channel_data.dart';
 import '../data/resource_category_data.dart';
@@ -104,6 +105,7 @@ class _MvpSubcategoryFeedState extends State<MvpSubcategoryFeed> {
               source: source,
               saved: provider.isBookmarkSaved(bookmark.stableKey),
               onBookmark: () => unawaited(provider.toggleBookmark(bookmark)),
+              onShare: () => Share.share('${source.title}\n${source.url}'),
             );
           }
 
@@ -219,11 +221,13 @@ class _SourceCard extends StatelessWidget {
   final VerifiedSubcategorySource source;
   final bool saved;
   final VoidCallback? onBookmark;
+  final VoidCallback? onShare;
 
   const _SourceCard({
     required this.source,
     this.saved = false,
     this.onBookmark,
+    this.onShare,
   });
 
   Future<void> _open(BuildContext context) async {
@@ -339,7 +343,8 @@ class _SourceCard extends StatelessWidget {
                       const Icon(Icons.arrow_forward_ios_rounded,
                           size: 11, color: AppTheme.gold),
                       const Spacer(),
-                      if (onBookmark != null) _actionMenu(context),
+                      if (onBookmark != null || onShare != null)
+                        _actionMenu(context),
                     ]),
                   ],
                 ),
@@ -386,7 +391,8 @@ class _SourceCard extends StatelessWidget {
       padding: EdgeInsets.zero,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       itemBuilder: (_) => [
-        PopupMenuItem(
+        if (onBookmark != null)
+          PopupMenuItem(
           value: 'save',
           child: Row(children: [
             Icon(
@@ -397,9 +403,21 @@ class _SourceCard extends StatelessWidget {
             const SizedBox(width: 10),
             Text(saved ? 'Remove bookmark' : 'Bookmark'),
           ]),
-        ),
+          ),
+        if (onShare != null)
+          const PopupMenuItem(
+            value: 'share',
+            child: Row(children: [
+              Icon(Icons.share_outlined, size: 18),
+              SizedBox(width: 10),
+              Text('Share'),
+            ]),
+          ),
       ],
-      onSelected: (_) => onBookmark?.call(),
+      onSelected: (value) {
+        if (value == 'save') onBookmark?.call();
+        if (value == 'share') onShare?.call();
+      },
     );
   }
 }
