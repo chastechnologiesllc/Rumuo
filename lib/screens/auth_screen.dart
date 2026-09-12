@@ -120,7 +120,10 @@ class _AuthScreenState extends State<AuthScreen> {
                   decoration: _inputDecoration(context, 'At least 8 characters', Icons.lock_outline_rounded).copyWith(
                     suffixIcon: IconButton(
                       tooltip: _obscurePassword ? 'Show password' : 'Hide password',
-                      icon: Icon(_obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                      // The closed eye is the affordance while the password is
+                      // hidden. Pressing it reveals the value and switches to
+                      // the open eye, matching common password-field behavior.
+                      icon: Icon(_obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined),
                       onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                     ),
                   ),
@@ -175,7 +178,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 _ProviderButton(
                   backgroundColor: surface,
                   borderColor: divider,
-                  leading: Icon(Icons.apple, color: text, size: 22),
+                  leading: _AppleMark(color: text),
                   label: 'Continue with Apple',
                   labelColor: text,
                   onPressed: () => _showProviderMessage('Apple'),
@@ -235,7 +238,7 @@ class _ProviderButton extends StatelessWidget {
       height: 54,
       child: OutlinedButton.icon(
         onPressed: onPressed,
-        icon: leading,
+        icon: SizedBox(width: 28, height: 28, child: Center(child: leading)),
         label: Text(label, style: TextStyle(color: labelColor ?? AppTheme.textColor(context), fontSize: 15, fontWeight: FontWeight.w700)),
         style: OutlinedButton.styleFrom(
           backgroundColor: backgroundColor,
@@ -260,11 +263,25 @@ class _GoogleMark extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Image.asset(
         'assets/icons/google_g_mark.png',
-        width: 22,
-        height: 22,
+        width: 24,
+        height: 24,
         fit: BoxFit.contain,
         filterQuality: FilterQuality.high,
         semanticLabel: 'Google',
+      );
+}
+
+class _AppleMark extends StatelessWidget {
+  final Color color;
+
+  const _AppleMark({required this.color});
+
+  @override
+  Widget build(BuildContext context) => Icon(
+        Icons.apple,
+        color: color,
+        size: 28,
+        semanticLabel: 'Apple',
       );
 }
 
