@@ -80,6 +80,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   expandedHeight: 110,
                   backgroundColor: AppTheme.bgColor(context),
                   surfaceTintColor: Colors.transparent,
+                  actions: [
+                    IconButton(
+                      tooltip: 'Settings',
+                      icon: Icon(
+                        Icons.settings_outlined,
+                        color: AppTheme.textColor(context),
+                      ),
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const SettingsScreen(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
                   flexibleSpace: FlexibleSpaceBar(
                     titlePadding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
                     title: Text(
@@ -133,16 +148,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
 
                       const _SectionHeader('Rumuo'),
-                      _SettingsTile(
-                        icon: Icons.tune_rounded,
-                        iconColor: AppTheme.textColor(context),
-                        title: 'Settings',
-                        subtitle: 'Privacy, personalization, search and data controls',
-                        trailing: const Icon(Icons.chevron_right_rounded),
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const SettingsScreen()),
-                        ),
-                      ),
                       _SettingsTile(
                         icon: Icons.auto_awesome_rounded,
                         iconColor: AppTheme.textColor(context),
