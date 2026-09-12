@@ -9,6 +9,7 @@ import '../config/app_config.dart';
 import '../data/resource_category_data.dart';
 import '../screens/my_business_screen.dart';
 import '../screens/privacy_policy_screen.dart';
+import '../screens/auth_screen.dart';
 import '../services/network_policy.dart';
 import '../services/user_profile_service.dart';
 import '../theme/app_theme.dart';
@@ -97,6 +98,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 SliverToBoxAdapter(
                   child: Column(
                     children: [
+                      // ── Account ──────────────────────────────────────────
+                      const _SectionHeader('Account'),
+                      _SettingsTile(
+                        icon: Icons.person_add_alt_1_rounded,
+                        iconColor: AppTheme.gold,
+                        title: 'Create your account',
+                        subtitle: 'Sign up or log in to keep your Rumuo journey',
+                        trailing: const Icon(Icons.chevron_right_rounded),
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const AuthScreen(),
+                          ),
+                        ),
+                      ),
+
                       // ── Personalize ──────────────────────────────────────
                       const _SectionHeader('Personalize'),
                       _SettingsTile(
