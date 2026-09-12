@@ -162,6 +162,7 @@ class _MvpSubcategoryFeedState extends State<MvpSubcategoryFeed> {
           subcategoryName: 'Blogs',
           title: blog['name'] ?? 'Blog source',
           url: blog['url'] ?? '',
+          thumbnailUrl: _faviconFor(blog['url'] ?? ''),
           description: 'Verified written source with current articles and updates.',
           contentType: 'Written blog source',
           region: 'Global',
@@ -170,9 +171,10 @@ class _MvpSubcategoryFeedState extends State<MvpSubcategoryFeed> {
       for (final book in ResourceCategoryData.verifiedBooks.take(40)) {
         result.add(VerifiedSubcategorySource(
           subcategoryId: 'written_books',
-          subcategoryName: 'Books',
+          subcategoryName: book.author,
           title: book.title,
           url: book.freeSourceUrl,
+          thumbnailUrl: book.coverUrl,
           description: book.freeSourceNote ?? 'Verified free book or guide.',
           contentType: 'Written book or guide',
           region: book.region ?? 'Global',
@@ -181,6 +183,13 @@ class _MvpSubcategoryFeedState extends State<MvpSubcategoryFeed> {
       return result;
     }
     return const [];
+  }
+
+  static String? _faviconFor(String url) {
+    final host = Uri.tryParse(url)?.host;
+    return host == null || host.isEmpty
+        ? null
+        : 'https://www.google.com/s2/favicons?domain=$host&sz=256';
   }
 }
 
@@ -204,6 +213,9 @@ class _SourceCard extends StatelessWidget {
   }
 
   String get _thumbnailUrl {
+    if (source.thumbnailUrl?.trim().isNotEmpty == true) {
+      return source.thumbnailUrl!;
+    }
     final host = Uri.tryParse(source.url)?.host ?? '';
     return host.isEmpty
         ? ''
@@ -214,7 +226,6 @@ class _SourceCard extends StatelessWidget {
   Widget build(BuildContext context) => GestureDetector(
         onTap: () => _open(context),
         child: Container(
-          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: AppTheme.surfaceColor(context),
             borderRadius: BorderRadius.circular(16),
@@ -224,11 +235,11 @@ class _SourceCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
                 child: Stack(
                   children: [
                     AspectRatio(
-                      aspectRatio: 16 / 7,
+                      aspectRatio: 16 / 9,
                       child: Image.network(
                         _thumbnailUrl,
                         fit: BoxFit.cover,
@@ -240,49 +251,40 @@ class _SourceCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Positioned(
-                      left: 6,
-                      top: 6,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.62),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-                          child: Text(source.subcategoryName,
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700)),
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
-              Text(source.title,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(fontWeight: FontWeight.w800)),
-              const SizedBox(height: 7),
-              Text(source.description,
-                  maxLines: 4,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppTheme.textMuted(context), height: 1.4)),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Text(source.contentType,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppTheme.textMuted(context))),
-                  const Spacer(),
-                  const Icon(Icons.open_in_new_rounded,
-                      size: 17, color: AppTheme.gold),
-                ],
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 12, 12, 14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(source.title,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w800, height: 1.28)),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        const Icon(Icons.account_circle_rounded,
+                            size: 20, color: AppTheme.gold),
+                        const SizedBox(width: 7),
+                        Expanded(
+                          child: Text(source.subcategoryName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  color: AppTheme.gold,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 13)),
+                        ),
+                        Icon(Icons.more_vert_rounded,
+                            size: 19, color: AppTheme.textMuted(context)),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

@@ -186,6 +186,7 @@ class VerifiedSubcategorySource {
   final String subcategoryName;
   final String title;
   final String url;
+  final String? thumbnailUrl;
   final String description;
   final String contentType;
   final String region;
@@ -195,6 +196,7 @@ class VerifiedSubcategorySource {
     required this.subcategoryName,
     required this.title,
     required this.url,
+    this.thumbnailUrl,
     required this.description,
     required this.contentType,
     required this.region,
@@ -206,6 +208,7 @@ class VerifiedSubcategorySource {
         subcategoryName: json['subcategoryName'] as String? ?? '',
         title: json['title'] as String? ?? '',
         url: json['url'] as String? ?? '',
+        thumbnailUrl: json['thumbnailUrl'] as String?,
         description: json['description'] as String? ?? '',
         contentType: json['contentType'] as String? ?? '',
         region: json['region'] as String? ?? '',
