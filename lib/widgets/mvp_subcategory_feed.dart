@@ -88,10 +88,11 @@ class _MvpSubcategoryFeedState extends State<MvpSubcategoryFeed> {
               );
             }
             final source = sources[index - videos.length];
-            final isData = widget.form == InformationForm.structured;
             final bookmark = SavedBookmark(
               id: source.url.isNotEmpty ? source.url : source.title,
-              kind: SavedBookmarkKind.blog,
+              kind: source.subcategoryId == 'written_books'
+                  ? SavedBookmarkKind.book
+                  : SavedBookmarkKind.blog,
               title: source.title,
               description: source.description,
               sourceName: source.subcategoryName,
@@ -101,10 +102,8 @@ class _MvpSubcategoryFeedState extends State<MvpSubcategoryFeed> {
             );
             return _SourceCard(
               source: source,
-              saved: isData && provider.isBookmarkSaved(bookmark.stableKey),
-              onBookmark: isData
-                  ? () => unawaited(provider.toggleBookmark(bookmark))
-                  : null,
+              saved: provider.isBookmarkSaved(bookmark.stableKey),
+              onBookmark: () => unawaited(provider.toggleBookmark(bookmark)),
             );
           }
 
@@ -285,42 +284,32 @@ class _SourceCard extends StatelessWidget {
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w800, height: 1.28)),
                     const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        const Icon(Icons.account_circle_rounded,
-                            size: 20, color: AppTheme.gold),
-                        const SizedBox(width: 7),
-                        Expanded(
-                          child: Text(source.subcategoryName,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                  color: AppTheme.gold,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 13)),
+                    Row(children: [
+                      Container(
+                        width: 7,
+                        height: 7,
+                        decoration: const BoxDecoration(
+                          color: AppTheme.gold,
+                          shape: BoxShape.circle,
                         ),
-                        if (onBookmark != null)
-                          IconButton(
-                            tooltip: saved ? 'Remove bookmark' : 'Bookmark',
-                            onPressed: onBookmark,
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(
-                                minWidth: 30, minHeight: 30),
-                            icon: Icon(
-                              saved
-                                  ? Icons.bookmark_rounded
-                                  : Icons.bookmark_border_rounded,
-                              size: 20,
-                              color: saved
-                                  ? AppTheme.gold
-                                  : AppTheme.textMuted(context),
-                            ),
-                          )
-                        else
-                          Icon(Icons.more_vert_rounded,
-                              size: 19, color: AppTheme.textMuted(context)),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(source.subcategoryName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: AppTheme.gold,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 13,
+                            )),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.arrow_forward_ios_rounded,
+                          size: 11, color: AppTheme.gold),
+                      const Spacer(),
+                      if (onBookmark != null) _actionMenu(context),
+                    ]),
                   ],
                 ),
               ),
@@ -356,6 +345,30 @@ class _SourceCard extends StatelessWidget {
         child: const Icon(Icons.public_rounded,
             color: AppTheme.gold, size: 34),
       ),
+    );
+  }
+
+  Widget _actionMenu(BuildContext context) {
+    return PopupMenuButton<String>(
+      icon: Icon(Icons.more_vert_rounded,
+          size: 18, color: AppTheme.textMuted(context)),
+      padding: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      itemBuilder: (_) => [
+        PopupMenuItem(
+          value: 'save',
+          child: Row(children: [
+            Icon(
+              saved ? Icons.bookmark_rounded : Icons.bookmark_add_outlined,
+              size: 18,
+              color: AppTheme.gold,
+            ),
+            const SizedBox(width: 10),
+            Text(saved ? 'Remove bookmark' : 'Bookmark'),
+          ]),
+        ),
+      ],
+      onSelected: (_) => onBookmark?.call(),
     );
   }
 }
