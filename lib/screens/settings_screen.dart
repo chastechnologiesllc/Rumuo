@@ -72,14 +72,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     SwitchListTile.adaptive(
                       value: _personalization,
                       onChanged: (value) => setState(() => _personalization = value),
-                      activeColor: AppTheme.gold,
+                      activeThumbColor: AppTheme.textColor(context),
+                      activeTrackColor:
+                          AppTheme.textColor(context).withValues(alpha: 0.3),
                       title: const Text('Personalized discovery'),
                       subtitle: const Text('Use selected interests and recent activity to shape the feed.'),
                     ),
                     SwitchListTile.adaptive(
                       value: _researchMemory,
                       onChanged: (value) => setState(() => _researchMemory = value),
-                      activeColor: AppTheme.gold,
+                      activeThumbColor: AppTheme.textColor(context),
+                      activeTrackColor:
+                          AppTheme.textColor(context).withValues(alpha: 0.3),
                       title: const Text('Research continuity'),
                       subtitle: const Text('Keep useful context while you explore a topic.'),
                     ),
@@ -102,7 +106,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         setState(() => _privateSearch = value);
                         await SearchSessionStore.setPrivateSearchEnabled(value);
                       },
-                      activeColor: AppTheme.gold,
+                      activeThumbColor: AppTheme.textColor(context),
+                      activeTrackColor:
+                          AppTheme.textColor(context).withValues(alpha: 0.3),
                       title: const Text('Offer private search first'),
                       subtitle: const Text('Search without adding activity to persistent sessions.'),
                     ),
@@ -127,7 +133,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     SwitchListTile.adaptive(
                       value: policy.isDataSaverEnabled,
                       onChanged: (_) => policy.toggle(),
-                      activeColor: AppTheme.gold,
+                      activeThumbColor: AppTheme.textColor(context),
+                      activeTrackColor:
+                          AppTheme.textColor(context).withValues(alpha: 0.3),
                       title: const Text('Data Saver'),
                       subtitle: const Text('Reduce preloading and background network use.'),
                     ),

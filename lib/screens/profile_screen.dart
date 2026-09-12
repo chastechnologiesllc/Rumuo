@@ -340,7 +340,7 @@ class _SectionHeader extends StatelessWidget {
       child: Text(
         title.toUpperCase(),
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: AppTheme.textColor(context),
+              color: AppTheme.gold,
               letterSpacing: 1.4,
               fontWeight: FontWeight.w800,
               fontSize: 11,
