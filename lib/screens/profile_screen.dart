@@ -102,7 +102,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const _SectionHeader('Account'),
                       _SettingsTile(
                         icon: Icons.person_add_alt_1_rounded,
-                        iconColor: AppTheme.gold,
+                        iconColor: AppTheme.textColor(context),
                         title: 'Create your account',
                         subtitle: 'Sign up or log in to keep your Rumuo journey',
                         trailing: const Icon(Icons.chevron_right_rounded),

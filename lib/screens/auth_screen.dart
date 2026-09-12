@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
+import '../widgets/rumuo_mark.dart';
 
 /// Front-end-only authentication surface. Wire the buttons to the auth service
 /// when the backend is ready; the navigation entry remains intentionally scoped
@@ -75,7 +76,7 @@ class _AuthScreenState extends State<AuthScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _AuthBrandMark(color: AppTheme.gold),
+                const RumuoMark(size: 56, borderRadius: 18),
                 const SizedBox(height: 24),
                 Text(
                   _isSignUp ? 'Create your account' : 'Welcome back',
@@ -96,34 +97,6 @@ class _AuthScreenState extends State<AuthScreen> {
                   style: TextStyle(color: muted, fontSize: 15, height: 1.4),
                 ),
                 const SizedBox(height: 30),
-                _ProviderButton(
-                  backgroundColor: surface,
-                  borderColor: divider,
-                  leading: const _GoogleMark(),
-                  label: 'Continue with Google',
-                  onPressed: () => _showProviderMessage('Google'),
-                ),
-                const SizedBox(height: 12),
-                _ProviderButton(
-                  backgroundColor: text,
-                  borderColor: text,
-                  leading: Icon(Icons.apple, color: AppTheme.bgColor(context), size: 22),
-                  label: 'Continue with Apple',
-                  labelColor: AppTheme.bgColor(context),
-                  onPressed: () => _showProviderMessage('Apple'),
-                ),
-                const SizedBox(height: 26),
-                Row(
-                  children: [
-                    Expanded(child: Divider(color: divider)),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 14),
-                      child: Text('OR', style: TextStyle(color: muted, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.2)),
-                    ),
-                    Expanded(child: Divider(color: divider)),
-                  ],
-                ),
-                const SizedBox(height: 24),
                 _FieldLabel(label: 'Email address', color: text),
                 const SizedBox(height: 8),
                 TextFormField(
@@ -179,6 +152,34 @@ class _AuthScreenState extends State<AuthScreen> {
                     onPressed: _submitEmail,
                     child: Text(_isSignUp ? 'Create account' : 'Log in', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
                   ),
+                ),
+                const SizedBox(height: 26),
+                Row(
+                  children: [
+                    Expanded(child: Divider(color: divider)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      child: Text('OR', style: TextStyle(color: muted, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.2)),
+                    ),
+                    Expanded(child: Divider(color: divider)),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                _ProviderButton(
+                  backgroundColor: surface,
+                  borderColor: divider,
+                  leading: const _GoogleMark(),
+                  label: 'Continue with Google',
+                  onPressed: () => _showProviderMessage('Google'),
+                ),
+                const SizedBox(height: 12),
+                _ProviderButton(
+                  backgroundColor: surface,
+                  borderColor: divider,
+                  leading: Icon(Icons.apple, color: text, size: 22),
+                  label: 'Continue with Apple',
+                  labelColor: text,
+                  onPressed: () => _showProviderMessage('Apple'),
                 ),
                 const SizedBox(height: 22),
                 Row(
@@ -253,13 +254,6 @@ class _FieldLabel extends StatelessWidget {
   const _FieldLabel({required this.label, required this.color});
   @override
   Widget build(BuildContext context) => Text(label, style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w700));
-}
-
-class _AuthBrandMark extends StatelessWidget {
-  final Color color;
-  const _AuthBrandMark({required this.color});
-  @override
-  Widget build(BuildContext context) => Center(child: Container(width: 56, height: 56, decoration: BoxDecoration(color: color.withValues(alpha: .12), borderRadius: BorderRadius.circular(18)), child: Icon(Icons.person_rounded, color: color, size: 30)));
 }
 
 /// The four-colour Google G mark, drawn locally so the auth screen does not
