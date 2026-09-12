@@ -75,7 +75,7 @@ class _AuthScreenState extends State<AuthScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _RumuoPlatformMark(color: text),
+                const _RumuoSplashMark(),
                 const SizedBox(height: 24),
                 Text(
                   _isSignUp ? 'Create your account' : 'Welcome back',
@@ -268,19 +268,17 @@ class _GoogleMark extends StatelessWidget {
       );
 }
 
-class _RumuoPlatformMark extends StatelessWidget {
-  final Color color;
-
-  const _RumuoPlatformMark({required this.color});
+class _RumuoSplashMark extends StatelessWidget {
+  const _RumuoSplashMark();
 
   @override
-  Widget build(BuildContext context) => ColorFiltered(
-        colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+  Widget build(BuildContext context) => ClipRRect(
+        borderRadius: BorderRadius.circular(18),
         child: Image.asset(
-          'assets/icons/rumuo_bird_transparent.png',
+          'assets/icons/rumuo_native_launch.png',
           width: 56,
           height: 56,
-          fit: BoxFit.contain,
+          fit: BoxFit.cover,
           semanticLabel: 'Rumuo',
         ),
       );
