@@ -130,6 +130,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
 
+                      const _SectionHeader('Rumuo'),
+                      _SettingsTile(
+                        icon: Icons.auto_awesome_rounded,
+                        iconColor: AppTheme.textColor(context),
+                        title: 'Rumuo plans',
+                        subtitle: 'Explore Pro research and future professional tools',
+                        trailing: const Icon(Icons.chevron_right_rounded),
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const MonetizationScreen()),
+                        ),
+                      ),
+
                       // ── Personalize ──────────────────────────────────────
                       const _SectionHeader('Personalize'),
                       _SettingsTile(
@@ -147,17 +159,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         },
                       ),
 
-                      const _SectionHeader('Rumuo'),
-                      _SettingsTile(
-                        icon: Icons.auto_awesome_rounded,
-                        iconColor: AppTheme.textColor(context),
-                        title: 'Rumuo plans',
-                        subtitle: 'Explore Pro research and future professional tools',
-                        trailing: const Icon(Icons.chevron_right_rounded),
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const MonetizationScreen()),
-                        ),
-                      ),
 
                       // ── Data usage ────────────────────────────────────────
                       const _SectionHeader('Data usage'),
