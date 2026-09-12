@@ -138,13 +138,21 @@ class ContentSearchScreen extends StatefulWidget {
 
 class _ContentSearchScreenState extends State<ContentSearchScreen> {
   final _ctrl = TextEditingController();
-  Timer? _debounce;
   String _query = '';
   bool _loading = false;
   bool _fetchingBlogs = false;
   bool _typing = false;
   int _searchSessionCount = 0;
   int _searchGeneration = 0;
+  List<String> _recentSearches = const [];
+
+  static const _popularSearches = <String>[
+    'business ideas',
+    'personal finance',
+    'technology and innovation',
+    'health and wellbeing',
+    'learning and education',
+  ];
 
   List<_SearchItem> _left  = [];
   List<_SearchItem> _right = [];
@@ -163,7 +171,7 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
     _ctrl.addListener(_onInput);
     unawaited(_loadSearchSessionCount());
     if (_ctrl.text.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _onInput());
+      WidgetsBinding.instance.addPostFrameCallback((_) => _submitSearch(_ctrl.text));
     }
     _lastFeedState = _fp.state;
     // Listen to feed so we re-search automatically when it finishes loading
@@ -175,6 +183,7 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
     final sessions = await SearchSessionStore.loadSessions();
     if (!mounted) return;
     setState(() => _searchSessionCount = sessions.length);
+    setState(() => _recentSearches = sessions.take(5).toList());
   }
 
   Future<void> _recordSearchSession(String query) async {
@@ -186,7 +195,6 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
 
   @override
   void dispose() {
-    _debounce?.cancel();
     _fp.removeListener(_onFeedChanged);
     _ctrl
       ..removeListener(_onInput)
@@ -208,43 +216,36 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
   }
 
   void _onInput() {
-    _debounce?.cancel();
     final q = _ctrl.text.trim();
-    if (q == _query && !_typing && !_loading) return;
+    if (q == _query && _typing) return;
+    ++_searchGeneration;
+    setState(() {
+      _query = q;
+      _left = [];
+      _right = [];
+      _loading = false;
+      _fetchingBlogs = false;
+      _typing = true;
+    });
+  }
+
+  void _submitSearch([String? value]) {
+    final q = (value ?? _ctrl.text).trim();
+    if (q.length < 2) return;
+    _ctrl
+      ..text = q
+      ..selection = TextSelection.collapsed(offset: q.length);
     final generation = ++_searchGeneration;
-
-    if (q.length < 2) {
-      setState(() {
-        _query = q;
-        _left = [];
-        _right = [];
-        _loading = false;
-        _fetchingBlogs = false;
-        _typing = false;
-      });
-      return;
-    }
-
-    // Clear stale results immediately. The generation token prevents an old
-    // index or blog request from painting over the newer query.
     setState(() {
       _query = q;
       _left = [];
       _right = [];
       _loading = true;
       _fetchingBlogs = false;
-      _typing = true;
+      _typing = false;
     });
-
-    // Debounce only the expensive search work, keeping the text field itself
-    // responsive while avoiding one full index pass per keystroke.
-    _debounce = Timer(
-      const Duration(milliseconds: 200),
-      () {
-        unawaited(_recordSearchSession(q));
-        unawaited(_search(q, generation));
-      },
-    );
+    unawaited(_recordSearchSession(q));
+    unawaited(_search(q, generation));
   }
 
   // ── Scoring ─────────────────────────────────────────────────────────────
@@ -575,7 +576,11 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         titleSpacing: 0,
-        title: _SearchBar(controller: _ctrl),
+        title: _SearchBar(
+          controller: _ctrl,
+          onSubmitted: _submitSearch,
+          onSearch: () => _submitSearch(),
+        ),
         actions: [
           if (!widget.privateMode)
             IconButton(
@@ -651,6 +656,7 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
   }
 
   Widget _buildBody() {
+    if (_typing) return _buildSearchSuggestions();
     if (_query.isEmpty) return _EmptyPrompt(privateMode: widget.privateMode);
 
     final hasResults = _left.isNotEmpty || _right.isNotEmpty;
@@ -823,13 +829,62 @@ class _ContentSearchScreenState extends State<ContentSearchScreen> {
       ],
     );
   }
+
+  Widget _buildSearchSuggestions() {
+    final typed = _ctrl.text.trim().toLowerCase();
+    final suggestions = <String>{
+      ..._recentSearches,
+      ..._popularSearches,
+    }.where((item) => typed.isEmpty || item.toLowerCase().contains(typed)).toList();
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+      children: [
+        Text(
+          typed.isEmpty ? 'Start typing to see suggestions' : 'Suggestions',
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            color: AppTheme.textMuted(context),
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 8),
+        if (suggestions.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            child: Text(
+              'Press Search when you are ready.',
+              style: TextStyle(color: AppTheme.textMuted(context)),
+            ),
+          )
+        else
+          ...suggestions.map((suggestion) => ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: Icon(
+              _recentSearches.contains(suggestion)
+                  ? Icons.history_rounded
+                  : Icons.search_rounded,
+              color: AppTheme.textMuted(context),
+            ),
+            title: Text(suggestion),
+            trailing: const Icon(Icons.north_west_rounded, size: 18),
+            onTap: () => _submitSearch(suggestion),
+          )),
+      ],
+    );
+  }
 }
 
 // ── Search bar ──────────────────────────────────────────────────────────────
 
 class _SearchBar extends StatelessWidget {
   final TextEditingController controller;
-  const _SearchBar({required this.controller});
+  final ValueChanged<String> onSubmitted;
+  final VoidCallback onSearch;
+  const _SearchBar({
+    required this.controller,
+    required this.onSubmitted,
+    required this.onSearch,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -850,6 +905,8 @@ class _SearchBar extends StatelessWidget {
         child: TextField(
           controller:    controller,
           autofocus:     true,
+          textInputAction: TextInputAction.search,
+          onSubmitted: onSubmitted,
           textAlignVertical: TextAlignVertical.center,
           style: TextStyle(
             color: Theme.of(context).brightness == Brightness.dark
@@ -882,6 +939,11 @@ class _SearchBar extends StatelessWidget {
                   semanticLabel: 'Rumuo search',
                 ),
               ),
+            ),
+            suffixIcon: IconButton(
+              tooltip: 'Search',
+              onPressed: onSearch,
+              icon: const Icon(Icons.search_rounded),
             ),
             border:      InputBorder.none,
             isDense:     true,
