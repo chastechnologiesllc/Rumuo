@@ -102,6 +102,20 @@ def main() -> None:
             for video in newest
         ]
 
+    # A scheduled refresh can temporarily receive no channel responses when
+    # YouTube throttles the collector. Never let that transient network state
+    # erase the last verified offline feed from the app bundle.
+    if not compact['channels']:
+        previous_path = root / 'assets/data/feed_snapshot_compact.json'
+        if previous_path.exists():
+            try:
+                previous = json.loads(previous_path.read_text())
+                previous_channels = previous.get('channels') or {}
+                if previous_channels:
+                    compact['channels'] = previous_channels
+            except (OSError, json.JSONDecodeError):
+                pass
+
     compact['blogs'] = [
         {
             'title': article.get('title', ''),
