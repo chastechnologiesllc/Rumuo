@@ -11,8 +11,8 @@ import 'channels_screen.dart';
 import 'saved_screen.dart';
 
 /// The Feed screen uses horizontal primary tabs, matching the original Rumuo
-/// navigation: Videos, Shorts, Audio, Written, and Datasets. Blogs and Books
-/// are subcategories inside Written rather than primary tabs of their own.
+/// navigation: Videos, Shorts, Audio, Text, and Data. Blogs and Books remain
+/// subcategories inside Text rather than primary tabs of their own.
 class HomeScreen extends StatefulWidget {
   final VoidCallback? onOpenSaved;
 
@@ -253,13 +253,18 @@ class _PrimaryTabs extends StatelessWidget {
           children: List.generate(forms.length, (index) {
             final selected = index == selectedIndex;
             final form = forms[index];
+            final tabLabel = switch (form) {
+              InformationForm.written => 'Text',
+              InformationForm.structured => 'Data',
+              _ => form.label,
+            };
             return Expanded(
               child: Padding(
                 padding: EdgeInsets.only(right: index == forms.length - 1 ? 0 : 6),
                 child: Semantics(
                   button: true,
                   selected: selected,
-                  label: form.label,
+                  label: tabLabel,
                   child: GestureDetector(
                     onTap: () => onSelected(index),
                     child: AnimatedContainer(
@@ -278,7 +283,7 @@ class _PrimaryTabs extends StatelessWidget {
                         ),
                       ),
                       child: Text(
-                        form.label,
+                        tabLabel,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
