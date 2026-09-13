@@ -309,6 +309,18 @@ class _SourceCard extends StatelessWidget {
                               ),
                             ),
                           ),
+                          if (onBookmark != null || onShare != null)
+                            Positioned(
+                              right: 6,
+                              top: 6,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withValues(alpha: 0.62),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: _actionMenu(context),
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -352,10 +364,6 @@ class _SourceCard extends StatelessWidget {
                           size: 11, color: AppTheme.gold),
                       const SizedBox(width: 6),
                       const Expanded(child: SizedBox()),
-                      if (onBookmark != null || onShare != null) ...[
-                        const SizedBox(width: 4),
-                        _actionMenu(context),
-                      ],
                     ]),
                   ],
                 ),
@@ -397,9 +405,9 @@ class _SourceCard extends StatelessWidget {
 
   Widget _actionMenu(BuildContext context) {
     return PopupMenuButton<String>(
-      icon: Icon(Icons.more_vert_rounded,
-          size: 18, color: AppTheme.textMuted(context)),
+      icon: const Icon(Icons.more_vert_rounded, size: 18, color: Colors.white),
       padding: EdgeInsets.zero,
+      tooltip: 'More options',
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       itemBuilder: (_) => [
         if (onBookmark != null)
