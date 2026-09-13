@@ -7,7 +7,7 @@ import 'rumuo_shimmer.dart';
 /// All skeletons match the exact dimensions of the real cards so there is
 /// zero layout shift when content arrives.
 
-enum ShimmerVariant { videoFeed, blogFeed, grid }
+enum ShimmerVariant { videoFeed, blogFeed, grid, shortsGrid }
 
 class ShimmerLoader extends StatelessWidget {
   final int count;
@@ -51,6 +51,8 @@ class ShimmerLoader extends StatelessWidget {
                   );
           case ShimmerVariant.grid:
             child = _buildPlaceholderGrid(skeleton, count, columns);
+          case ShimmerVariant.shortsGrid:
+            child = _buildShortsGrid(skeleton, count, columns);
         }
 
         // The scroll view already preserves the existing card geometry. The
@@ -105,6 +107,101 @@ class ShimmerLoader extends StatelessWidget {
           decoration: BoxDecoration(
             color: skeleton,
             borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+
+  Widget _buildShortsGrid(Color skeleton, int itemCount, int columns) =>
+      GridView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(10, 10, 10, 110),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: columns,
+          childAspectRatio: 9 / 16,
+          crossAxisSpacing: columns == 4 ? 10 : 8,
+          mainAxisSpacing: columns == 4 ? 10 : 8,
+        ),
+        itemCount: itemCount < columns * 4 ? columns * 4 : itemCount,
+        itemBuilder: (_, __) => _ShortsShimmerCard(placeholderColor: skeleton),
+      );
+}
+
+class _ShortsShimmerCard extends StatelessWidget {
+  final Color placeholderColor;
+
+  const _ShortsShimmerCard({required this.placeholderColor});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          ColoredBox(color: placeholderColor),
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.transparent, Colors.black38],
+                stops: [0.45, 1.0],
+              ),
+            ),
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Container(height: 3, color: placeholderColor),
+          ),
+          const Center(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: Colors.black26,
+                shape: BoxShape.circle,
+              ),
+              child: Padding(
+                padding: EdgeInsets.all(8),
+                child: Icon(Icons.play_arrow_rounded,
+                    color: Colors.white54, size: 28),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 8,
+            left: 8,
+            right: 8,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _ShortLine(widthFactor: 1, color: placeholderColor),
+                const SizedBox(height: 5),
+                _ShortLine(widthFactor: 0.72, color: placeholderColor),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ShortLine extends StatelessWidget {
+  final double widthFactor;
+  final Color color;
+
+  const _ShortLine({required this.widthFactor, required this.color});
+
+  @override
+  Widget build(BuildContext context) => FractionallySizedBox(
+        widthFactor: widthFactor,
+        alignment: Alignment.centerLeft,
+        child: Container(
+          height: 10,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(5),
           ),
         ),
       );
