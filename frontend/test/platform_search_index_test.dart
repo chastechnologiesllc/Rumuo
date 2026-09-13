@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import '../frontend/lib/data/resource_category_data.dart';
-import '../frontend/lib/models/resource_category.dart';
-import '../frontend/lib/models/video.dart';
-import '../frontend/lib/services/blog_rss_service.dart';
-import '../frontend/lib/services/platform_search_index.dart';
+import '../lib/data/resource_category_data.dart';
+import '../lib/models/resource_category.dart';
+import '../lib/models/video.dart';
+import '../lib/services/blog_rss_service.dart';
+import '../lib/services/platform_search_index.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
