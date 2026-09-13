@@ -309,12 +309,6 @@ class _SourceCard extends StatelessWidget {
                               ),
                             ),
                           ),
-                          if (onBookmark != null || onShare != null)
-                            Positioned(
-                              right: 6,
-                              bottom: 6,
-                              child: _actionMenu(context),
-                            ),
                         ],
                       ),
                     ),
@@ -358,6 +352,10 @@ class _SourceCard extends StatelessWidget {
                           size: 11, color: AppTheme.gold),
                       const SizedBox(width: 6),
                       const Expanded(child: SizedBox()),
+                      if (onBookmark != null || onShare != null) ...[
+                        const SizedBox(width: 4),
+                        _actionMenu(context),
+                      ],
                     ]),
                   ],
                 ),
