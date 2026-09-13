@@ -312,14 +312,8 @@ class _SourceCard extends StatelessWidget {
                           if (onBookmark != null || onShare != null)
                             Positioned(
                               right: 6,
-                              top: 6,
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withValues(alpha: 0.62),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: _actionMenu(context),
-                              ),
+                              bottom: 6,
+                              child: _actionMenu(context),
                             ),
                         ],
                       ),
@@ -405,7 +399,8 @@ class _SourceCard extends StatelessWidget {
 
   Widget _actionMenu(BuildContext context) {
     return PopupMenuButton<String>(
-      icon: const Icon(Icons.more_vert_rounded, size: 18, color: Colors.white),
+      icon: Icon(Icons.more_vert_rounded,
+          size: 18, color: AppTheme.textMuted(context)),
       padding: EdgeInsets.zero,
       tooltip: 'More options',
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
