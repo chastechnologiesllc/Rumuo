@@ -96,7 +96,7 @@ class _MvpSubcategoryFeedState extends State<MvpSubcategoryFeed> {
                   : SavedBookmarkKind.blog,
               title: source.title,
               description: source.description,
-              sourceName: source.subcategoryName,
+              sourceName: _publisherName(source),
               url: source.url,
               thumbnailUrl: source.thumbnailUrl,
               publishedAt: DateTime(2000),
@@ -237,7 +237,7 @@ class _SourceCard extends StatelessWidget {
       builder: (_) => BlogReaderScreen(
         url: source.url,
         title: source.title,
-        sourceName: source.subcategoryName,
+        sourceName: _publisherLabel,
         thumbnailUrl: _thumbnailUrl,
         excerpt: source.description,
       ),
@@ -255,6 +255,14 @@ class _SourceCard extends StatelessWidget {
   }
 
   Color get _accentColor => ChannelData.fallback.accentColor;
+
+  String get _categoryLabel {
+    if (source.subcategoryId == 'written_books') return 'Books';
+    if (source.subcategoryId == 'written_blogs') return 'Blogs';
+    return source.subcategoryName;
+  }
+
+  String get _publisherLabel => _publisherName(source);
 
   @override
   Widget build(BuildContext context) => GestureDetector(
@@ -291,7 +299,7 @@ class _SourceCard extends StatelessWidget {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 7, vertical: 4),
                                 child: Text(
-                                  source.subcategoryName,
+                                  _categoryLabel,
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 10,
@@ -330,7 +338,7 @@ class _SourceCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 6),
                       Flexible(
-                        child: Text(source.subcategoryName,
+                        child: Text(_publisherLabel,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
@@ -420,4 +428,26 @@ class _SourceCard extends StatelessWidget {
       },
     );
   }
+}
+
+String _publisherName(VerifiedSubcategorySource source) {
+  if (source.subcategoryId == 'written_books') return source.subcategoryName;
+  final host = Uri.tryParse(source.url)?.host.toLowerCase() ?? '';
+  const known = <String, String>{
+    'npr.org': 'NPR',
+    'librivox.org': 'LibriVox',
+    'bbc.co.uk': 'BBC Sounds',
+    'oyc.yale.edu': 'Open Yale Courses',
+    'open.edu': 'OpenLearn',
+    'data.gov': 'Data.gov',
+    'ourworldindata.org': 'Our World in Data',
+    'desmos.com': 'Desmos',
+    'wikidata.org': 'Wikidata',
+    'phet.colorado.edu': 'PhET',
+  };
+  if (known.containsKey(host)) return known[host]!;
+  final trimmed = host.startsWith('www.') ? host.substring(4) : host;
+  final root = trimmed.split('.').first;
+  if (root.isEmpty) return 'Publisher';
+  return root[0].toUpperCase() + root.substring(1);
 }

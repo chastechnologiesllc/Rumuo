@@ -73,7 +73,7 @@ class _ChannelsScreenState extends State<ChannelsScreen> {
         builder: (context, constraints) {
           final desktop = constraints.maxWidth >= 600;
           return ShimmerLoader(
-            variant: desktop ? ShimmerVariant.grid : ShimmerVariant.videoFeed,
+            variant: ShimmerVariant.grid,
             columns: desktop ? 4 : 2,
             count: desktop ? 12 : 8,
           );
