@@ -43,7 +43,7 @@ Physiotherapy, Radiography, Medical Laboratory Science, Environmental Health, Nu
 
 ---
 
-## Cross-Cutting Channels (40 — from `_general.json`)
+## Cross-Cutting Channels (40 — from `the mock general catalog`)
 
 | Channel | Focus |
 |---|---|
@@ -103,7 +103,7 @@ RSS feeds — no API key required.
 | **Background** | WorkManager RSS polling + local push notifications |
 | **Connectivity** | Multi-endpoint probing — no false positives |
 | **Ad-block detect** | 4 ad-server probes; gates interstitials if 2+ fail |
-| **Category data** | 60 JSON files under `assets/data/resources/` — one per category |
+| **Category data** | In-code deterministic mock catalog under `frontend/lib/data/` |
 | **Books** | 690+ entries with cover images (Open Library CDN) across all JSON files |
 | **Personalisation** | `UserProfileService` + `EngagementService` (21-day decay) |
 | **Startup** | Parallel service init (6 s ceiling); instant first frame |
@@ -154,7 +154,7 @@ rumuo/
 ├── ios/
 ├── assets/
 │   ├── data/
-│   │   ├── resource_categories.json   ← 60-category taxonomy manifest
+│   │   ├── the in-code mock catalog   ← 60-category taxonomy manifest
 │   │   └── resources/                 ← 66 JSON files (60 categories + _general
 │   │                                      + 5 auxiliary)
 │   ├── icons/          ← app_icon.png + adaptive variants

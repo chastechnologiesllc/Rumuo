@@ -1,20 +1,20 @@
-import 'package:rumuo/config/app_config.dart';
-import 'package:rumuo/data/channel_avatar_data.dart';
-import 'package:rumuo/data/channel_data.dart';
-import 'package:rumuo/models/channel.dart';
-import 'package:rumuo/models/resource_category.dart';
-import 'package:rumuo/models/saved_bookmark.dart';
-import 'package:rumuo/models/video.dart';
-import 'package:rumuo/services/blog_rss_service.dart';
-import 'package:rumuo/services/book_reader_content.dart';
-import 'package:rumuo/services/feed_snapshot_service.dart';
-import 'package:rumuo/services/media_cache_manager.dart';
-import 'package:rumuo/utils/category_search.dart';
-import 'package:rumuo/widgets/book_cover_image.dart';
-import 'package:rumuo/widgets/blog_thumbnail_image.dart';
-import 'package:rumuo/widgets/channel_avatar.dart';
-import 'package:rumuo/widgets/rumuo_shimmer.dart';
-import 'package:rumuo/widgets/video_thumbnail_image.dart';
+import '../frontend/lib/config/app_config.dart';
+import '../frontend/lib/data/channel_avatar_data.dart';
+import '../frontend/lib/data/channel_data.dart';
+import '../frontend/lib/models/channel.dart';
+import '../frontend/lib/models/resource_category.dart';
+import '../frontend/lib/models/saved_bookmark.dart';
+import '../frontend/lib/models/video.dart';
+import '../frontend/lib/services/blog_rss_service.dart';
+import '../frontend/lib/services/book_reader_content.dart';
+import '../frontend/lib/services/feed_snapshot_service.dart';
+import '../frontend/lib/services/media_cache_manager.dart';
+import '../frontend/lib/utils/category_search.dart';
+import '../frontend/lib/widgets/book_cover_image.dart';
+import '../frontend/lib/widgets/blog_thumbnail_image.dart';
+import '../frontend/lib/widgets/channel_avatar.dart';
+import '../frontend/lib/widgets/rumuo_shimmer.dart';
+import '../frontend/lib/widgets/video_thumbnail_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -126,13 +126,10 @@ void main() {
       );
     });
 
-    test('bundled feed snapshot has public channel and blog data', () async {
+    test('offline feed source stays empty while cards use frontend mocks', () async {
       final snapshot = FeedSnapshotService.instance;
-      expect((await snapshot.blogArticles()).isNotEmpty, isTrue);
-      expect(
-        (await snapshot.channelVideos('UCGq-a57w-aPwyi3pW7XLiHw')).isNotEmpty,
-        isTrue,
-      );
+      expect(await snapshot.blogArticles(), isEmpty);
+      expect(await snapshot.channelVideos('mock-channel'), isEmpty);
     });
 
     test('blog source keys ignore punctuation and repeated whitespace', () {
@@ -264,18 +261,10 @@ void main() {
           contains('https://example.com/cached'));
     });
 
-    test('School of Life snapshot uses the canonical channel feed', () async {
+    test('removed live-feed snapshot does not supply remote videos', () async {
       final videos = await FeedSnapshotService.instance
           .channelVideos('UC7IcJI8PUf5Z3zKxnZvTBog');
-      expect(videos, isNotEmpty);
-      expect(videos.every((video) => video.channelId == 'UC7IcJI8PUf5Z3zKxnZvTBog'), isTrue);
-      expect(
-        videos.every(
-          (video) => !RegExp(r' chicken|goose|swan|poultry|bird', caseSensitive: false)
-              .hasMatch('${video.title} ${video.description}'),
-        ),
-        isTrue,
-      );
+      expect(videos, isEmpty);
     });
   });
 

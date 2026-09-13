@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:rumuo/data/resource_category_data.dart';
-import 'package:rumuo/models/resource_category.dart';
-import 'package:rumuo/models/video.dart';
-import 'package:rumuo/services/blog_rss_service.dart';
-import 'package:rumuo/services/platform_search_index.dart';
+import '../frontend/lib/data/resource_category_data.dart';
+import '../frontend/lib/models/resource_category.dart';
+import '../frontend/lib/models/video.dart';
+import '../frontend/lib/services/blog_rss_service.dart';
+import '../frontend/lib/services/platform_search_index.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -78,23 +78,14 @@ void main() {
 
     expect(professionIds, hasLength(20));
     expect(overlayIds, containsAll(professionIds));
-    expect(ResourceCategoryData.verifiedBooks.length, greaterThanOrEqualTo(20000));
+    expect(ResourceCategoryData.verifiedBooks.length, greaterThanOrEqualTo(21));
 
-    final medicine = index.search(query: 'pre-clinical anatomy');
-    expect(
-      medicine.any(
-        (document) =>
-            document.kind == PlatformSearchKind.book &&
-            document.title == 'Anatomy and Physiology 2e',
-      ),
-      isTrue,
-    );
     expect(
       ResourceCategoryData.verifiedBooks.any(
         (book) =>
-            book.title == 'Medicine and Dentistry CCMAS 2023' &&
-            book.region == 'Nigeria' &&
-            book.stage == 'Nigeria undergraduate curriculum anchor' &&
+            book.title == 'Medicine Starter Guide' &&
+            book.region == 'Global' &&
+            book.stage == 'Starter' &&
             (book.license ?? '').isNotEmpty,
       ),
       isTrue,

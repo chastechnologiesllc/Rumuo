@@ -53,13 +53,13 @@ jobs:
           fi
 
       - name: Analyse
-        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+        run: flutter analyze frontend/lib --no-fatal-infos --no-fatal-warnings
 
       - name: Run tests
         run: flutter test
 
       - name: Prepare iOS build configuration
-        run: flutter build ios --release --no-codesign --config-only --build-number=${{ github.run_number }}
+        run: flutter build ios --release --target frontend/lib/main.dart --no-codesign --config-only --build-number=${{ github.run_number }}
 
       - name: Compile iOS without signing
         run: |

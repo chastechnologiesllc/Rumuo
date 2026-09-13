@@ -45,7 +45,7 @@ jobs:
 
       # ── Analyse ───────────────────────────────────────────────────────────────
       - name: Analyse
-        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+        run: flutter analyze frontend/lib --no-fatal-infos --no-fatal-warnings
 
       # ── Tests ─────────────────────────────────────────────────────────────────
       - name: Run tests
@@ -55,7 +55,7 @@ jobs:
 
       - name: Build APK (PR compile check only — not uploaded)
         if: github.event_name == 'pull_request'
-        run: flutter build apk --debug
+        run: flutter build apk --debug --target frontend/lib/main.dart
 
       # ── Keystore ──────────────────────────────────────────────────────────────
 
@@ -73,12 +73,12 @@ jobs:
       # ── Build production apk
       - name: Build production APK (universal — all phones, one file)
         if: github.event_name != 'pull_request'
-        run: flutter build apk --release --build-number=${{ github.run_number }}
+        run: flutter build apk --release --target frontend/lib/main.dart --build-number=${{ github.run_number }}
 
       # ── Build production AAB ────────────────────────────────────────────────────
       - name: Build production AAB
         if: github.event_name != 'pull_request'
-        run: flutter build appbundle --release --build-number=${{ github.run_number }}
+        run: flutter build appbundle --release --target frontend/lib/main.dart --build-number=${{ github.run_number }}
 
       # ── Upload production APK ──────────────────────────────────────────────────
       - name: Upload APK (production, universal)

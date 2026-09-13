@@ -52,7 +52,7 @@ jobs:
 
       # ── Analyse (same bar as Android workflow) ──────────────────────────────
       - name: Analyse
-        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+        run: flutter analyze frontend/lib --no-fatal-infos --no-fatal-warnings
 
       # ── Tests ───────────────────────────────────────────────────────────────
       - name: Run tests
@@ -64,7 +64,7 @@ jobs:
       # If you later use a custom domain at the site root, change to "/" .
       - name: Build web (release)
         run: |
-          flutter build web --release \
+          flutter build web --release --target frontend/lib/main.dart \
             --base-href "/Rumuo/" \
             --build-number=${{ github.run_number }}
 
