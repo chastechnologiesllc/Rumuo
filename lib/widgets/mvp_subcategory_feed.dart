@@ -350,9 +350,12 @@ class _SourceCard extends StatelessWidget {
                       const SizedBox(width: 4),
                       const Icon(Icons.arrow_forward_ios_rounded,
                           size: 11, color: AppTheme.gold),
-                      const Spacer(),
-                      if (onBookmark != null || onShare != null)
+                      const SizedBox(width: 6),
+                      const Expanded(child: SizedBox()),
+                      if (onBookmark != null || onShare != null) ...[
+                        const SizedBox(width: 4),
                         _actionMenu(context),
+                      ],
                     ]),
                   ],
                 ),
