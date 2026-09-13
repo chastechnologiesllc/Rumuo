@@ -327,36 +327,39 @@ class _SourceCard extends StatelessWidget {
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             height: 1.35, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 10),
-                    Row(children: [
-                      Container(
-                        width: 7,
-                        height: 7,
-                        decoration: BoxDecoration(
-                          color: _accentColor,
-                          shape: BoxShape.circle,
+                    SizedBox(
+                      width: double.infinity,
+                      child: Row(children: [
+                        Container(
+                          width: 7,
+                          height: 7,
+                          decoration: BoxDecoration(
+                            color: _accentColor,
+                            shape: BoxShape.circle,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 6),
-                      Flexible(
-                        child: Text(_publisherLabel,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: AppTheme.gold,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 13,
-                            )),
-                      ),
-                      const SizedBox(width: 4),
-                      const Icon(Icons.arrow_forward_ios_rounded,
-                          size: 11, color: AppTheme.gold),
-                      const SizedBox(width: 6),
-                      const Expanded(child: SizedBox()),
-                      if (onBookmark != null || onShare != null) ...[
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(_publisherLabel,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: AppTheme.gold,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 13,
+                              )),
+                        ),
                         const SizedBox(width: 4),
-                        _actionMenu(context),
-                      ],
-                    ]),
+                        const Icon(Icons.arrow_forward_ios_rounded,
+                            size: 11, color: AppTheme.gold),
+                        const SizedBox(width: 6),
+                        const Spacer(),
+                        if (onBookmark != null || onShare != null) ...[
+                          const SizedBox(width: 4),
+                          _actionMenu(context),
+                        ],
+                      ]),
+                    ),
                   ],
                 ),
               ),
