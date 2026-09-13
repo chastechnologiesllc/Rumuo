@@ -124,7 +124,8 @@ Play Store installs → Google Play billing.
 
 ```
 rumuo/
-├── lib/
+├── frontend/
+│   ├── lib/
 │   ├── data/           ← resource_category_data.dart (loads all 60 JSON files)
 │   │                      book_insights_data.dart
 │   │                      category_playbook_data.dart
@@ -146,13 +147,13 @@ rumuo/
 │   │                      inline_video_card, video_card,
 │   │                      book_cover_image, shimmer_loader
 │   └── main.dart
-├── android/
+│   ├── android/
 │   ├── app/build.gradle        ← AGP 8.6.0, minSdk 23, targetSdk 36
 │   ├── settings.gradle         ← Kotlin 2.4.0
 │   └── app/src/main/
 │       └── kotlin/             ← MainActivity.kt, MainApplication.kt
-├── ios/
-├── assets/
+│   ├── ios/
+│   ├── assets/
 │   ├── data/
 │   │   ├── the in-code mock catalog   ← 60-category taxonomy manifest
 │   │   └── resources/                 ← 66 JSON files (60 categories + _general
@@ -160,8 +161,11 @@ rumuo/
 │   ├── icons/          ← app_icon.png + adaptive variants
 │   ├── sounds/         ← notification.wav, ding.wav
 │   └── books/          ← bundled PDF masterclass playbooks + covers
-├── scripts/
+│   ├── scripts/
 │   └── ExportOptions.plist
+├── test/
+│   ├── ...
+├── pubspec.yaml
 └── .github/workflows/
     ├── build_android.yml
     └── build_ios.yml

@@ -23,6 +23,9 @@ jobs:
     name: Build Flutter Web
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: frontend
 
     steps:
       # ── Checkout ────────────────────────────────────────────────────────────
@@ -52,7 +55,7 @@ jobs:
 
       # ── Analyse (same bar as Android workflow) ──────────────────────────────
       - name: Analyse
-        run: flutter analyze frontend/lib --no-fatal-infos --no-fatal-warnings
+        run: flutter analyze lib --no-fatal-infos --no-fatal-warnings
 
       # ── Tests ───────────────────────────────────────────────────────────────
       - name: Run tests
@@ -64,7 +67,7 @@ jobs:
       # If you later use a custom domain at the site root, change to "/" .
       - name: Build web (release)
         run: |
-          flutter build web --release --target frontend/lib/main.dart \
+          flutter build web --release --target lib/main.dart \
             --base-href "/Rumuo/" \
             --build-number=${{ github.run_number }}
 
@@ -73,7 +76,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: rumuo-web
-          path: build/web
+          path: frontend/build/web
           retention-days: 30
 
       # ── Deploy to GitHub Pages (main/master only, not PRs) ──────────────────
@@ -82,7 +85,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build/web
+          publish_dir: ./frontend/build/web
           force_orphan: true
           # Flutter assets can start with _; disable Jekyll so they are served
           enable_jekyll: false

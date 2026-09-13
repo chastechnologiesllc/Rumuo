@@ -17,6 +17,9 @@ jobs:
     name: Build Android APK + AAB
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: frontend
 
     steps:
       # ── Checkout ────────────────────────────────────────────────────────────
@@ -45,7 +48,7 @@ jobs:
 
       # ── Analyse ───────────────────────────────────────────────────────────────
       - name: Analyse
-        run: flutter analyze frontend/lib --no-fatal-infos --no-fatal-warnings
+        run: flutter analyze lib --no-fatal-infos --no-fatal-warnings
 
       # ── Tests ─────────────────────────────────────────────────────────────────
       - name: Run tests
@@ -55,7 +58,7 @@ jobs:
 
       - name: Build APK (PR compile check only — not uploaded)
         if: github.event_name == 'pull_request'
-        run: flutter build apk --debug --target frontend/lib/main.dart
+        run: flutter build apk --debug --target lib/main.dart
 
       # ── Keystore ──────────────────────────────────────────────────────────────
 
@@ -73,12 +76,12 @@ jobs:
       # ── Build production apk
       - name: Build production APK (universal — all phones, one file)
         if: github.event_name != 'pull_request'
-        run: flutter build apk --release --target frontend/lib/main.dart --build-number=${{ github.run_number }}
+        run: flutter build apk --release --target lib/main.dart --build-number=${{ github.run_number }}
 
       # ── Build production AAB ────────────────────────────────────────────────────
       - name: Build production AAB
         if: github.event_name != 'pull_request'
-        run: flutter build appbundle --release --target frontend/lib/main.dart --build-number=${{ github.run_number }}
+        run: flutter build appbundle --release --target lib/main.dart --build-number=${{ github.run_number }}
 
       # ── Upload production APK ──────────────────────────────────────────────────
       - name: Upload APK (production, universal)
@@ -86,7 +89,7 @@ jobs:
         uses: actions/upload-artifact@v7                # ← updated from v4
         with:
           name: rumuo-production-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: frontend/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 90
 
       # ── Upload production AAB ───────────────────────────────────────────────────
@@ -95,7 +98,7 @@ jobs:
         uses: actions/upload-artifact@v7                # ← updated from v4
         with:
           name: rumuo-production-aab
-          path: build/app/outputs/bundle/release/app-release.aab
+          path: frontend/build/app/outputs/bundle/release/app-release.aab
           retention-days: 90
 
       # ── GitHub Release ────────────────────────────────────────────────────────
@@ -105,8 +108,8 @@ jobs:
         uses: softprops/action-gh-release@v3            # ← updated from v2
         with:
           files: |
-            build/app/outputs/flutter-apk/app-release.apk
-            build/app/outputs/bundle/release/app-release.aab
+            frontend/build/app/outputs/flutter-apk/app-release.apk
+            frontend/build/app/outputs/bundle/release/app-release.aab
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

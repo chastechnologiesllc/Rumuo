@@ -31,9 +31,9 @@ pubspec.lock
 **/android/local.properties
 **/android/**/GeneratedPluginRegistrant.java
 # Signing — NEVER commit
-android/key.properties
-android/app/*.jks
-android/app/*.keystore
+**/android/key.properties
+**/android/app/*.jks
+**/android/app/*.keystore
 
 # ── iOS ───────────────────────────────────────────────────────────────────────
 **/ios/**/*.mode1v3
