@@ -1,0 +1,7 @@
+{
+  "name": "rumuo-backend",
+  "private": true,
+  "version": "1.0.0",
+  "engines": { "node": ">=20" },
+  "dependencies": { "pg": "^8.13.1" }
+}

@@ -6,6 +6,12 @@ class AppConfig {
   static const String byLine = 'by chAs Technologies LLC';
   static const String company = 'chAs Technologies LLC';
   static const String packageName = 'com.chastechgroup.rumuo';
+  /// Set with --dart-define=RUMUO_API_BASE_URL=https://your-project.vercel.app/api/resources.
+  /// An empty value intentionally produces an honest empty state instead of mock content.
+  static const String resourceApiBaseUrl = String.fromEnvironment(
+    'RUMUO_API_BASE_URL',
+    defaultValue: '',
+  );
 
   // ── Shared application settings ──────────────────────────────────────────────
 
