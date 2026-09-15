@@ -1,0 +1,93 @@
+# db/seeds/medicine_nigeria/taxonomy.yaml
+# Source of truth: Rumuo_LD-01_Medicine_Taxonomy_and_Source_Allocation.md §2
+# Loaded by scripts/seed_medicine_nigeria.py into taxonomy_nodes (ED-03 §2).
+# world_anchor values must match core.enums — profession / skill / business only (ED-03 §1).
+# Per ED-03 §2: this file IS the taxonomy. Do not also hard-code it in application logic.
+
+profession:
+  name: Medicine
+  level: 0
+  children:
+    - name: Clinical Specialty Knowledge
+      level: 1
+      target_allocation: 55000  # LD-01 §3.1
+      children:
+        - {name: Family Medicine / General Practice, level: 2, target_allocation: 8000}
+        - {name: Internal Medicine, level: 2, target_allocation: 7000, note: "seed subspecialty nodes (Cardiology, Nephrology, Endocrinology, GI, ...) as level-3 children as needed — data, not code, per ED-03 §2"}
+        - {name: Paediatrics & Child Health, level: 2, target_allocation: 6000}
+        - {name: Obstetrics & Gynaecology, level: 2, target_allocation: 6000}
+        - {name: Surgery, level: 2, target_allocation: 6000, note: "seed subspecialty nodes (General, Orthopaedic, Neuro, Urology, Plastic, Cardiothoracic, Paediatric) as level-3 children as needed"}
+        - {name: Public Health / Community Medicine, level: 2, target_allocation: 4000}
+        - {name: Psychiatry & Mental Health, level: 2, target_allocation: 3000}
+        - {name: Emergency Medicine & Critical Care, level: 2, target_allocation: 3000}
+        - {name: Radiology & Medical Imaging, level: 2, target_allocation: 2500}
+        - {name: Pathology & Laboratory Medicine, level: 2, target_allocation: 2500}
+        - {name: Anaesthesia & Perioperative Care, level: 2, target_allocation: 2000}
+        - {name: Dental & Oral Health, level: 2, target_allocation: 2000}
+        - {name: Ophthalmology, level: 2, target_allocation: 1500}
+        - {name: ENT (Otorhinolaryngology), level: 2, target_allocation: 1000}
+        - {name: Dermatology & Venereology, level: 2, target_allocation: 500}
+
+    - name: Practice, Business & Career Operations
+      level: 1
+      target_allocation: 20000  # LD-01 §3.2
+      children:
+        - {name: Postgraduate Training & Fellowship Exams, level: 2, target_allocation: 4000}
+        - {name: Licensing, Registration & Regulatory Compliance, level: 2, target_allocation: 3500}
+        - {name: Practice Setup & Clinic/Hospital Business Management, level: 2, target_allocation: 3000}
+        - {name: Continuing Medical Education & Recertification, level: 2, target_allocation: 2000}
+        - {name: Health Insurance, Billing & Claims, level: 2, target_allocation: 2000}
+        - {name: Locum, Employment & Diaspora/IMG Pathways, level: 2, target_allocation: 2000}
+        - {name: Medico-Legal, Ethics & Malpractice, level: 2, target_allocation: 2000}
+        - {name: Health Financing & Practice Financing, level: 2, target_allocation: 1500}
+
+    - name: Public Health, Guidelines & Reference Knowledge
+      level: 1
+      target_allocation: 15000  # LD-01 §3.3
+      children:
+        - {name: Clinical Guidelines & Standard Treatment Protocols, level: 2, target_allocation: 5000}
+        - {name: Drug & Pharmacology References, level: 2, target_allocation: 4000}
+        - {name: Disease Surveillance & Nigeria-Specific Epidemiology, level: 2, target_allocation: 3000}
+        - {name: Research, Publishing & Ethics Approval, level: 2, target_allocation: 3000}
+
+    - name: Digital Health, Technology & Emerging Practice
+      level: 1
+      target_allocation: 6000  # LD-01 §3.4
+      children:
+        - {name: Telemedicine & Digital Health Tools, level: 2, target_allocation: 2500}
+        - {name: Medical Technology & Equipment, level: 2, target_allocation: 2000}
+        - {name: Health Data, AI & Informatics for Clinicians, level: 2, target_allocation: 1500}
+
+    - name: Professional Community & Patient-Facing Support
+      level: 1
+      target_allocation: 4000  # LD-01 §3.5
+      children:
+        - {name: Professional Associations & Advocacy, level: 2, target_allocation: 1500}
+        - {name: Patient Education Materials Authored For/By Clinicians, level: 2, target_allocation: 1500}
+        - {name: Rural & Underserved Practice / Posting Guidance, level: 2, target_allocation: 1000}
+
+# world_anchor: business — LD-01 §1. Linked to the Medicine profession node via
+# `requires`/`regulated_by` relationships, never merged into the profession tree (ED-03 §8).
+business:
+  - name: Private Hospital
+    level: 0
+  - name: Clinic
+    level: 0
+  - name: Pharmacy
+    level: 0
+  - name: Diagnostic Lab
+    level: 0
+  - name: Telemedicine Practice
+    level: 0
+
+# world_anchor: skill — LD-01 §1. Seeded narrowly per ED-03 §7's minimum-viable rule;
+# expand as cross-profession skill reuse patterns emerge.
+skill:
+  - name: Clinical Diagnosis
+    level: 0
+  - name: Surgical Procedure
+    level: 0
+  - name: Patient Communication
+    level: 0
+  - name: Medical Research Method
+    level: 0

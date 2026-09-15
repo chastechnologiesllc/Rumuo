@@ -1,0 +1,60 @@
+# db/seeds/medicine_nigeria/authority_weights.yaml
+# Source of truth: ED-04 §2's four worked examples, applied to this pilot's source_type values
+# and jurisdiction=Nigeria (ED-04 §7 requires jurisdiction as a lookup key, not just claim type).
+#
+# IMPORTANT: the weight values below (0.0-1.0) are illustrative starting points, not
+# researched or founder-approved figures. ED-04 §2 specifies *relative ranking*
+# ("strongest source type" per claim type) — it does not specify numeric weights.
+# Coder/founder must tune these against real outcomes; do not treat as final.
+
+- claim_type: current_legal_requirement
+  jurisdiction: Nigeria
+  weights:
+    institution: 0.95      # government regulator — MDCN, NHIA, Ministry of Health (strongest, per ED-04 §2)
+    organization: 0.55     # professional association — secondary for legal claims
+    publisher: 0.40
+    platform: 0.20
+    creator: 0.25
+    individual: 0.15
+
+- claim_type: professional_standard
+  jurisdiction: Nigeria
+  weights:
+    organization: 0.90     # professional association — NMA, NPMCN, WACP/WACS (strongest, per ED-04 §2)
+    institution: 0.70      # teaching hospitals, colleges
+    publisher: 0.45
+    platform: 0.20
+    creator: 0.30
+    individual: 0.20
+
+- claim_type: research_finding
+  jurisdiction: Nigeria
+  weights:
+    publisher: 0.90        # peer-reviewed study (strongest, per ED-04 §2)
+    institution: 0.60      # university/research-org publishing directly
+    organization: 0.40
+    platform: 0.15
+    creator: 0.20
+    individual: 0.15
+
+- claim_type: lived_operational_knowledge
+  jurisdiction: Nigeria
+  weights:
+    individual: 0.75       # experienced practitioner (strongest, per ED-04 §2)
+    creator: 0.65          # practitioner publishing as a creator (blog, video channel, etc.)
+    organization: 0.35
+    institution: 0.30
+    publisher: 0.25
+    platform: 0.20
+
+- claim_type: unclassified
+  jurisdiction: Nigeria
+  weights:
+    # ED-13 §4: unclassified queries get neutral treatment, never defaulted to the
+    # highest-authority source type by assumption.
+    institution: 0.40
+    organization: 0.40
+    publisher: 0.40
+    platform: 0.40
+    creator: 0.40
+    individual: 0.40

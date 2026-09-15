@@ -1,0 +1,60 @@
+# db/seeds/medicine_nigeria/questions.yaml
+# Source of truth: Rumuo_LD-01_Medicine_Taxonomy_and_Source_Allocation.md §4
+# Loaded into the `questions` table (ED-01 §1.4) before any Researcher activity begins
+# (ED-03 §7's Phase-A gate). Each resource that answers one of these links to it via
+# `supports_question` (core.enums.Relation.SUPPORTS_QUESTION) — never re-created per resource.
+
+- id: standing_test_question
+  text: "How do successful doctors build private hospitals in Nigeria?"
+  decomposition:
+    profession: Doctor
+    business: Private Hospital
+    geography: Nigeria
+    intent: research/build
+  note: >
+    The canonical test case this entire document set (ED-02, ED-04, ED-11) was built around.
+    Every major system component should be validated against this exact question before
+    being trusted against anything else.
+
+- id: licensing_seed
+  text: "What are the requirements to register with MDCN as a newly qualified doctor?"
+  decomposition:
+    profession: Doctor
+    geography: Nigeria
+    intent: licensing/compliance
+  taxonomy_target: "Practice, Business & Career Operations > Licensing, Registration & Regulatory Compliance"
+
+- id: clinical_guidelines_seed
+  text: "What is the current standard treatment protocol for [common condition] in a Nigerian primary care setting?"
+  decomposition:
+    profession: Doctor
+    geography: Nigeria
+    intent: clinical reference
+  taxonomy_target: "Public Health, Guidelines & Reference Knowledge > Clinical Guidelines & Standard Treatment Protocols"
+  note: "Template question — instantiate per condition as real seed data grows; do not leave the bracket literal in production."
+
+- id: insurance_billing_seed
+  text: "How does NHIA capitation billing work for a private clinic?"
+  decomposition:
+    business: Clinic
+    geography: Nigeria
+    intent: business operations
+  taxonomy_target: "Practice, Business & Career Operations > Health Insurance, Billing & Claims"
+
+- id: postgraduate_training_seed
+  text: "What are the NPMCN Part I requirements for [specialty]?"
+  decomposition:
+    profession: Doctor
+    geography: Nigeria
+    intent: career development
+  taxonomy_target: "Practice, Business & Career Operations > Postgraduate Training & Fellowship Exams"
+  note: "Template question — instantiate per specialty."
+
+- id: telemedicine_seed
+  text: "How does a doctor set up a telemedicine practice in Nigeria?"
+  decomposition:
+    profession: Doctor
+    business: Telemedicine Practice
+    geography: Nigeria
+    intent: research/build
+  taxonomy_target: "Digital Health, Technology & Emerging Practice > Telemedicine & Digital Health Tools"
