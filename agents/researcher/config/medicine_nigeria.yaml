@@ -1,0 +1,90 @@
+# agents/researcher/config/medicine_nigeria.yaml
+#
+# Researcher configuration for the Medicine / Nigeria pilot.
+# Per LD-01 §3 — this file is the acquisition plan the founder signs off on.
+#
+# HARD BLOCKER: Do not activate the Researcher agent against live sources
+# until the founder has explicitly confirmed this file is approved (kickoff §4).
+#
+# MUST NOT: bypass auth, paywalls, or platform access protections (ED-01 §4 item 1).
+# MUST NOT: begin acquisition of any source_type not listed here without founder sign-off.
+
+vertical: medicine
+jurisdiction: Nigeria
+target_source_count: 100000
+
+# ── Approved source types (LD-01 §2 allocation) ──────────────────────────────
+source_types:
+
+  - type: institution
+    examples:
+      - MDCN (Medical and Dental Council of Nigeria)
+      - NPMCN (National Postgraduate Medical College of Nigeria)
+      - NHIA (National Health Insurance Authority)
+      - NAFDAC (National Agency for Food and Drug Administration and Control)
+      - Nigerian Medical Association (NMA)
+      - Federal Ministry of Health Nigeria
+      - NCDC (Nigeria Centre for Disease Control)
+    channels: [web_crawl, rss]
+    trust_weight_claim: current_legal_requirement
+    access_policy: public_only
+
+  - type: publisher
+    examples:
+      - African Journals Online (AJOL)
+      - Nigerian Medical Journal
+      - Annals of African Medicine
+      - West African Journal of Medicine
+    channels: [rss, openalex_api]
+    trust_weight_claim: research_finding
+    access_policy: open_access_only   # MUST NOT scrape paywalled content
+
+  - type: platform
+    examples:
+      - YouTube (medical education channels, Nigeria-based)
+      - Coursera (open-access medicine courses)
+      - OpenWHO (WHO open learning)
+    channels: [youtube_api, web_crawl]
+    trust_weight_claim: professional_standard
+    access_policy: public_only
+
+  - type: creator
+    examples:
+      - Nigerian doctor/clinician YouTube channels
+      - Medical podcast hosts (Nigeria-based)
+    channels: [youtube_api, rss]
+    trust_weight_claim: lived_operational_knowledge
+    access_policy: public_only
+
+  - type: organization
+    examples:
+      - West African Health Organisation (WAHO)
+      - Nigerian Medical School faculties (Lagos, Ibadan, Abuja, etc.)
+    channels: [web_crawl, rss]
+    trust_weight_claim: professional_standard
+    access_policy: public_only
+
+# ── Channel rate limits (per channel, per hour) ──────────────────────────────
+rate_limits:
+  youtube_api:    100
+  web_crawl:      200
+  rss:            500
+  openalex_api:   200
+
+# ── Minimum content quality gates (pre-index) ────────────────────────────────
+quality_gates:
+  min_content_length_chars: 200
+  reject_languages_other_than: []   # empty = accept all languages (multilingual pilot)
+  require_published_date: false
+
+# ── Phase allocation (LD-04 §1) ──────────────────────────────────────────────
+phases:
+  A:
+    goal: 5000 sources indexed, standing test question answered
+    source_priority: [institution, publisher, organization]
+  B:
+    goal: 50000 sources indexed
+    source_priority: [platform, creator, publisher]
+  C:
+    goal: 100000 sources indexed
+    source_priority: [creator, platform]
