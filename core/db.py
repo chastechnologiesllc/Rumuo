@@ -62,8 +62,6 @@ def init_db() -> None:
 
     engine = create_async_engine(
         _build_url(),
-        pool_size=1 if _IS_SERVERLESS else 5,
-        max_overflow=0 if _IS_SERVERLESS else 10,
         pool_pre_ping=True,
         poolclass=NullPool,
         connect_args=connect_args,
