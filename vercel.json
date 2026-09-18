@@ -1,15 +1,11 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "api/index.py",
-      "use": "@vercel/python"
-    }
-  ],
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/index.py":  { "maxDuration": 30 },
+    "api/review.py": { "maxDuration": 30 }
+  },
   "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "api/index.py"
-    }
+    { "src": "/review(.*)", "dest": "api/review.py" },
+    { "src": "/(.*)",       "dest": "api/index.py"  }
   ]
 }

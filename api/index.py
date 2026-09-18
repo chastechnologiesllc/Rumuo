@@ -1,11 +1,7 @@
 """
-api/index.py — Vercel serverless entry point for the Rumuo experience API.
+api/index.py — Vercel Python entry point for the Rumuo Experience API.
 
-Mangum wraps the FastAPI ASGI app so Vercel's Python runtime can call it.
-lifespan="off" because Vercel has no persistent process — db.py lazy-inits on
-the first request instead (SERVERLESS=1 env var must be set in Vercel dashboard).
+Vercel's Python runtime serves FastAPI apps directly.
+SERVERLESS=1 must be set in Vercel Project → Settings → Environment Variables.
 """
-from mangum import Mangum
 from services.experience_api.main import app
-
-handler = Mangum(app, lifespan="off")
