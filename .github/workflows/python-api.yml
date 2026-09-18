@@ -12,6 +12,7 @@ on:
       - 'scripts/**'
       - 'tests/**'
       - 'requirements.txt'
+      - '.github/workflows/python-api.yml'
   pull_request:
     branches: [main]
     paths:
@@ -22,6 +23,7 @@ on:
       - 'services/**'
       - 'tests/**'
       - 'requirements.txt'
+      - '.github/workflows/python-api.yml'
 
 jobs:
   test:
