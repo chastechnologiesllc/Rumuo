@@ -54,7 +54,7 @@ class Entity(Base):
     entity_type  = Column(Text, nullable=False)   # entity_type enum
     name         = Column(Text, nullable=False)
     world_anchor = Column(Text, CheckConstraint("world_anchor IN ('profession', 'skill', 'business')"))
-    metadata     = Column(JSONB)
+    metadata_json = Column("metadata", JSONB)
 
 
 class Topic(Base):
