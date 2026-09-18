@@ -73,9 +73,13 @@ async def seed_taxonomy(session) -> dict[str, uuid.UUID]:
         for child in tree.get("children", []):
             await walk(child, world_anchor, level + 1, parent_id=node_id)
 
-    # taxonomy.yaml top-level key is the world_anchor
-    for world_anchor, tree in data.items():
-        await walk(tree, world_anchor=world_anchor, level=tree.get("level", 0))
+    # taxonomy.yaml top-level keys are world anchors. A world anchor may be a
+    # single nested tree (profession/skill) or a list of independent roots
+    # (business), so support both documented fixture shapes.
+    for world_anchor, tree_or_roots in data.items():
+        roots = tree_or_roots if isinstance(tree_or_roots, list) else [tree_or_roots]
+        for tree in roots:
+            await walk(tree, world_anchor=world_anchor, level=tree.get("level", 0))
 
     print(f"  taxonomy_nodes: {len(id_map)} nodes seeded")
     return id_map
