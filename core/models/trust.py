@@ -4,11 +4,16 @@ core/models/trust.py — ED-04 §2/§6/§9 and ED-12 §1.1 trust layer tables.
 import uuid
 from datetime import datetime
 
-from sqlalchemy import TIMESTAMP, CheckConstraint, Column, Float, Index, Text, UniqueConstraint
+from sqlalchemy import CheckConstraint, Column, Enum as SAEnum, Float, Index, Text, TIMESTAMP, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from core.db import Base
+from core.enums import ReviewReasonCode, ReviewStatus
+
+
+def _enum_values(enum_cls):
+    return [member.value for member in enum_cls]
 
 
 class InformationForm(Base):
@@ -88,8 +93,8 @@ class ReviewQueue(Base):
     review_id    = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     subject_type = Column(Text, nullable=False)
     subject_id   = Column(UUID(as_uuid=True), nullable=False)
-    reason_code  = Column(Text, nullable=False)   # review_reason_code enum
-    status       = Column(Text, nullable=False, default="open")
+    reason_code  = Column(SAEnum(ReviewReasonCode, name="review_reason_code", values_callable=_enum_values, create_type=False), nullable=False)
+    status       = Column(SAEnum(ReviewStatus, name="review_status", values_callable=_enum_values, create_type=False), nullable=False, default=ReviewStatus.OPEN)
     assigned_to  = Column(UUID(as_uuid=True))
     resolution   = Column(Text)
     created_at   = Column(TIMESTAMP(timezone=True), nullable=False, default=datetime.utcnow)
