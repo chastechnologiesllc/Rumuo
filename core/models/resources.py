@@ -11,13 +11,14 @@ from datetime import datetime
 
 from sqlalchemy import TIMESTAMP
 from sqlalchemy import (
-    ARRAY, CheckConstraint, Column, Date, Float, ForeignKey,
+    ARRAY, CheckConstraint, Column, Date, Enum as SAEnum, Float, ForeignKey,
     Index, Interval, Text,
 )
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
 
 from core.db import Base
+from core.enums import AccessStatus, PipelineStatus, TrustState
 
 
 class Source(Base):
@@ -33,7 +34,7 @@ class Source(Base):
     languages                = Column(ARRAY(Text))
     publication_history      = Column(JSONB)
     known_access_paths       = Column(JSONB)
-    verification_status      = Column(Text, nullable=False, default="discovered")  # trust_state
+    verification_status      = Column(SAEnum(TrustState, name="trust_state", create_type=False), nullable=False, default=TrustState.DISCOVERED)
     org_people_relationships = Column(JSONB)
     created_at               = Column(TIMESTAMP(timezone=True), nullable=False, default=datetime.utcnow)
     updated_at               = Column(TIMESTAMP(timezone=True), nullable=False, default=datetime.utcnow,
@@ -104,19 +105,19 @@ class Resource(Base):
     published_date             = Column(Date)
     updated_date               = Column(Date)
     languages                  = Column(ARRAY(Text))
-    access_status              = Column(Text, nullable=False, default="public")
+    access_status              = Column(SAEnum(AccessStatus, name="access_status", create_type=False), nullable=False, default=AccessStatus.PUBLIC)
     access_conditions          = Column(Text)
     license                    = Column(Text)
     rights_info                = Column(Text)
     attribution_requirements   = Column(Text)
     provenance                 = Column(JSONB)
-    trust_state                = Column(Text, nullable=False, default="discovered")
+    trust_state                = Column(SAEnum(TrustState, name="trust_state", create_type=False), nullable=False, default=TrustState.DISCOVERED)
     trust_dimensions           = Column(JSONB)
     field_confidence           = Column(JSONB)
     freshness_last_checked     = Column(TIMESTAMP(timezone=True))
     freshness_cadence_override = Column(Interval)
     context                    = Column(JSONB)
-    pipeline_status            = Column(Text, nullable=False, default="intake")
+    pipeline_status            = Column(SAEnum(PipelineStatus, name="pipeline_status", create_type=False), nullable=False, default=PipelineStatus.INTAKE)
     created_at                 = Column(TIMESTAMP(timezone=True), nullable=False, default=datetime.utcnow)
     updated_at                 = Column(TIMESTAMP(timezone=True), nullable=False, default=datetime.utcnow,
                                         onupdate=datetime.utcnow)
@@ -165,7 +166,7 @@ class Relationship(Base):
     object_type      = Column(Text, nullable=False)
     object_id        = Column(UUID(as_uuid=True), nullable=False)
     confidence       = Column(Float)
-    confidence_state = Column(Text, nullable=False, default="ai_assessed")
+    confidence_state = Column(SAEnum(TrustState, name="trust_state", create_type=False), nullable=False, default=TrustState.AI_ASSESSED)
     created_by       = Column(Text, nullable=False, default="ai")
     created_at       = Column(TIMESTAMP(timezone=True), nullable=False, default=datetime.utcnow)
 
