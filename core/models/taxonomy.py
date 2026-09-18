@@ -33,9 +33,17 @@ class TaxonomyNode(Base):
     name         = Column(Text, nullable=False)
     level        = Column(Integer, nullable=False)
 
-    children = relationship("TaxonomyNode",
-                            foreign_keys=[parent_id],
-                            backref="parent")
+    parent = relationship(
+        "TaxonomyNode",
+        remote_side=[taxonomy_id],
+        foreign_keys=[parent_id],
+        back_populates="children",
+    )
+    children = relationship(
+        "TaxonomyNode",
+        foreign_keys=[parent_id],
+        back_populates="parent",
+    )
 
     __table_args__ = (
         CheckConstraint("world_anchor IN ('profession', 'skill', 'business')",
