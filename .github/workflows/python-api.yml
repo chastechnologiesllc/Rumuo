@@ -67,6 +67,9 @@ jobs:
             -h localhost -U rumuo_test -d rumuo_test \
             -f db/migrations/001_initial_schema.sql
 
+      - name: Seed test fixtures
+        run: python scripts/seed_medicine_nigeria.py --confirm
+
       - name: Enum consistency check
         run: |
           python3 - << 'PYEOF'
