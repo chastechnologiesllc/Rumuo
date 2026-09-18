@@ -13,10 +13,8 @@ MUST NOT: delete or repurpose a form_id once any resources row references it.
 """
 from __future__ import annotations
 
-import uuid
 from dataclasses import dataclass, field
 from datetime import date
-from typing import Optional
 
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -72,7 +70,8 @@ async def check_candidate_form(
 
     # Step 3: confirm no hard-coded form count in ranking or nav
     # (Static analysis — checks for literal "five" or "5" near form references in key files)
-    import os, re
+    import os
+    import re
     files_to_check = [
         "services/ranking/ranker.py",
         "services/experience_api/queries.py",

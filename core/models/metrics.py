@@ -7,8 +7,8 @@ They measure the system; they do not drive it (Doc 9 §9, ED-11 §6).
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Column, Date, Float, ForeignKey, Index, Integer, Text, UniqueConstraint
-from sqlalchemy.dialects.postgresql import TIMESTAMPTZ, UUID
+from sqlalchemy import TIMESTAMP, Column, Date, Float, ForeignKey, Index, Integer, Text, UniqueConstraint
+from sqlalchemy.dialects.postgresql import UUID
 
 from core.db import Base
 
@@ -24,7 +24,7 @@ class CoverageGap(Base):
     gap_id                = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     query_text            = Column(Text, nullable=False)
     knowledge_universe_id = Column(Text, nullable=False)
-    detected_at           = Column(TIMESTAMPTZ, nullable=False, default=datetime.utcnow)
+    detected_at           = Column(TIMESTAMP(timezone=True), nullable=False, default=datetime.utcnow)
     resolution_status     = Column(Text, nullable=False, default="open")
 
     __table_args__ = (
@@ -51,7 +51,7 @@ class LearningLoopEvent(Base):
                              ForeignKey("coverage_gaps.gap_id"), nullable=False)
     resource_id     = Column(UUID(as_uuid=True),
                              ForeignKey("resources.resource_id"))
-    occurred_at     = Column(TIMESTAMPTZ, nullable=False, default=datetime.utcnow)
+    occurred_at     = Column(TIMESTAMP(timezone=True), nullable=False, default=datetime.utcnow)
 
     __table_args__ = (
         Index("learning_loop_events_gap_id_idx", "coverage_gap_id"),

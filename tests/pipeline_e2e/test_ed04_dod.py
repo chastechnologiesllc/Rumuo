@@ -14,7 +14,7 @@ import pytest
 from sqlalchemy import select, update
 
 from core.db import get_session, init_db
-from core.models import Resource, Evidence, ReviewQueue, AuthorityWeight
+from core.models import Resource, AuthorityWeight
 from services.trust.state_machine import advance_trust_state, ALLOWED_TRANSITIONS
 from services.trust.review_queue import open_review, resolve_review, assign_review
 
@@ -31,7 +31,8 @@ async def test_verified_gate_enforced():
     async with get_session() as session:
         r = Resource(type="written", title="ED-04 verified gate",
                      trust_state="evidence_supported", pipeline_status="indexed")
-        session.add(r); await session.flush()
+        session.add(r)
+        await session.flush()
 
         result = await advance_trust_state(
             session, resource_id=r.resource_id, target_state="verified"
@@ -47,7 +48,8 @@ async def test_verified_after_approved_review():
     async with get_session() as session:
         r = Resource(type="written", title="ED-04 approved review",
                      trust_state="evidence_supported", pipeline_status="indexed")
-        session.add(r); await session.flush()
+        session.add(r)
+        await session.flush()
 
         review = await open_review(session, subject_type="resource",
                                    subject_id=r.resource_id, reason_code="high_value_source")
@@ -69,7 +71,8 @@ async def test_access_and_trust_independent():
         r = Resource(type="audio", title="ED-04 access independence",
                      trust_state="verified", pipeline_status="monitoring",
                      access_status="public")
-        session.add(r); await session.flush()
+        session.add(r)
+        await session.flush()
 
         await session.execute(
             update(Resource).where(Resource.resource_id == r.resource_id)
@@ -89,7 +92,8 @@ async def test_evidence_supported_requires_platform_verified_evidence():
     async with get_session() as session:
         r = Resource(type="video", title="ED-04 evidence gate",
                      trust_state="ai_assessed", pipeline_status="indexed")
-        session.add(r); await session.flush()
+        session.add(r)
+        await session.flush()
 
         # Without a platform_verified evidence row, state machine allows the
         # transition in code but the service layer MUST check first.
@@ -126,7 +130,8 @@ async def test_authoritative_official_requires_verified():
         r = Resource(type="structured_interactive",
                      title="ED-04 authoritative gate",
                      trust_state="ai_assessed", pipeline_status="indexed")
-        session.add(r); await session.flush()
+        session.add(r)
+        await session.flush()
 
         result = await advance_trust_state(
             session, resource_id=r.resource_id, target_state="authoritative_official"

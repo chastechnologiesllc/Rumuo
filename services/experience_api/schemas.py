@@ -9,7 +9,7 @@ Flutter expects (ResourceApiService.dart):
   trust_state, provenance_url, verified_at
 """
 from typing import Any, Dict, List, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class ResourceRecord(BaseModel):

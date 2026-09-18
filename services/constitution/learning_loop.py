@@ -89,14 +89,6 @@ async def loop_health_report(
     total = total_gaps.scalar()
 
     # Gaps that have at least one resource_served event
-    closed_subquery = (
-        select(LearningLoopEvent.coverage_gap_id)
-        .where(LearningLoopEvent.loop_stage == LoopStage.RESOURCE_SERVED.value)
-        .join(CoverageGap, CoverageGap.gap_id == LearningLoopEvent.coverage_gap_id)
-        .where(CoverageGap.knowledge_universe_id == universe_id)
-        .distinct()
-        .scalar_subquery()
-    )
     closed_count_result = await session.execute(
         select(func.count()).select_from(
             select(LearningLoopEvent.coverage_gap_id)

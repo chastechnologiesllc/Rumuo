@@ -6,7 +6,7 @@ An "exact match" is defined as a resource whose title or description contains
 the query string as a whole word (to_tsvector / plainto_tsquery).
 """
 from typing import Optional, Tuple
-from sqlalchemy import and_, or_, select, text
+from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.models import Resource, Source

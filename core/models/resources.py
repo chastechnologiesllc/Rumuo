@@ -7,13 +7,14 @@ at the service layer via core/enums.py — SQLAlchemy PG ENUM types would
 couple migrations to models, which LD-03 §7 explicitly discourages.
 """
 import uuid
-from datetime import date, datetime
+from datetime import datetime
 
+from sqlalchemy import TIMESTAMP
 from sqlalchemy import (
-    ARRAY, Boolean, CheckConstraint, Column, Date, Float, ForeignKey,
-    Index, Integer, Interval, String, Text, UniqueConstraint,
+    ARRAY, CheckConstraint, Column, Date, Float, ForeignKey,
+    Index, Interval, Text,
 )
-from sqlalchemy.dialects.postgresql import JSONB, TIMESTAMPTZ, UUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
 
 from core.db import Base
@@ -34,8 +35,8 @@ class Source(Base):
     known_access_paths       = Column(JSONB)
     verification_status      = Column(Text, nullable=False, default="discovered")  # trust_state
     org_people_relationships = Column(JSONB)
-    created_at               = Column(TIMESTAMPTZ, nullable=False, default=datetime.utcnow)
-    updated_at               = Column(TIMESTAMPTZ, nullable=False, default=datetime.utcnow,
+    created_at               = Column(TIMESTAMP(timezone=True), nullable=False, default=datetime.utcnow)
+    updated_at               = Column(TIMESTAMP(timezone=True), nullable=False, default=datetime.utcnow,
                                       onupdate=datetime.utcnow)
 
     resources = relationship("Resource", back_populates="source")
@@ -112,12 +113,12 @@ class Resource(Base):
     trust_state                = Column(Text, nullable=False, default="discovered")
     trust_dimensions           = Column(JSONB)
     field_confidence           = Column(JSONB)
-    freshness_last_checked     = Column(TIMESTAMPTZ)
+    freshness_last_checked     = Column(TIMESTAMP(timezone=True))
     freshness_cadence_override = Column(Interval)
     context                    = Column(JSONB)
     pipeline_status            = Column(Text, nullable=False, default="intake")
-    created_at                 = Column(TIMESTAMPTZ, nullable=False, default=datetime.utcnow)
-    updated_at                 = Column(TIMESTAMPTZ, nullable=False, default=datetime.utcnow,
+    created_at                 = Column(TIMESTAMP(timezone=True), nullable=False, default=datetime.utcnow)
+    updated_at                 = Column(TIMESTAMP(timezone=True), nullable=False, default=datetime.utcnow,
                                         onupdate=datetime.utcnow)
 
     source       = relationship("Source", back_populates="resources")
@@ -166,7 +167,7 @@ class Relationship(Base):
     confidence       = Column(Float)
     confidence_state = Column(Text, nullable=False, default="ai_assessed")
     created_by       = Column(Text, nullable=False, default="ai")
-    created_at       = Column(TIMESTAMPTZ, nullable=False, default=datetime.utcnow)
+    created_at       = Column(TIMESTAMP(timezone=True), nullable=False, default=datetime.utcnow)
 
     __table_args__ = (
         Index("relationships_subject_idx", "subject_type", "subject_id"),
@@ -188,6 +189,6 @@ class UserSignal(Base):
     resource_id = Column(UUID(as_uuid=True), ForeignKey("resources.resource_id"), nullable=False)
     signal_type = Column(Text, nullable=False)   # signal_type enum
     payload     = Column(JSONB)
-    created_at  = Column(TIMESTAMPTZ, nullable=False, default=datetime.utcnow)
+    created_at  = Column(TIMESTAMP(timezone=True), nullable=False, default=datetime.utcnow)
 
     resource = relationship("Resource", back_populates="user_signals")

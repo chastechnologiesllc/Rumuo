@@ -30,3 +30,5 @@ def get_connector(channel: str) -> BaseConnector:
             "Add the channel to medicine_nigeria.yaml and register it here."
         )
     return cls()
+
+__all__ = ['BaseConnector', 'CandidateURL', 'YouTubeConnector', 'WebCrawlConnector', 'RSSConnector', 'OpenAlexConnector']

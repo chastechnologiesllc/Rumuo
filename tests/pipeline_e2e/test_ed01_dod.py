@@ -11,14 +11,12 @@ These tests verify the hard structural requirements from ED-01 §5:
 Run with: pytest tests/pipeline_e2e/test_ed01_dod.py -v
 Requires DATABASE_URL pointing to a test database with migrations applied.
 """
-import uuid
 import pytest
-import pytest_asyncio
 from sqlalchemy import select, update
 
 from core.db import get_session, init_db
 from core.models import Resource, Evidence, ReviewQueue, UserSignal
-from services.trust.state_machine import advance_trust_state, ALLOWED_TRANSITIONS
+from services.trust.state_machine import advance_trust_state
 from services.trust.review_queue import open_review
 
 
@@ -33,8 +31,7 @@ def setup_db():
 async def test_core_tables_queryable():
     """All 18 tables from the schema checklist must be queryable."""
     from core.models import (
-        Resource, Source, Entity, Topic, Question, Evidence,
-        Relationship, UserSignal, InformationForm, AuthorityWeight,
+        Resource, Source, Entity, Topic, Question, Relationship, UserSignal, InformationForm, AuthorityWeight,
         FreshnessPolicy, ReviewQueue, TaxonomyNode, TrainingExample,
         ModelRegistry, CoverageGap, LearningLoopEvent, GlobalExpansionMetric,
     )

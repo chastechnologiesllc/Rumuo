@@ -15,7 +15,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.enums import TrainingOutcomeQuality
-from core.models import TrainingExample, ReviewQueue, Evidence
+from core.models import TrainingExample, Evidence
 
 
 # Weight per outcome_quality — verified_successful carries strongest signal (ED-13 §1.1)

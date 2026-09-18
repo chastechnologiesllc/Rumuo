@@ -18,7 +18,7 @@ MUST NOT: confidence substitute for evidence in claim_type detection (ED-13 §4)
 from __future__ import annotations
 
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Optional
 
@@ -29,7 +29,6 @@ from core.models import LearningLoopEvent, CoverageGap
 from services.orchestrator.intent import understand_query, IntentResult
 from services.orchestrator.adjacent_domain import inject_adjacent_domain
 from services.ranking.ranker import rank_resources, RankedResult
-from services.taxonomy.crud import get_resources_for_question, find_questions
 
 
 # Minimum trust score below which a gap is recorded

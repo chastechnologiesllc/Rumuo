@@ -4,8 +4,8 @@ core/models/trust.py — ED-04 §2/§6/§9 and ED-12 §1.1 trust layer tables.
 import uuid
 from datetime import datetime
 
-from sqlalchemy import CheckConstraint, Column, Float, ForeignKey, Index, Text, UniqueConstraint
-from sqlalchemy.dialects.postgresql import TIMESTAMPTZ, UUID
+from sqlalchemy import TIMESTAMP, CheckConstraint, Column, Float, Index, Text, UniqueConstraint
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from core.db import Base
@@ -92,8 +92,8 @@ class ReviewQueue(Base):
     status       = Column(Text, nullable=False, default="open")
     assigned_to  = Column(UUID(as_uuid=True))
     resolution   = Column(Text)
-    created_at   = Column(TIMESTAMPTZ, nullable=False, default=datetime.utcnow)
-    resolved_at  = Column(TIMESTAMPTZ)
+    created_at   = Column(TIMESTAMP(timezone=True), nullable=False, default=datetime.utcnow)
+    resolved_at  = Column(TIMESTAMP(timezone=True))
 
     __table_args__ = (
         Index("review_queue_status_reason_idx", "status", "reason_code"),

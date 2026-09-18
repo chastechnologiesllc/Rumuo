@@ -11,8 +11,7 @@ MUST NOT: call any check "passing" unless it is independently verifiable from co
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Callable, Awaitable
-import os
+from typing import Callable
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -115,8 +114,6 @@ async def _check_not_one_country(session: AsyncSession):
 async def _check_not_english_only(session: AsyncSession):
     """Not an English-only representation | ED-02 §5, ED-11 §2: original-language indexing"""
     from core.models import Resource
-    from sqlalchemy import select, func, cast
-    from sqlalchemy.dialects.postgresql import ARRAY
     # Check resources table supports languages array
     cols = {c.key for c in Resource.__table__.columns}
     passing = "languages" in cols
@@ -148,7 +145,6 @@ async def _check_format_extensibility(session: AsyncSession):
     result = await session.execute(select(InformationForm))
     forms = result.scalars().all()
     has_registry = len(forms) >= 5
-    has_candidate_status = any(f.status == "candidate" for f in forms) or True  # protocol exists
     passing = has_registry
     return passing, (
         f"information_forms registry exists with {len(forms)} forms. "

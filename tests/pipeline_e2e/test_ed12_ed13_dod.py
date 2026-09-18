@@ -14,14 +14,13 @@ ED-13 checks:
   - model_registry candidate → active promotion blocked without evidence for orchestration role
   - deprecated model does NOT erase historical provenance
 """
-import uuid
 import pytest
 from sqlalchemy import select
 
 from core.db import get_session, init_db
 from core.models import (
     InformationForm, TrainingExample, ModelRegistry,
-    CoverageGap, LearningLoopEvent,
+    CoverageGap,
 )
 from services.constitution.form_extensibility import check_candidate_form
 from services.constitution.learning_loop import record_loop_event, loop_health_report
@@ -81,7 +80,8 @@ async def test_learning_loop_closes():
             knowledge_universe_id="medicine_nigeria:test",
             resolution_status="open",
         )
-        session.add(gap); await session.flush()
+        session.add(gap)
+        await session.flush()
 
         await record_loop_event(session, "gap_detected", gap.gap_id)
         await record_loop_event(session, "acquisition_triggered", gap.gap_id)

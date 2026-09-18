@@ -79,8 +79,10 @@ def _extract_meta(html: bytes, url: str) -> dict:
     try:
         from bs4 import BeautifulSoup
         soup = BeautifulSoup(html, "html.parser")
-        og = lambda p: (soup.find("meta", property=p) or {}).get("content", "")
-        nm = lambda n: (soup.find("meta", attrs={"name": n}) or {}).get("content", "")
+        def og(p):
+            return (soup.find("meta", property=p) or {}).get("content", "")
+        def nm(n):
+            return (soup.find("meta", attrs={"name": n}) or {}).get("content", "")
         return {
             "title":       og("og:title") or (soup.find("title") or {}).get_text(strip=True),
             "description": og("og:description") or nm("description"),

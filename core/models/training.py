@@ -4,9 +4,8 @@ core/models/training.py — ED-13 §1.1 training_examples and §5.1 model_regist
 import uuid
 from datetime import datetime
 
-from sqlalchemy import ARRAY, Column, ForeignKey, Text
-from sqlalchemy.dialects.postgresql import JSONB, TIMESTAMPTZ, UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy import TIMESTAMP, ARRAY, Column, ForeignKey, Text
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 
 from core.db import Base
 
@@ -27,7 +26,7 @@ class TrainingExample(Base):
     resource_path   = Column(ARRAY(UUID(as_uuid=True)))
     outcome_quality = Column(Text, nullable=False, default="unverified")
     provenance      = Column(UUID(as_uuid=True), ForeignKey("evidence.evidence_id"))
-    created_at      = Column(TIMESTAMPTZ, nullable=False, default=datetime.utcnow)
+    created_at      = Column(TIMESTAMP(timezone=True), nullable=False, default=datetime.utcnow)
 
 
 class ModelRegistry(Base):
@@ -46,5 +45,5 @@ class ModelRegistry(Base):
     role               = Column(Text, nullable=False)   # model_role enum
     status             = Column(Text, nullable=False, default="candidate")
     evaluation_metrics = Column(JSONB)
-    promoted_at        = Column(TIMESTAMPTZ)
-    deprecated_at      = Column(TIMESTAMPTZ)
+    promoted_at        = Column(TIMESTAMP(timezone=True))
+    deprecated_at      = Column(TIMESTAMP(timezone=True))

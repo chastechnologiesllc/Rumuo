@@ -6,7 +6,6 @@ Requires YOUTUBE_API_KEY in environment.
 MUST NOT acquire private/unlisted content.
 """
 from __future__ import annotations
-from typing import Optional
 import httpx
 import os
 from .base import BaseConnector, CandidateURL

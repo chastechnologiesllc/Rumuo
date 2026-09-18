@@ -95,8 +95,10 @@ def _extract_meta(html: bytes, url: str) -> dict:
     try:
         from bs4 import BeautifulSoup
         soup = BeautifulSoup(html, "html.parser")
-        og = lambda prop: (soup.find("meta", property=prop) or {}).get("content", "")
-        name = lambda n: (soup.find("meta", attrs={"name": n}) or {}).get("content", "")
+        def og(prop):
+            return (soup.find("meta", property=prop) or {}).get("content", "")
+        def name(n):
+            return (soup.find("meta", attrs={"name": n}) or {}).get("content", "")
         title = (og("og:title") or
                  (soup.find("title") or {}).get_text(strip=True) or "")
         authors_raw = name("author") or og("article:author")

@@ -12,7 +12,7 @@ MUST NOT: silently rewrite user's explicit_interests from a single adjacent-doma
 """
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession

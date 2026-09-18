@@ -17,18 +17,15 @@ Returned resources:
   - trust_state and provenance exposed so the Flutter client can display
     appropriate disclosure per ED-07 §4.
 """
-import os
-import uuid
 from contextlib import asynccontextmanager
 from typing import Optional
 
-from fastapi import FastAPI, Query, Request
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 
 from core.db import get_session, init_db
 from services.experience_api.queries import fetch_resources
-from services.experience_api.schemas import ResourceRecord, ResourcesResponse
+from services.experience_api.schemas import ResourcesResponse
 from services.experience_api.subcategory_map import resolve_subcategory
 
 

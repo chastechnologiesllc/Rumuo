@@ -22,7 +22,7 @@ from pydantic import BaseModel
 from sqlalchemy import select
 
 from core.db import get_session, init_db
-from core.models import Resource, ReviewQueue
+from core.models import Resource
 from services.trust.review_queue import (
     assign_review,
     get_open_reviews,

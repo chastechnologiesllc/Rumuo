@@ -36,3 +36,5 @@ def get_extractor(form_id: str) -> BaseExtractor:
             "Add the form to information_forms table (ED-12 §1.1) and register an extractor here."
         )
     return cls()
+
+__all__ = ['BaseExtractor', 'ExtractionResult', 'VideoExtractor', 'AudioExtractor']

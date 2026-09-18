@@ -26,7 +26,7 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.enums import PipelineStatus, TrustState
-from core.models import Resource, Source, Evidence, Relationship
+from core.models import Resource, Evidence, Relationship
 from services.trust.review_queue import open_review
 from services.trust.state_machine import advance_trust_state
 

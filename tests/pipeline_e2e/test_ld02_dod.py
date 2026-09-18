@@ -8,7 +8,6 @@ Confirms that:
    is a valid, fully automated resting state for Medicine).
 3. Trust state cannot jump from ai_assessed directly to verified.
 """
-import uuid
 import pytest
 
 from core.db import get_session, init_db
