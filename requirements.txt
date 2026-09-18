@@ -33,3 +33,4 @@ anyio==4.6.0
 
 # ── Dev / tooling ────────────────────────────────────────────────────────────
 python-dotenv==1.0.1
+mangum==0.17.0           # ASGI → Vercel adapter
