@@ -12,6 +12,7 @@ from typing import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.pool import NullPool
 
 
 class Base(DeclarativeBase):
@@ -64,6 +65,7 @@ def init_db() -> None:
         pool_size=1 if _IS_SERVERLESS else 5,
         max_overflow=0 if _IS_SERVERLESS else 10,
         pool_pre_ping=True,
+        poolclass=NullPool,
         connect_args=connect_args,
         echo=os.environ.get("DB_ECHO", "").lower() == "true",
     )
