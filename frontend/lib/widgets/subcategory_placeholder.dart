@@ -82,10 +82,32 @@ class _ResourceCard extends StatelessWidget {
   final ResourceRecord record;
   const _ResourceCard({required this.record});
   @override
-  Widget build(BuildContext context) => Container(margin: const EdgeInsets.only(bottom: 12), padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: AppTheme.surfaceColor(context), borderRadius: BorderRadius.circular(17), border: Border.all(color: AppTheme.dividerColor(context), width: 0.7)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Wrap(spacing: 8, runSpacing: 6, children: [ _Tag(label: record.contentType), _Tag(label: record.publisher), _Tag(label: record.trustState, accent: true)]), const SizedBox(height: 9), Text(record.title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)), const SizedBox(height: 6), Text(record.summary, style: TextStyle(color: AppTheme.textMuted(context), height: 1.35)), const SizedBox(height: 10), Text('${record.region} · ${record.license ?? 'Licence not specified'}', style: TextStyle(color: AppTheme.textMuted(context), fontSize: 11)), const SizedBox(height: 8), Row(children: [TextButton.icon(onPressed: () => launchUrl(record.url, mode: LaunchMode.externalApplication), icon: const Icon(Icons.open_in_new_rounded, size: 16), label: const Text('Open source')), const Spacer(), IconButton(tooltip: 'View provenance', onPressed: () => launchUrl(record.provenanceUrl, mode: LaunchMode.externalApplication), icon: Icon(Icons.fact_check_outlined, color: AppTheme.textMuted(context), size: 20))])]));
+  Widget build(BuildContext context) {
+    final sourceUrl = record.url;
+    final provenanceUrl = record.provenanceUrl;
+    return Container(margin: const EdgeInsets.only(bottom: 12), padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: AppTheme.surfaceColor(context), borderRadius: BorderRadius.circular(17), border: Border.all(color: AppTheme.dividerColor(context), width: 0.7)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Wrap(spacing: 8, runSpacing: 6, children: [ _Tag(label: record.contentType), _Tag(label: record.publisher), _Tag(label: record.trustState, accent: true)]), const SizedBox(height: 9), Text(record.title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)), const SizedBox(height: 6), Text(record.summary, style: TextStyle(color: AppTheme.textMuted(context), height: 1.35)), const SizedBox(height: 10), Text('${record.region} · ${record.license ?? 'Licence not specified'}', style: TextStyle(color: AppTheme.textMuted(context), fontSize: 11)), const SizedBox(height: 8), Row(children: [TextButton.icon(onPressed: sourceUrl == null ? null : () => launchUrl(sourceUrl, mode: LaunchMode.externalApplication), icon: const Icon(Icons.open_in_new_rounded, size: 16), label: const Text('Open source')), const Spacer(), IconButton(tooltip: 'View provenance', onPressed: provenanceUrl == null ? null : () => launchUrl(provenanceUrl, mode: LaunchMode.externalApplication), icon: Icon(Icons.fact_check_outlined, color: AppTheme.textMuted(context), size: 20))])]);
+  }
 }
 
-class _Tag extends StatelessWidget { final String label; final bool accent; const _Tag({required this.label, this.accent = false}); @override Widget build(BuildContext context) => Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: accent ? AppTheme.gold.withValues(alpha: 0.16) : AppTheme.surfaceColor(context), borderRadius: BorderRadius.circular(20)), child: Text(label, style: TextStyle(color: accent ? AppTheme.gold : AppTheme.textMuted(context), fontSize: 11, fontWeight: FontWeight.w700))); }
+class _Tag extends StatelessWidget {
+  final String label;
+  final bool accent;
+  const _Tag({required this.label, this.accent = false});
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    decoration: BoxDecoration(
+      color: accent ? AppTheme.gold.withValues(alpha: 0.16) : AppTheme.surfaceColor(context),
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: Text(label, style: TextStyle(
+      color: accent ? AppTheme.gold : AppTheme.textMuted(context),
+      fontSize: 11,
+      fontWeight: FontWeight.w700,
+    )),
+  );
+}
 class _MessageState extends StatelessWidget { final IconData icon; final String title; final String detail; final VoidCallback onRetry; const _MessageState({required this.icon, required this.title, required this.detail, required this.onRetry}); @override Widget build(BuildContext context) => Container(padding: const EdgeInsets.all(28), decoration: BoxDecoration(color: AppTheme.surfaceColor(context), borderRadius: BorderRadius.circular(17), border: Border.all(color: AppTheme.dividerColor(context))), child: Column(children: [Icon(icon, size: 38, color: AppTheme.textMuted(context)), const SizedBox(height: 10), Text(title, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)), const SizedBox(height: 5), Text(detail, textAlign: TextAlign.center, style: TextStyle(color: AppTheme.textMuted(context))), const SizedBox(height: 12), OutlinedButton(onPressed: onRetry, child: const Text('Try again'))])); }
 
 class SubcategoryScaffold extends StatelessWidget {
