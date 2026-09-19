@@ -11,6 +11,7 @@ from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.engine import make_url
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.pool import NullPool
 
@@ -33,7 +34,20 @@ def _build_url() -> str:
         url = url.replace("postgres://", "postgresql+asyncpg://", 1)
     elif url.startswith("postgresql://") and "+asyncpg" not in url:
         url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
-    return url
+
+    # Supabase provides libpq-style query parameters in copied URIs. Some of
+    # those (notably pgbouncer and channel_binding) are not accepted by
+    # asyncpg and cause every database-backed route to return HTTP 500 even
+    # though the FastAPI health route works. Keep only asyncpg-compatible SSL
+    # configuration and let the serverless connect_args handle pooling.
+    parsed = make_url(url)
+    query = dict(parsed.query)
+    sslmode = query.pop("sslmode", None)
+    query.pop("pgbouncer", None)
+    query.pop("channel_binding", None)
+    if sslmode and "ssl" not in query:
+        query["ssl"] = "require" if sslmode in {"require", "verify-ca", "verify-full"} else sslmode
+    return parsed.set(query=query).render_as_string(hide_password=False)
 
 
 engine = None
