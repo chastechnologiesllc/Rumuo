@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../data/channel_avatar_data.dart';
-
 class Channel {
   final String id;
   final String name;
@@ -12,12 +10,8 @@ class Channel {
   final String focus;
   final String initials;
 
-  /// Links this channel to one of the 60 "Business of Your Skill/Business/
-  /// Profession" categories (see models/resource_category.dart), e.g.
-  /// 'skill_01_tailoring_fashion_design'. Null for channels that haven't
-  /// been mapped to a category yet — every existing channel stays null
-  /// and behaves exactly as before. Used by FeedProvider to give a
-  /// person's selected category's channels priority in the feed.
+  /// Links this channel to one of the Rumuo taxonomy categories.
+  /// Populated from the DB via the experience API.
   final String? resourceCategoryId;
 
   const Channel({
@@ -37,9 +31,9 @@ class Channel {
 
   String get channelUrl => 'https://www.youtube.com/channel/$id';
 
-  /// Official YouTube profile image captured from the channel page metadata.
-  /// Null means the channel page did not currently expose a usable avatar.
-  String? get avatarUrl => ChannelAvatarData.byChannelId[id];
+  /// Avatar URL — sourced from the `sources` table via the API.
+  /// Returns null until the source record is fetched.
+  String? get avatarUrl => null;
 
   String get youtubeHandle {
     final value = handle.trim();
@@ -47,8 +41,6 @@ class Channel {
     if (value.startsWith('@') && !value.contains(' ')) {
       return 'https://www.youtube.com/$value';
     }
-    // Some older catalog records stored a display name instead of a handle.
-    // The verified channel ID is the authoritative, always-valid fallback.
     return channelUrl;
   }
 }

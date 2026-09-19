@@ -8,7 +8,6 @@ on:
     branches: [main, master]
   workflow_dispatch:
 
-# Required so the deploy job can push to the gh-pages branch
 permissions:
   contents: write
   pages: write
@@ -28,11 +27,9 @@ jobs:
         working-directory: frontend
 
     steps:
-      # ── Checkout ────────────────────────────────────────────────────────────
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      # ── Flutter ─────────────────────────────────────────────────────────────
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -40,38 +37,29 @@ jobs:
           channel: 'stable'
           cache: true
 
-      # ── Dependencies ────────────────────────────────────────────────────────
       - name: Install dependencies
         run: flutter pub get
 
-      # ── Ensure web platform (only if missing; never overwrite tests) ────────
       - name: Ensure web platform
         run: |
           if [ ! -d web ]; then
             flutter create . --platforms=web --project-name rumuo
           fi
-          # flutter create can regenerate the template test that references MyApp
           rm -f test/widget_test.dart
 
-      # ── Analyse (same bar as Android workflow) ──────────────────────────────
       - name: Analyse
         run: flutter analyze lib --no-fatal-infos --no-fatal-warnings
 
-      # ── Tests ───────────────────────────────────────────────────────────────
       - name: Run tests
         run: flutter test
 
-      # ── Build ───────────────────────────────────────────────────────────────
-      # base-href must match the GitHub Pages path for this repo:
-      #   https://chastechnologiesllc.github.io/Rumuo/
-      # If you later use a custom domain at the site root, change to "/" .
       - name: Build web (release)
         run: |
           flutter build web --release --target lib/main.dart \
             --base-href "/Rumuo/" \
-            --build-number=${{ github.run_number }}
+            --build-number=${{ github.run_number }} \
+            --dart-define=RUMUO_API_BASE_URL=https://rumuo-api-ch-as-technologies-llc.vercel.app/api/resources
 
-      # ── Upload artifact (always, including PRs) ─────────────────────────────
       - name: Upload web build artifact
         uses: actions/upload-artifact@v7
         with:
@@ -79,7 +67,6 @@ jobs:
           path: frontend/build/web
           retention-days: 30
 
-      # ── Deploy to GitHub Pages (main/master only, not PRs) ──────────────────
       - name: Deploy to GitHub Pages
         if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         uses: peaceiris/actions-gh-pages@v4
@@ -87,5 +74,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./frontend/build/web
           force_orphan: true
-          # Flutter assets can start with _; disable Jekyll so they are served
           enable_jekyll: false

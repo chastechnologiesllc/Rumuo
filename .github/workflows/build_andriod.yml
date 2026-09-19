@@ -22,11 +22,9 @@ jobs:
         working-directory: frontend
 
     steps:
-      # ── Checkout ────────────────────────────────────────────────────────────
       - name: Checkout repository
-        uses: actions/checkout@v6                        # ← updated from v4
+        uses: actions/checkout@v6
 
-      # ── Java ─────────────────────────────────────────────────────────────────
       - name: Set up JDK 17
         uses: actions/setup-java@v5
         with:
@@ -34,33 +32,27 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
-      # ── Flutter ───────────────────────────────────────────────────────────────
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.44.0'                     # ← updated from 3.27.0
+          flutter-version: '3.44.0'
           channel: 'stable'
           cache: true
 
-      # ── Dependencies ──────────────────────────────────────────────────────────
       - name: Install dependencies
         run: flutter pub get
 
-      # ── Analyse ───────────────────────────────────────────────────────────────
       - name: Analyse
         run: flutter analyze lib --no-fatal-infos --no-fatal-warnings
 
-      # ── Tests ─────────────────────────────────────────────────────────────────
       - name: Run tests
         run: flutter test
 
-      # ── PR compile check ─────────────────────────────────────────────────────
-
-      - name: Build APK (PR compile check only — not uploaded)
+      - name: Build APK (PR compile check only)
         if: github.event_name == 'pull_request'
-        run: flutter build apk --debug --target lib/main.dart
-
-      # ── Keystore ──────────────────────────────────────────────────────────────
+        run: |
+          flutter build apk --debug --target lib/main.dart \
+            --dart-define=RUMUO_API_BASE_URL=https://rumuo-api-ch-as-technologies-llc.vercel.app/api/resources
 
       - name: Decode keystore
         if: github.event_name != 'pull_request'
@@ -73,39 +65,39 @@ jobs:
           keyPassword=${{ secrets.KEYSTORE_KEY_PASSWORD }}
           EOF
 
-      # ── Build production apk
-      - name: Build production APK (universal — all phones, one file)
+      - name: Build production APK
         if: github.event_name != 'pull_request'
-        run: flutter build apk --release --target lib/main.dart --build-number=${{ github.run_number }}
+        run: |
+          flutter build apk --release --target lib/main.dart \
+            --build-number=${{ github.run_number }} \
+            --dart-define=RUMUO_API_BASE_URL=https://rumuo-api-ch-as-technologies-llc.vercel.app/api/resources
 
-      # ── Build production AAB ────────────────────────────────────────────────────
       - name: Build production AAB
         if: github.event_name != 'pull_request'
-        run: flutter build appbundle --release --target lib/main.dart --build-number=${{ github.run_number }}
+        run: |
+          flutter build appbundle --release --target lib/main.dart \
+            --build-number=${{ github.run_number }} \
+            --dart-define=RUMUO_API_BASE_URL=https://rumuo-api-ch-as-technologies-llc.vercel.app/api/resources
 
-      # ── Upload production APK ──────────────────────────────────────────────────
-      - name: Upload APK (production, universal)
+      - name: Upload APK
         if: github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v7                # ← updated from v4
+        uses: actions/upload-artifact@v7
         with:
           name: rumuo-production-apk
           path: frontend/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 90
 
-      # ── Upload production AAB ───────────────────────────────────────────────────
-      - name: Upload AAB (production)
+      - name: Upload AAB
         if: github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v7                # ← updated from v4
+        uses: actions/upload-artifact@v7
         with:
           name: rumuo-production-aab
           path: frontend/build/app/outputs/bundle/release/app-release.aab
           retention-days: 90
 
-      # ── GitHub Release ────────────────────────────────────────────────────────
-
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v3            # ← updated from v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             frontend/build/app/outputs/flutter-apk/app-release.apk

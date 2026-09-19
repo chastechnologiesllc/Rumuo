@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:convert';
 import 'dart:math';
 
@@ -17,12 +16,13 @@ import '../models/video.dart';
 import '../services/blog_rss_service.dart';
 import '../services/engagement_service.dart';
 import '../services/network_policy.dart';
-import '../services/rss_service.dart';
+import '../services/resource_api_service.dart';
 import '../services/user_profile_service.dart';
 
 enum FeedState { idle, loading, loaded, error }
 
 class FeedProvider extends ChangeNotifier {
+  static const _api = ResourceApiService();
   /// Last constructed instance — VideoPlayerScreen is pushed as a route
   /// outside MultiProvider (sibling of home under MaterialApp's navigator),
   /// so context.read<FeedProvider>() fails there. Same pattern as
@@ -488,62 +488,11 @@ class FeedProvider extends ChangeNotifier {
 
   static final _epoch = DateTime(2000);
 
-  // static final → created exactly once, not on every access.
-  static final List<Video> _bookVideos = [
-    // ── Public domain classics — read in full via EPUB, free, no login ──────
-    Video(id:'book_richest_man',
-      title:'The Richest Man in Babylon — George S. Clason',
-      description:'Timeless laws of money: pay yourself first, make money work for you.',
-      channelId:'books',channelName:'Free Finance Library',publishedAt:_epoch,
-      thumbnailUrl:'https://covers.openlibrary.org/b/isbn/9780451205360-L.jpg'),
-    Video(id:'book_think_grow',
-      title:'Think and Grow Rich — Napoleon Hill',
-      description:"13 principles of wealth distilled from 500+ of history's most successful people.",
-      channelId:'books',channelName:'Free Finance Library',publishedAt:_epoch,
-      thumbnailUrl:'https://covers.openlibrary.org/b/isbn/9781585424337-L.jpg'),
-    Video(id:'book_science_rich',
-      title:'The Science of Getting Rich — Wallace D. Wattles',
-      description:'The original 1910 law-of-attraction wealth blueprint that inspired The Secret.',
-      channelId:'books',channelName:'Free Finance Library',publishedAt:_epoch,
-      thumbnailUrl:'https://archive.org/services/img/science_gettingrich_1005_librivox'),
-    Video(id:'book_art_money',
-      title:'The Art of Money Getting — P. T. Barnum',
-      description:"20 golden rules for making money from America's greatest showman (1880).",
-      channelId:'books',channelName:'Free Finance Library',publishedAt:_epoch,
-      thumbnailUrl:'https://www.globalgreyebooks.com/content/book-covers/p-t-barnum_art-of-money-getting.jpg'),
-    Video(id:'book_as_man_thinketh',
-      title:'As a Man Thinketh — James Allen',
-      description:'How your thoughts shape your wealth, health, and circumstances (1903).',
-      channelId:'books',channelName:'Free Finance Library',publishedAt:_epoch,
-      thumbnailUrl:'https://covers.openlibrary.org/b/id/14828006-L.jpg'),
-    Video(id:'book_eight_pillars',
-      title:'Eight Pillars of Prosperity — James Allen',
-      description:'Energy, economy, integrity, and five more virtues that build lasting wealth (1911).',
-      channelId:'books',channelName:'Free Finance Library',publishedAt:_epoch,
-      thumbnailUrl:'https://archive.org/services/img/eightpillarsofprosperity_1411_librivox'),
-    Video(id:'book_master_key',
-      title:'The Master Key System — Charles F. Haanel',
-      description:'A 24-week course on mastering the mind to attract wealth and success (1912).',
-      channelId:'books',channelName:'Free Finance Library',publishedAt:_epoch,
-      thumbnailUrl:'https://covers.openlibrary.org/b/olid/OL25601790M-L.jpg'),
-    Video(id:'book_popular_delusions',
-      title:'Extraordinary Popular Delusions — Charles Mackay',
-      description:'The tulip mania, South Sea bubble and how crowds go financially mad (1841).',
-      channelId:'books',channelName:'Free Finance Library',publishedAt:_epoch,
-      thumbnailUrl:'https://covers.openlibrary.org/b/id/8100251-L.jpg'),
-
-    // ── Bundled masterclass playbooks — ship inside the app, fully offline ──
-    Video(id:'book_five_buckets_playbook',
-      title:'The Five Buckets: Build What They Can Never Take From You',
-      description:'An encyclopedic masterclass on Knowledge, Skills, Network, Resources & Reputation — inspired by Steven Bartlett\'s 5-Bucket framework.',
-      channelId:'books',channelName:'Masterclass Playbooks',publishedAt:_epoch,
-      thumbnailUrl:'assets/books/five_buckets_playbook_cover.jpg'),
-    Video(id:'book_five_buckets_complete',
-      title:'The Five Buckets: A Field Manual for Unstoppable Success',
-      description:'How to build unshakeable knowledge, master high-value skills, engineer powerful networks, command strategic resources, and forge a reputation that opens doors before you knock.',
-      channelId:'books',channelName:'Masterclass Playbooks',publishedAt:_epoch,
-      thumbnailUrl:'assets/books/five_buckets_complete_cover.jpg'),
-  ];
+  /// Medical books and written resources come from the Rumuo API
+  /// (resources with type='written', served from /api/resources?subcategory=written_books).
+  /// The previous general finance/business book list has been removed as it
+  /// was not Medicine content (wrong vertical for the Nigeria pilot).
+  static final List<Video> _bookVideos = const [];
 
   // ── Init ──────────────────────────────────────────────────────────────────────
 
@@ -560,25 +509,10 @@ class FeedProvider extends ChangeNotifier {
     await refresh(force: false, silent: hasCached);
   }
 
-  Future<void> _loadDiskCache() async {
-    final channelIds = LinkedHashSet<String>.from(
-      ChannelData.combined.map((ch) => ch.id).where((id) => id.isNotEmpty),
-    );
-    final cachedEntries = await Future.wait(channelIds.map((channelId) async {
-      final cached = await RssService.instance.getCached(channelId);
-      return MapEntry(channelId, cached);
-    }));
-    final snap = <String, List<Video>>{
-      for (final entry in cachedEntries)
-        if (entry.value.isNotEmpty) entry.key: entry.value,
-    };
-    if (snap.isNotEmpty) {
-      _videosByChannel = Map.unmodifiable(snap);
-      _tabCache.clear();
-      _state = FeedState.loaded;
-      notifyListeners();
-    }
-  }
+  /// No-op in production — API responses are not disk-cached yet.
+  /// Disk caching will be added in a future session once Phase A
+  /// acquisition is running and we have stable resource IDs to key on.
+  Future<void> _loadDiskCache() async {}
 
   // ── Tab ───────────────────────────────────────────────────────────────────────
 
@@ -612,83 +546,46 @@ class FeedProvider extends ChangeNotifier {
 
   Future<void> _refreshInternal({required bool force, required bool silent}) async {
     try {
-    if (!silent) {
-      _state = FeedState.loading;
-      _errorMessage = null;
-      notifyListeners();
-    }
-
-    // Deduplicate channels by ID before fetching — a channel listed in both
-    // the mock general catalog (null categoryId) and a selected category's JSON can appear
-    // multiple times in _eagerChannels(). Prefer the category-specific version
-    // so _dateMixed's 3-day boost fires correctly, and skip empty IDs entirely.
-    final seenChannelIds = <String>{};
-    final channels = <Channel>[];
-    for (final ch in _eagerChannels()) {
-      if (ch.id.isEmpty) continue;
-      if (seenChannelIds.add(ch.id)) {
-        channels.add(ch);
-      } else if (ch.resourceCategoryId != null) {
-        // Upgrade null-category entry to category-specific so boost fires.
-        final idx = channels.indexWhere((c) => c.id == ch.id);
-        if (idx >= 0 && channels[idx].resourceCategoryId == null) {
-          channels[idx] = ch;
-        }
+      if (!silent) {
+        _state = FeedState.loading;
+        _errorMessage = null;
+        notifyListeners();
       }
-    }
 
-    final snap = <String, List<Video>>{};
+      // Fetch from the Rumuo experience API — one call per information form.
+      // No more YouTube RSS / channel dependency.
+      final snap = <String, List<Video>>{};
 
-    // Keep an adaptive worker pool instead of starting every channel at once.
-    // The constrained profile is deliberately small and staggered; this is
-    // gentler on low-end phones and browser proxies than a full burst.
-    final results = List<List<Video>?>.filled(channels.length, null);
-    var nextIndex = 0;
-    Future<void> fetchWorker() async {
-      while (true) {
-        final index = nextIndex++;
-        if (index >= channels.length) return;
-        final ch = channels[index];
+      final subcategories = {
+        'api_videos': 'videos_long_form',
+        'api_shorts': 'shorts_clips',
+        'api_audio':  'audio_podcasts',
+      };
+
+      await Future.wait(subcategories.entries.map((entry) async {
         try {
-          results[index] = await RssService.instance.fetchVideos(
-            ch.id,
-            forceRefresh: force,
-            staggerMs: index *
-                (NetworkPolicy.instance.isConstrained ? 180 : 50),
+          final videos = await _api.listAsVideos(
+            subcategory: entry.value,
+            limit: NetworkPolicy.instance.isConstrained ? 20 : 40,
           );
-        } on Object catch (e) {
-          debugPrint('[FeedProvider] channel ${ch.id} failed: $e');
-          results[index] = const [];
+          snap[entry.key] = videos;
+        } catch (e) {
+          debugPrint('[FeedProvider] API ${entry.value} failed: $e');
+          snap[entry.key] = const [];
         }
-      }
-    }
+      }));
 
-    final workerCount = min(
-      NetworkPolicy.instance.feedConcurrency,
-      channels.length,
-    );
-    await Future.wait(
-      List.generate(workerCount, (_) => fetchWorker()),
-    );
-    for (var i = 0; i < channels.length; i++) {
-      final videos = results[i];
-      if (videos != null) snap[channels[i].id] = videos;
-    }
+      _videosByChannel = Map.unmodifiable(snap);
+      _tabCache.clear();
+      final total = snap.values.fold(0, (s, l) => s + l.length);
+      _state = total > 0 ? FeedState.loaded : FeedState.error;
+      _errorMessage = total == 0
+          ? 'Content is being indexed. Check back soon.'
+          : null;
 
-    final total = snap.values.fold(0, (s, l) => s + l.length);
-
-    // snap COMPLETELY REPLACES _videosByChannel (not merged/appended) — this
-    // is what ensures each channel's video list is always exactly its
-    // current latest 15 from YouTube's RSS feed, never a stale mix of old
-    // and new entries.
-    _videosByChannel = Map.unmodifiable(snap);
-    _tabCache.clear();
-    _state = total > 0 ? FeedState.loaded : FeedState.error;
-    _errorMessage = total == 0 ? 'Could not load content. Check your connection.' : null;
-
-    final refreshedAt = DateTime.now();
-    _lastRefreshAt = refreshedAt;
-    if (force) _lastForcedRefreshAt = refreshedAt;
+      final refreshedAt = DateTime.now();
+      _lastRefreshAt = refreshedAt;
+      if (force) _lastForcedRefreshAt = refreshedAt;
 
       notifyListeners();
     } finally {

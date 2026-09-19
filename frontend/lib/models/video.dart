@@ -7,22 +7,14 @@ class Video {
   final DateTime publishedAt;
   final String thumbnailUrl;
 
-  /// Ordered fallback cover URLs for book-like videos. Empty for ordinary
-  /// videos; the first successful exact-cover URL is rendered.
+  /// Ordered fallback cover URLs for book-like videos.
   final List<String> thumbnailFallbackUrls;
 
-  /// Original RSS link — YouTube Shorts have /shorts/ in this URL.
+  /// Original link — YouTube Shorts have /shorts/ in this URL.
+  /// For API-sourced resources this is the canonical resource URL.
   final String? originalLink;
 
-  /// The following three fields are only set when channelId ==
-  /// 'verified_book' — a real, named book pulled from a category's
-  /// the in-code mock catalog (see VerifiedBook in
-  /// resource_category.dart), as opposed to 'books' (the original 10
-  /// hand-picked classics/playbooks with their own EPUB/PDF/insights
-  /// reader). These entries never open BookDetailScreen — home_screen.dart
-  /// routes them to an external launch ('download') or the same in-app web
-  /// reader a blog article uses ('web'). Always null for every other kind
-  /// of Video.
+  // Book-only fields
   final String? freeSourceUrl;
   final String? freeSourceType; // 'web' or 'download'
   final String? sourceCategoryId;
@@ -42,10 +34,11 @@ class Video {
     this.sourceCategoryId,
   });
 
-  /// True if this video is a YouTube Short.
-  /// Primary signal: original RSS link contains /shorts/ path.
-  /// Fallback: explicit #shorts hashtag in title or description.
+  /// True if this video is a short-form clip.
+  /// API-sourced shorts use channelId == 'api_shorts'.
+  /// YouTube Shorts are detected from the /shorts/ URL path.
   bool get isShort {
+    if (channelId == 'api_shorts') return true;
     if (originalLink != null && originalLink!.contains('/shorts/')) return true;
     final t = title.toLowerCase();
     final d = description.toLowerCase();
@@ -57,26 +50,24 @@ class Video {
         d.contains('youtube.com/shorts');
   }
 
-  String get watchUrl =>
-      isShort ? 'https://www.youtube.com/shorts/$id'
-               : 'https://www.youtube.com/watch?v=$id';
+  /// For API-sourced resources, watchUrl is the canonical resource URL.
+  String get watchUrl {
+    if (channelId.startsWith('api_')) return originalLink ?? '';
+    return isShort
+        ? 'https://www.youtube.com/shorts/$id'
+        : 'https://www.youtube.com/watch?v=$id';
+  }
 
-  /// Books (channelId == 'books' or 'verified_book') are not real YouTube
-  /// videos — their `id` is a synthetic key like 'book_richest_man' or
-  /// 'vbook_...', so constructing an img.youtube.com URL from it would
-  /// always 404. Both kinds of book must use their own [thumbnailUrl]
-  /// (which may be a network cover, a bundled asset path, or — for a
-  /// verified_book with no cover source — empty, which BookCoverImage
-  /// already renders as a graceful placeholder) everywhere a thumbnail is
-  /// requested.
-  bool get _isBookLike => channelId == 'books' || channelId == 'verified_book';
+  /// API resources use thumbnailUrl directly (no YouTube img.youtube.com).
+  bool get _isBookLike =>
+      channelId == 'books' ||
+      channelId == 'verified_book' ||
+      channelId.startsWith('api_');
 
   String get thumbnailHd =>
-      _isBookLike ? thumbnailUrl
-                  : 'https://img.youtube.com/vi/$id/maxresdefault.jpg';
+      _isBookLike ? thumbnailUrl : 'https://img.youtube.com/vi/$id/maxresdefault.jpg';
   String get thumbnailMq =>
-      _isBookLike ? thumbnailUrl
-                  : 'https://img.youtube.com/vi/$id/mqdefault.jpg';
+      _isBookLike ? thumbnailUrl : 'https://img.youtube.com/vi/$id/mqdefault.jpg';
 
   Map<String, dynamic> toJson() => {
         'id': id,

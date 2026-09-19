@@ -24,6 +24,6 @@ class Subcategory {
     required this.form,
     required this.icon,
     required this.description,
-    this.isLive = false,
+    this.isLive = true, // Production: all subcategories live via API
   });
 }
