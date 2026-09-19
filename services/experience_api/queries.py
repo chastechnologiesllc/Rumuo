@@ -1,15 +1,18 @@
 """
-services/experience_api/queries.py — DB queries for the experience API.
+Database queries for the public experience API.
 
-Implements ED-07 §2: exact-match results surface before ranked results.
-An "exact match" is defined as a resource whose title or description contains
-the query string as a whole word (to_tsvector / plainto_tsquery).
+The live Supabase project exposes the compact ``resources`` registry used by
+Flutter: id, title, summary, url, content_type, subcategory_id, publisher,
+region, license, trust_state, provenance_url, and verification timestamps.
+This module deliberately uses SQLAlchemy text queries so the API remains
+compatible with that production schema while the broader ingestion ORM is
+migrated independently.
 """
 from typing import Optional, Tuple
-from sqlalchemy import and_, or_, select
+
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.models import Resource, Source
 from services.experience_api.schemas import ResourceRecord
 
 
@@ -25,97 +28,122 @@ async def fetch_resources(
     limit: int,
     offset: int,
 ) -> Tuple[list[ResourceRecord], int]:
-    """Fetch resources for the experience API, exact matches first.
+    """Fetch servable resources from the live Supabase resource registry.
 
-    Returns (records, exact_count) where exact_count is the number of
-    exact-match results at the front of the list.
+    Country filtering keeps globally relevant material visible to every
+    country while including records explicitly tagged for the requested
+    country. The current compact schema has no language column, so language is
+    accepted for API compatibility and intentionally does not filter results.
     """
-    # Build base filter conditions
-    conditions = [Resource.trust_state.in_(trust_states)]
+    trust_params = []
+    params: dict[str, object] = {"limit": limit, "offset": offset}
+    for index, state in enumerate(trust_states):
+        key = f"trust_state_{index}"
+        trust_params.append(f":{key}")
+        params[key] = state
+    conditions = [
+        "r.deleted_at IS NULL",
+        f"r.trust_state IN ({', '.join(trust_params)})",
+    ]
 
     if form_id:
-        conditions.append(Resource.type == form_id)
-
+        # The compact production schema stores this as content_type.
+        conditions.append("r.content_type = :form_id")
+        params["form_id"] = form_id
     if subtype:
-        conditions.append(Resource.subtype == subtype)
+        # For compact records, subcategory_id is the stable Flutter-facing
+        # selector. Accept the mapped subtype as a fallback for future rows.
+        conditions.append("(r.subcategory_id = :subcategory OR r.content_type = :subtype)")
+        params["subcategory"] = _subcategory_for(form_id, subtype)
+        params["subtype"] = subtype
+    if country:
+        conditions.append("(lower(coalesce(r.region, 'global')) IN ('global', lower(:country)) )")
+        params["country"] = country
 
-    # ── Exact-match query (ED-07 §2) ─────────────────────────────────────
-    exact_records: list[ResourceRecord] = []
-    if query:
-        exact_stmt = (
-            select(Resource, Source.name.label("source_name"))
-            .outerjoin(Source, Resource.source_id == Source.source_id)
-            .where(
-                and_(
-                    *conditions,
-                    or_(
-                        Resource.title.ilike(f"%{query}%"),
-                        Resource.description.ilike(f"%{query}%"),
-                    ),
-                )
-            )
-            .order_by(Resource.trust_state.asc(), Resource.updated_at.desc())
-            .limit(limit)
-            .offset(offset)
-        )
-        result = await session.execute(exact_stmt)
-        for row in result.all():
-            resource, source_name = row
-            exact_records.append(_to_record(resource, source_name))
+    where_sql = " AND ".join(conditions)
+    search_sql = ""
+    if query and query.strip():
+        search_sql = " AND (r.title ILIKE :query OR coalesce(r.summary, '') ILIKE :query)"
+        params["query"] = f"%{query.strip()}%"
 
-    # ── Ranked / browsed results (fallback when no query, or to pad) ──────
-    ranked_records: list[ResourceRecord] = []
-    exact_ids = {r.id for r in exact_records}
-    remaining = limit - len(exact_records)
+    exact_sql = f"""
+        SELECT r.id, r.title, r.summary, r.url, r.content_type,
+               r.publisher, r.region, r.license, r.trust_state,
+               r.provenance_url, r.verified_at, r.updated_at,
+               NULL::jsonb AS trust_dimensions,
+               NULL::jsonb AS field_confidence
+        FROM public.resources AS r
+        WHERE {where_sql}{search_sql}
+        ORDER BY r.trust_state ASC, r.updated_at DESC NULLS LAST
+        LIMIT :limit OFFSET :offset
+    """
 
+    exact_rows = []
+    if query and query.strip():
+        result = await session.execute(text(exact_sql), params)
+        exact_rows = result.mappings().all()
+
+    exact_ids = {str(row["id"]) for row in exact_rows}
+    remaining = limit - len(exact_rows)
+    ranked_rows = []
     if remaining > 0:
-        browse_stmt = (
-            select(Resource, Source.name.label("source_name"))
-            .outerjoin(Source, Resource.source_id == Source.source_id)
-            .where(and_(*conditions))
-            .order_by(Resource.trust_state.asc(), Resource.updated_at.desc())
-            .limit(remaining + len(exact_ids))   # over-fetch to account for dedup
-            .offset(offset if not query else 0)
-        )
-        result = await session.execute(browse_stmt)
-        for row in result.all():
-            resource, source_name = row
-            rid = str(resource.resource_id)
-            if rid not in exact_ids:
-                ranked_records.append(_to_record(resource, source_name))
-                if len(ranked_records) >= remaining:
+        ranked_params = dict(params)
+        ranked_params["limit"] = remaining + len(exact_ids)
+        ranked_params["offset"] = 0 if query and query.strip() else offset
+        ranked_sql = f"""
+            SELECT r.id, r.title, r.summary, r.url, r.content_type,
+                   r.publisher, r.region, r.license, r.trust_state,
+                   r.provenance_url, r.verified_at, r.updated_at,
+                   NULL::jsonb AS trust_dimensions,
+                   NULL::jsonb AS field_confidence
+            FROM public.resources AS r
+            WHERE {where_sql}
+            ORDER BY r.trust_state ASC, r.updated_at DESC NULLS LAST
+            LIMIT :limit OFFSET :offset
+        """
+        result = await session.execute(text(ranked_sql), ranked_params)
+        for row in result.mappings().all():
+            if str(row["id"]) not in exact_ids:
+                ranked_rows.append(row)
+                if len(ranked_rows) >= remaining:
                     break
 
-    all_records = exact_records + ranked_records
-    return all_records, len(exact_records)
+    return (
+        [_to_record(row) for row in [*exact_rows, *ranked_rows]],
+        len(exact_rows),
+    )
 
 
-def _to_record(resource: Resource, source_name: Optional[str]) -> ResourceRecord:
-    """Map a Resource ORM object to the API response shape."""
-    provenance_url = None
-    if resource.provenance and isinstance(resource.provenance, dict):
-        provenance_url = resource.provenance.get("url")
+def _subcategory_for(form_id: Optional[str], subtype: str) -> str:
+    """Return the Flutter slug used by the compact resources table."""
+    if form_id == "video":
+        return f"videos_{subtype}s" if subtype != "long_form" else "videos_long_form"
+    if form_id == "shorts":
+        return f"shorts_{subtype}s"
+    if form_id == "audio":
+        return f"audio_{subtype}s"
+    if form_id == "written":
+        return f"written_{subtype}s"
+    if form_id == "structured_interactive":
+        return f"structured_{subtype}s"
+    return subtype
 
-    context = resource.context or {}
-    region = context.get("geography") or "global"
 
+def _to_record(row) -> ResourceRecord:
+    verified_at = row["verified_at"]
     return ResourceRecord(
-        id=str(resource.resource_id),
-        title=resource.title,
-        summary=resource.description,
-        url=resource.canonical_url,
-        content_type=resource.subtype or "resource",
-        publisher=source_name or "Unknown publisher",
-        region=region,
-        license=resource.license,
-        trust_state=resource.trust_state,
-        provenance_url=provenance_url,
-        verified_at=(
-            resource.freshness_last_checked.isoformat()
-            if resource.freshness_last_checked
-            else None
-        ),
-        trust_dimensions=resource.trust_dimensions,
-        field_confidence=resource.field_confidence,
-        type=resource.type,
+        id=str(row["id"]),
+        title=row["title"],
+        summary=row["summary"],
+        url=row["url"],
+        content_type=row["content_type"] or "resource",
+        publisher=row["publisher"] or "Unknown publisher",
+        region=row["region"] or "global",
+        license=row["license"],
+        trust_state=row["trust_state"] or "discovered",
+        provenance_url=row["provenance_url"],
+        verified_at=verified_at.isoformat() if hasattr(verified_at, "isoformat") else verified_at,
+        trust_dimensions=row["trust_dimensions"],
+        field_confidence=row["field_confidence"],
+        type=row["content_type"],
     )
