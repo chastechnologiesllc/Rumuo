@@ -21,7 +21,9 @@ from contextlib import asynccontextmanager
 from typing import Optional
 
 from fastapi import FastAPI, Query
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 
 from core.db import get_session, init_db
 from services.experience_api.queries import fetch_resources
@@ -118,3 +120,26 @@ async def get_resources(
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+
+@app.get("/health/db")
+async def database_health():
+    """Safely report whether Vercel can open a Postgres session.
+
+    This intentionally returns only the exception class and a short message;
+    credentials and the DATABASE_URL are never included in the response.
+    """
+    try:
+        async with get_session() as session:
+            await session.execute(text("select 1"))
+        return {"status": "ok", "database": "reachable"}
+    except Exception as exc:
+        return JSONResponse(
+            status_code=503,
+            content={
+                "status": "error",
+                "database": "unreachable",
+                "error_type": type(exc).__name__,
+                "detail": str(exc)[:300],
+            },
+        )

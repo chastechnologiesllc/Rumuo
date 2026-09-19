@@ -7,6 +7,7 @@ No service creates its own engine or connection pool.
 Expects DATABASE_URL in environment (postgres:// or postgresql+asyncpg://).
 """
 import os
+import logging
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
@@ -14,6 +15,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from sqlalchemy.engine import make_url
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.pool import NullPool
+
+logger = logging.getLogger(__name__)
 
 
 class Base(DeclarativeBase):
@@ -69,9 +72,12 @@ def init_db() -> None:
         return   # already initialised (idempotent for lazy callers)
 
     connect_args: dict = {}
-    if _IS_SERVERLESS:
+    database_url = os.environ.get("DATABASE_URL", "")
+    is_supabase_pooler = ".pooler.supabase.com" in database_url
+    if _IS_SERVERLESS or is_supabase_pooler:
         # Required for Supabase transaction pooler (pgbouncer in transaction mode):
-        # prepared statements are not supported across connections.
+        # prepared statements are not supported across connections. Apply this
+        # even when SERVERLESS was omitted so a copied pooler URI remains safe.
         connect_args["statement_cache_size"] = 0
 
     engine = create_async_engine(
@@ -103,5 +109,6 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
             yield session
             await session.commit()
         except Exception:
+            logger.exception("Database session operation failed")
             await session.rollback()
             raise
