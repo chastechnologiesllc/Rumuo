@@ -377,23 +377,19 @@ void main() {
 
   // ── Channel Data ────────────────────────────────────────────────────────────
   group('ChannelData', () {
-    test('has exactly 12 channels', () {
-      expect(ChannelData.all.length, 12);
+    test('does not embed a hard-coded channel catalog', () {
+      expect(ChannelData.all, isEmpty);
     });
 
-    test('official avatar manifest covers the primary channels', () {
-      expect(ChannelAvatarData.byChannelId.length, greaterThanOrEqualTo(477));
-      expect(
-        ChannelData.all.every((channel) => channel.avatarUrl != null),
-        isTrue,
-      );
+    test('channel avatars are supplied by the API', () {
+      expect(ChannelAvatarData.byChannelId, isEmpty);
+      expect(ChannelData.all, isEmpty);
     });
 
-    test('Doctorpreneur feed channel has an official profile image', () {
+    test('does not embed third-party channel profile images', () {
       const channelId = 'UCto7aLUgNulcszaErw4FS1g';
       final avatar = ChannelAvatarData.byChannelId[channelId];
-      expect(avatar, isNotNull);
-      expect(avatar, startsWith('https://yt3.googleusercontent.com/'));
+      expect(avatar, isNull);
     });
 
     testWidgets('channel avatar keeps a circular initials fallback',
@@ -415,10 +411,10 @@ void main() {
       expect(find.text('FC'), findsOneWidget);
     });
 
-    test('School of Hard Knocks is in the list', () {
+    test('does not embed a hard-coded YouTube channel list', () {
       expect(
-        ChannelData.all.any((ch) => ch.name == 'School of Hard Knocks'),
-        isTrue,
+        ChannelData.all.where((ch) => ch.name == 'School of Hard Knocks'),
+        isEmpty,
       );
     });
 

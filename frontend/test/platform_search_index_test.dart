@@ -27,18 +27,18 @@ void main() {
     expect(medicine.first.title, 'Medicine');
   });
 
-  test('indexes channels, verified blog sources, books, and playbooks', () {
+  test('indexes verified blog sources and books without mock channels', () {
     final channelResults = index.search(query: 'Entrepreneur');
     final blogResults = index.search(query: 'psychology');
     final bookResults = index.search(query: 'Michael Gerber');
 
-    expect(channelResults.any((d) => d.kind == PlatformSearchKind.channel), isTrue);
+    expect(channelResults.any((d) => d.kind == PlatformSearchKind.channel), isFalse);
     expect(blogResults.any((d) => d.kind == PlatformSearchKind.blogSource), isTrue);
     expect(bookResults.any((d) => d.kind == PlatformSearchKind.book), isTrue);
     expect(
       index.search(query: 'Business of Law')
           .any((d) => d.id.startsWith('playbook:')),
-      isTrue,
+      isFalse,
     );
   });
 
