@@ -81,11 +81,56 @@ class _IntroCard extends StatelessWidget {
 class _ResourceCard extends StatelessWidget {
   final ResourceRecord record;
   const _ResourceCard({required this.record});
+
   @override
   Widget build(BuildContext context) {
     final sourceUrl = record.url;
     final provenanceUrl = record.provenanceUrl;
-    return Container(margin: const EdgeInsets.only(bottom: 12), padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: AppTheme.surfaceColor(context), borderRadius: BorderRadius.circular(17), border: Border.all(color: AppTheme.dividerColor(context), width: 0.7)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Wrap(spacing: 8, runSpacing: 6, children: [ _Tag(label: record.contentType), _Tag(label: record.publisher), _Tag(label: record.trustState, accent: true)]), const SizedBox(height: 9), Text(record.title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)), const SizedBox(height: 6), Text(record.summary, style: TextStyle(color: AppTheme.textMuted(context), height: 1.35)), const SizedBox(height: 10), Text('${record.region} · ${record.license ?? 'Licence not specified'}', style: TextStyle(color: AppTheme.textMuted(context), fontSize: 11)), const SizedBox(height: 8), Row(children: [TextButton.icon(onPressed: sourceUrl == null ? null : () => launchUrl(sourceUrl, mode: LaunchMode.externalApplication), icon: const Icon(Icons.open_in_new_rounded, size: 16), label: const Text('Open source')), const Spacer(), IconButton(tooltip: 'View provenance', onPressed: provenanceUrl == null ? null : () => launchUrl(provenanceUrl, mode: LaunchMode.externalApplication), icon: Icon(Icons.fact_check_outlined, color: AppTheme.textMuted(context), size: 20))])]);
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceColor(context),
+        borderRadius: BorderRadius.circular(17),
+        border: Border.all(color: AppTheme.dividerColor(context), width: 0.7),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: [
+              _Tag(label: record.contentType),
+              _Tag(label: record.publisher),
+              _Tag(label: record.trustState, accent: true),
+            ],
+          ),
+          const SizedBox(height: 9),
+          Text(record.title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+          const SizedBox(height: 6),
+          Text(record.summary, style: TextStyle(color: AppTheme.textMuted(context), height: 1.35)),
+          const SizedBox(height: 10),
+          Text('${record.region} · ${record.license ?? 'Licence not specified'}', style: TextStyle(color: AppTheme.textMuted(context), fontSize: 11)),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              TextButton.icon(
+                onPressed: sourceUrl == null ? null : () => launchUrl(sourceUrl, mode: LaunchMode.externalApplication),
+                icon: const Icon(Icons.open_in_new_rounded, size: 16),
+                label: const Text('Open source'),
+              ),
+              const Spacer(),
+              IconButton(
+                tooltip: 'View provenance',
+                onPressed: provenanceUrl == null ? null : () => launchUrl(provenanceUrl, mode: LaunchMode.externalApplication),
+                icon: Icon(Icons.fact_check_outlined, color: AppTheme.textMuted(context), size: 20),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 
